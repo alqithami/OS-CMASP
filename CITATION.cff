@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this manuscript or scaffold, please cite the released version. Replace placeholder metadata before public release."
+title: "Observer-Situation Constrained Multi-Agent Simulation Processes"
+version: "0.1.0-pre"
+date-released: "2026-04-18"
+authors:
+  - family-names: "TBD"
+    given-names: "TBD"
+repository-code: "https://github.com/<org-or-user>/os-cmasp"
+abstract: "A process-semantics formulation for multi-agent control under observer-situation-indexed fragmented truth, with a fixed-solver Berth-1-Conflict scaffold."
+keywords:
+  - multi-agent reinforcement learning
+  - stochastic games
+  - constrained control
+  - epistemic reasoning
+  - maritime logistics
+license: "NOASSERTION"

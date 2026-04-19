@@ -1,0 +1,3 @@
+seed,t,ready,crane_ok,eta_on_time,weather_safe,scenario,queue_state,weather_regime,disruption_family,vessel_class,operating_mode,time_bucket,berth_slot,eta_bin,prop,value,observer,situation,credibility,timestamp,provenance
+0,0,true,true,true,true,authority_conflict,normal,clear,none,feeder,nominal,day,slot-A,on-window,ready,true,harbor_master,berth-admission/current,1.0,0,template-authority
+0,0,true,true,true,true,authority_conflict,normal,clear,none,feeder,nominal,day,slot-A,on-window,ready,false,strategic_plan,berth-admission/planning,1.0,0,template-plan

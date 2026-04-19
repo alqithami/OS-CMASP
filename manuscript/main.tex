@@ -1,0 +1,3392 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,tabularx,array,longtable}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage[numbers,sort&compress]{natbib}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!45!black,
+  citecolor=blue!45!black,
+  urlcolor=blue!45!black,
+  pdftitle={Observer-Situation Constrained Multi-Agent Simulation Processes},
+  pdfauthor={Anonymous authors}
+}
+
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{2em}
+\linespread{1.04}
+\allowdisplaybreaks
+
+\newcommand{\OSCPOSG}{\mbox{\normalfont\textsc{OS-CPOSG}}}
+\newcommand{\OSCMASP}{\mbox{\normalfont\textsc{OS-CMASP}}}
+\newcommand{\RBP}{\operatorname{RBP}}
+\newcommand{\MCC}{\operatorname{MCC}}
+\newcommand{\Lit}{\operatorname{Lit}}
+\newcommand{\Lang}{\mathcal L}
+\newcommand{\Cons}{\mathsf{Cons}}
+\newcommand{\Incon}{\mathsf{Incon}}
+\newcommand{\Fam}{\mathsf{fam}}
+\newcommand{\DomRel}{\mathsf{DRel}}
+\newcommand{\Th}{\operatorname{Th}}
+\newcommand{\Reg}{\operatorname{Reg}}
+\newcommand{\Viol}{\operatorname{Viol}}
+\newcommand{\Cert}{\mathsf{Cert}}
+\newcommand{\DCert}{\mathsf{DCert}}
+\newcommand{\Exc}{\mathsf{Exc}}
+\newcommand{\Rel}{\mathsf{Rel}}
+\newcommand{\Agg}{\operatorname{Agg}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\Gini}{\operatorname{Gini}}
+\newcommand{\MM}{\operatorname{MM}}
+\newcommand{\APD}{\operatorname{APD}}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{example}[definition]{Example}
+\theoremstyle{plain}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
+
+\title{Observer--Situation Constrained Multi-Agent Simulation Processes\\[-0.15em]
+\large Control under fragmented truth in regulated maritime coordination}
+\author{Anonymous Authors}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+
+
+\begin{abstract}
+Regulated multi-agent logistics problems are usually modeled as constrained control under partial observability: agents estimate a latent operational state, optimize throughput or cost, and enforce safety, emission, or service constraints. This paper develops a different process semantics for socio-technical settings in which the decision-relevant object is not only a hidden state, but a set of incompatible, provenance-bearing claims made by heterogeneous observers under different situations. We define an Observer--Situation Constrained Partially Observable Stochastic Game (\OSCPOSG) and its simulator-coupled subclass, \OSCMASP. In these models the state contains both physical dynamics and a formula-valued observer--situation claim base; epistemic actions such as query, verify, defer, certify, and escalate are first-class actions; and critical physical actions are admissible only when supported by dominance-calibrated, consistency-checked certificates or routed through explicit exception acts.
+
+The contribution is process-semantic rather than architectural. We prove containment results relating the model to standard constrained partially observable stochastic games, an observer-collapse separation theorem showing that provenance erasure can induce linear regret under identical controller-visible context, a safety-budget corollary, and a certificate-soundness theorem for admissible critical actions. We then specify \textsc{Berth-1-Conflict}, a minimal maritime benchmark and frozen-solver ablation protocol for testing whether provenance-preserving claim semantics separate from provenance-erased alternatives before full maritime-digital-twin scale-up. Emission and fairness translations are treated as secondary, replay-certified validation claims rather than as the primary novelty. The resulting paper is a formal process-class proposal for control under fragmented truth, not a performance claim over a larger controller stack.
+\end{abstract}
+
+\noindent\textbf{Keywords:} multi-agent reinforcement learning; constrained stochastic games; simulator-coupled decision processes; epistemic action; truth maintenance; maritime logistics; fairness constraints; provenance-aware control.
+
+\tableofcontents
+
+\paragraph{Reader roadmap.} Sections~\ref{sec:introduction}--\ref{sec:theory} contain the main paper: motivation, novelty boundary, related work, formal model, and core theorems. Sections~\ref{sec:benchmark}--\ref{sec:implementation} define the minimal maritime validation protocol. The appendices collect proof details, replay schemas, extended budget and fairness machinery, and the dominance-gated implementation witness.
+
+\paragraph{Evidence status.} The current paper is a theory-and-protocol manuscript. It intentionally contains no local performance claims. Numerical evidence enters only after the visible-context map, dominance order, replay schema, condition set, and paired-seed protocol are locked.
+
+\section{Introduction}
+\label{sec:introduction}
+
+Maritime logistics is a natural stress test for multi-agent control. Vessels, trucks, cranes, yards, weather feeds, maintenance systems, and human operators interact under time pressure; actions affect emissions, safety, service delay, and equity across heterogeneous participants. The standard modeling move is to regard such systems as constrained partially observed control problems: agents receive noisy observations of a latent operational state and optimize actions subject to feasibility, budget, or safety constraints. This move is powerful, and it connects directly to stochastic games \citep{Shapley1953,Littman1994}, decentralized partially observable control \citep{Bernstein2002,OliehoekAmato2016}, constrained MDPs \citep{Altman1999}, and modern constrained or safe reinforcement learning \citep{Achiam2017,GarciaFernandez2015,Chow2018}.
+
+However, real port operations also exhibit a different failure mode. The issue is often not simply that the state is hidden. It is that the organization temporarily contains multiple incompatible but provenance-bearing descriptions of the same operational fact: an AIS-derived ETA conflicts with a pilot report; a berth-management system reports readiness while a crane-maintenance feed marks the same berth unavailable; a weather alert invalidates a planned emissions-feasible routing decision; or a human override contradicts an automated recommendation. Collapsing these reports into a single denoised estimate can erase the very information required to decide whether to act, verify, defer, or escalate.
+
+This paper proposes a process semantics for that regime. We call the model an Observer--Situation Constrained Multi-Agent Simulation Process (\OSCMASP). Its core move is to put \emph{fragmented truth} into the state: the environment state contains a physical component and a claim base indexed by observer--situation locations. A claim is not merely a feature value; it is a record of what was asserted, by whom or by which information source, under which situation, with what timestamp and provenance. Contradictions between comparable observer--situation records become first-class objects. The system can take physical actions, but it can also take epistemic actions such as query, verify, certify, defer, and escalate. A critical physical action is admissible only if its preconditions are supported by a consistency-checked certificate whose relevant claims are not defeated by the pre-registered dominance scheme, or if the action is routed through an explicit exception act.
+
+This is deliberately not a new controller stack. Multi-agent reinforcement learning already has rich algorithmic machinery: actor--critic methods \citep{Lowe2017,Foerster2018COMA}, value-factorization methods \citep{Sunehag2018VDN,Rashid2018QMIX}, common-knowledge policies \citep{SchroederdeWitt2019MACKRL}, and constrained hierarchical CH-MARL variants for sustainability and fairness \citep{Alqithami2025CHMARL,Alqithami2026EcoFair}. The present contribution is prior to solver choice: it asks whether the process observed by any solver should be a single latent state with noisy observations, or a physical state plus an explicit contradiction-bearing claim base.
+
+\paragraph{Contributions.} This paper makes four contributions.
+\begin{enumerate}[leftmargin=1.6em]
+  \item It defines \OSCPOSG{} and \OSCMASP, process classes in which formula-valued observer--situation claims, proposition-family dominance, contradiction components, epistemic repair actions, and certification-based admissibility are part of the formal model.
+  \item It proves an observer-collapse separation theorem: for a family of finite-horizon problems with identical controller-visible context and identical aggregated claim content, any policy invariant to observer--situation provenance suffers linear regret, while an observer-aware policy achieves zero regret. A safety-budget corollary shows that provenance erasure can also force a constraint tradeoff.
+  \item It gives a certification soundness theorem connecting action explanations to satisfiable support sets over observer--situation claims.
+  \item It specifies Berth-1-Conflict, a minimal maritime benchmark and ablation protocol designed to test process semantics under a frozen solver, before scaling to a larger maritime digital twin.
+\end{enumerate}
+
+\paragraph{Scope.} The paper does not claim that observer--situation semantics always improve performance, nor that every port-planning problem requires this formalism. The claim is conditional and falsifiable: when the correctness or admissibility of a critical action depends on provenance-bearing contradictions, provenance erasure can change the attainable control problem even if the solver is held fixed.
+
+
+\section{Claim hierarchy and non-stacking scope}
+\label{sec:claim-hierarchy}
+
+We position the paper as a process-semantics proposal rather than a new architecture proposal. To make that boundary explicit, \cref{tab:claim-hierarchy} separates the claims the paper is designed to support from secondary claims that require replay calibration.
+
+\begin{table}[H]
+\centering
+\caption{Claim hierarchy for the paper. Primary claims are semantic and solver-independent; metric claims are secondary.}
+\label{tab:claim-hierarchy}
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.20\textwidth}XX@{}}
+\toprule
+Claim level & What is being claimed & What would weaken it \\
+\midrule
+Primary semantic claim & Fragmented-truth state and certificate-based feasibility define a control problem that is not equivalent to a standard fused-state constrained POSG. & A provenance-erased fixed-solver controller matches the observer-aware controller on active-regime benchmarks without extra violations or interventions. \\
+Primary theorem claim & Observer--situation provenance can be decision-relevant enough that erasing it induces linear regret or a zero-violation safety--service tradeoff. & The construction leaks hidden truth through visible state or relies on a dominance rule chosen after outcomes are known. \\
+Secondary metric claim & Emissions and service-parity burdens can be lifted from the minimal benchmark into CH-MARL-style metrics through replay-certified envelopes. & Replay calibration is unstable, denominator distortion is large, or certified coefficients become non-positive under seed-shift stress. \\
+Implementation claim & A dominance-gated wrapper can witness the semantics while keeping the solver frozen. & The observed gains disappear under solver-isolated ablations or are explained by controller changes rather than claim-state semantics. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Non-stacking criterion.}
+A proposal would count as stacking, rather than as the contribution of this paper, if it leaves the process state as a single fused latent state and merely adds a belief module, explanation module, LLM interface, governance layer, or additional high-level planner. The present paper instead changes four objects: the state contains provenance-bearing claims, the action space includes epistemic repair, feasibility depends on certificates and exception acts, and the benchmark varies claim-state semantics while holding the solver fixed.
+
+\begin{definition}[Provenance-active regime]
+\label{def:provenance-active-regime-main}
+An \OSCMASP{} instance is \emph{provenance-active} for a policy class $\Pi$ and scenario distribution $\mathcal D_{sc}$ if there exist two claim bases with identical aggregated formula content and identical controller-visible non-claim context, but different observer--situation provenance, such that at least one of the following changes: the admissible physical action set, the available dominant certificates for a critical action, the required exception act, or the feasible value for some policy in $\Pi$. If none of these changes, provenance may remain useful for audit but is not operationally active for that process instance and policy class.
+\end{definition}
+
+This definition clarifies the active empirical regime. The maritime twin should be used to identify where provenance is operationally active, not to argue that every scenario requires the full observer--situation semantics.
+
+\section{Related work and precise delta}
+\label{sec:related}
+
+\subsection{Decentralized stochastic control and common information}
+
+Stochastic games provide the classical basis for multi-agent decision-making under uncertainty \citep{Shapley1953,Littman1994}; MDPs and POMDPs provide the single-agent foundations for stochastic control under full or partial state information \citep{Puterman1994,Kaelbling1998}. Dec-POMDPs and related decentralized control models formalize cooperative decision-making under partial observability, and exact finite-horizon solution is NEXP-hard even for small teams \citep{Bernstein2002,OliehoekAmato2016}. Common-information approaches identify shared histories or public information that can coordinate decentralized decision-making \citep{Nayyar2013}. These models motivate the present work, but they usually treat information as observations or histories over a single underlying state. \OSCMASP{} instead preserves a structured claim base in which mutually incompatible reports may coexist until resolved or certified.
+
+\subsection{Constrained and safe reinforcement learning}
+
+Constrained MDP theory studies optimal control subject to cumulative cost constraints \citep{Altman1999}. Constrained and safe RL extend this perspective to learned policies and approximate optimization \citep{Achiam2017,GarciaFernandez2015,Chow2018}. EcoFair-CH-MARL applies this family of ideas to sustainability- and fairness-constrained multi-agent coordination, using a hierarchical controller, primal--dual budget updates, and fairness-aware rewards \citep{Alqithami2026EcoFair}. \OSCMASP{} is complementary. It does not replace budget constraints; it adds a different source of admissibility: critical actions may require provenance-aware support certificates or exception acts when the claim base contains relevant contradictions.
+
+\subsection{Multi-agent RL algorithms}
+
+Modern MARL offers many solver families, including centralized-training/decentralized-execution actor--critic methods \citep{Lowe2017,Foerster2018COMA}, value decomposition and monotonic factorization \citep{Sunehag2018VDN,Rashid2018QMIX}, and common-knowledge coordination policies \citep{SchroederdeWitt2019MACKRL}. These methods are important baselines for implementation, but they are not the target contribution here. The proposed ablation protocol holds the solver fixed and changes only the claim-state semantics. This design is intended to distinguish process-class novelty from architecture stacking.
+
+\subsection{Epistemic reasoning, truth maintenance, and perspective-aware cognition}
+
+Epistemic logic and common knowledge provide formal accounts of what agents know, what they know about each other's knowledge, and how information updates change epistemic states \citep{Fagin1995,HalpernMoses1990,vanDitmarsch2007,Baltag1998}. Interactive POMDPs incorporate models of other agents into sequential planning under uncertainty \citep{GmytrasiewiczDoshi2005}. Multi-agent epistemic planning studies action planning over epistemic states \citep{LiuLiu2018MEP}. Truth-maintenance and belief-revision systems study how to maintain consistency under changing or contradictory assertions \citep{Doyle1979,deKleer1986,AGM1985}. Situation calculus provides a logical basis for reasoning about actions and changing worlds \citep{Reiter2001}.
+
+The Observer--Situation Lattice (OSL) is especially relevant because it gives a finite complete lattice over observer--situation pairs, with Relativized Belief Propagation and Minimal Contradiction Decomposition \citep{Alqithami2026OSL}. \OSCMASP{} uses that semantic idea as part of a stochastic control process: observer--situation records are not only beliefs or explanations; they constrain which physical actions are admissible and which epistemic actions are needed.
+
+\subsection{Simulator-coupled and logistics models}
+
+Simulator-coupled decision processes are increasingly important in regulated domains where dynamics are mediated by domain engines rather than closed-form transition kernels. R-CMASP is the closest process-level neighbor: it adds simulator-coupled transitions, structured roles, typed communication, and normative feasibility to multi-agent decision-making \citep{Dong2025RCMASP}. The distinction is that \OSCMASP{} makes fragmented truth explicit in the state and in action admissibility.
+
+In logistics and maritime operations, operations-research models have long studied terminals, cargo routing, and empty-container repositioning \citep{Steenken2004,SongDong2012}. MARL has also been applied to resource balancing in complex logistics networks \citep{Li2019LogisticsMARL} and to reinforcement-learning approaches for empty-container repositioning \citep{Xu2024ECRRL}. These works motivate the maritime benchmark but do not address the observer--situation provenance issue directly.
+
+\begin{table}[t]
+\centering
+\caption{Positioning of \OSCMASP{} relative to nearby model classes.}
+\label{tab:delta}
+\begin{tabularx}{\textwidth}{@{}p{0.23\textwidth}p{0.30\textwidth}X@{}}
+\toprule
+Model family & Primary object & Difference in \OSCMASP{} \\
+\midrule
+Dec-POMDP / POSG & Hidden state, local observations, decentralized policies & Keeps incompatible provenance-bearing claim records in state rather than only hidden-state beliefs. \\
+Constrained RL / CH-MARL & Cumulative budgets, primal--dual updates, safe/fair rewards & Adds certification and epistemic exception acts as admissibility conditions for critical actions. \\
+Epistemic planning / I-POMDP & Knowledge, belief, and models of other agents & Embeds observer--situation semantics inside a constrained stochastic control process. \\
+Truth maintenance / belief revision & Consistency maintenance under changing assertions & Couples contradiction components to action feasibility and regret. \\
+Simulator-coupled MAS & Domain simulator plus organizational rules & Adds fragmented-truth state semantics and contradiction-aware certification. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+\section{Notation and modeling commitments}
+\label{sec:notation}
+
+The formal model separates four objects that are often conflated in partially observed control: latent physical state, controller-visible context, observer--situation provenance, and admissibility. The notation in \cref{tab:notation} is used throughout the paper and the technical supplement.
+
+\begin{table}[H]
+\centering
+\caption{Core notation and modeling role.}
+\label{tab:notation}
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth}X@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$X$, $x_t$ & Latent physical state and its value at time $t$. \\
+$\chi:X\to\mathcal Y$ & Controller-visible context map; in the separation theorem it prevents hidden truth from leaking through ordinary state features. \\
+$L=\mathcal O\times\Sigma$ & Observer--situation carrier with product order. \\
+$C_t$ & Formula-valued claim base containing assertions, observer--situation labels, credibility, timestamps, and provenance. \\
+$\mathcal D$ & Proposition-family dominance scheme; fixed before evaluation. \\
+$A_i^p$, $A_i^e$ & Physical and epistemic action spaces for agent $i$. \\
+$\mathcal F$ & Admissibility relation coupling physical feasibility, dominant support certificates, contradiction mass, and exception acts. \\
+$\Agg(C)$ & Aggregation that erases observer--situation labels and provenance; used to define provenance-erased policies. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two modeling commitments are fixed before benchmark execution. First, $\chi$ must exclude the hidden truth variable that the theorem is intended to protect. Second, $\mathcal D$ must be declared before training or replay, so that authority, freshness, and source priority cannot be tuned after outcomes are observed.
+
+\section{Observer--Situation Constrained Process Model}
+\label{sec:model}
+
+\subsection{Observer--situation carrier, formula language, and claims}
+
+\begin{definition}[Observer--situation carrier]
+\label{def:carrier}
+Let $(\mathcal O,\preceq_{\mathcal O})$ be a finite complete lattice of observers and $(\Sigma,\preceq_{\Sigma})$ a finite complete lattice of situations. Define
+\[
+L=\mathcal O\times \Sigma,
+\qquad
+(o,\sigma)\preceq (o',\sigma')
+\Longleftrightarrow
+ o\preceq_{\mathcal O}o' \text{ and } \sigma\preceq_{\Sigma}\sigma'.
+\]
+Then $L$ is a finite complete lattice under the product order.
+\end{definition}
+
+\begin{definition}[Formula language and consistency oracle]
+\label{def:language}
+Let $\Phi$ be a finite propositional vocabulary and let $\Lang_\Phi$ be a finite set of propositional formulas over $\Phi$ closed under negation for the formulas used as action preconditions. Let
+\[
+\Cons:2^{\Lang_\Phi}\to\{0,1\}
+\]
+be a sound consistency predicate, where $\Cons(B)=1$ means that the finite formula set $B$ is propositionally satisfiable. We write $\Incon(B)=1-\Cons(B)$. For the literal-only benchmark, $\Lang_\Phi=\Lit(\Phi)$ and $\Cons$ is the usual no-complement-pair test. For richer operational schemas, $\Cons$ can be implemented by a SAT or SMT solver.
+\end{definition}
+
+\begin{definition}[Claim base]
+\label{def:claimbase}
+A claim record is
+\[
+c=(\varphi,\ell,w,\tau,\rho)
+\in \Lang_\Phi\times L\times[0,1]\times\mathbb T\times\mathcal P,
+\]
+where $\varphi$ is the asserted formula, $\ell$ is the observer--situation location, $w$ is credibility, $\tau$ is a timestamp, and $\rho$ is provenance metadata. A finite claim base $C$ is a finite set of such records. For a decision node $\lambda\in L$, the supported theory is
+\[
+\Th_{\lambda}(C)=\{\varphi: \exists(\varphi,\ell,w,\tau,\rho)\in C\text{ with }\ell\preceq \lambda\}.
+\]
+\end{definition}
+
+\begin{definition}[Proposition-family dominance scheme]
+\label{def:dominance}
+Let $\mathcal Q$ be a finite set of proposition families and let
+\[
+\Fam:\Lang_\Phi\to\mathcal Q
+\]
+map each formula to the operational fact-family it concerns, such as berth readiness, ETA, crane availability, weather admissibility, or customs clearance. A dominance scheme is a family of preorders
+\[
+\mathcal D=\{\unrhd_q:q\in\mathcal Q\}
+\]
+over claim records with family $q$. The strict part is denoted $\rhd_q$. The preorder may encode source authority, freshness, calibrated reliability, or regulatory priority; it is a process parameter and must be fixed before evaluation. For a finite set of claims $B$ of family $q$, define its undefeated elements as
+\[
+\operatorname{Max}_{\unrhd_q}(B)
+=
+\{c\in B:\nexists c'\in B\text{ such that }c'\rhd_q c\}.
+\]
+\end{definition}
+
+\begin{definition}[Contradiction graph]
+\label{def:contradiction}
+Given $C$, define $G_{\bot}(C)=(V,E)$ with $V=C$. For distinct claims $c=(\varphi,\ell,w,\tau,\rho)$ and $c'=(\psi,\ell',w',\tau',\rho')$, include edge $\{c,c'\}\in E$ iff
+\[
+\ell \text{ and }\ell' \text{ are comparable in }L
+\quad\text{and}\quad
+\Incon(\{\varphi,\psi\})=1.
+\]
+Let $\MCC(C)$ denote the non-singleton connected components of $G_{\bot}(C)$.
+\end{definition}
+
+\begin{remark}[Why the formula-level version is primary]
+The literal-only definition is adequate for the minimal benchmark, but it is too narrow for a deployable maritime setting: readiness, emissions feasibility, weather limits, and customs release often arrive as structured assertions rather than atomic literals. Making $\Cons$ explicit separates the process semantics from any particular logical implementation. The theory below requires only sound consistency checks; completeness or efficient satisfiability is an implementation question.
+\end{remark}
+
+\subsection{The OS-CPOSG}
+
+\begin{definition}[Observer--Situation Constrained POSG]
+\label{def:oscposg}
+An Observer--Situation Constrained Partially Observable Stochastic Game (\OSCPOSG) is a tuple
+\[
+\mathcal G=
+\langle N,X,L,\Lang_\Phi,\mathcal D,\{A_i^p,A_i^e,\Omega_i\}_{i\in N},P,Z,\Gamma,r,\mathbf g,\mathcal F,\gamma\rangle,
+\]
+where $N$ is the agent set; $X$ is the physical state space; $\mathcal D$ is a proposition-family dominance scheme; $A_i^p$ and $A_i^e$ are physical and epistemic action sets; $\Omega_i$ is the observation set; $P$ is the physical transition kernel; $Z$ is the observation kernel; $\Gamma$ maps observations and epistemic acts to new claim records; $r$ is the operational reward; $\mathbf g=(g_1,\dots,g_m)$ are cumulative constraint costs; $\mathcal F$ is an admissibility relation; and $\gamma\in(0,1)$ is a discount factor.
+
+The augmented state is
+\[
+s_t=(x_t,C_t)
+\in
+X\times 2^{\Lang_\Phi\times L\times[0,1]\times\mathbb T\times\mathcal P}.
+\]
+A joint action splits into physical and epistemic components,
+\[
+a_t=(a_t^p,a_t^e),\qquad
+ a_t^p\in\prod_i A_i^p,
+\quad
+ a_t^e\in\prod_i A_i^e.
+\]
+Physical dynamics and observations evolve as
+\[
+x_{t+1}\sim P(\cdot\mid x_t,a_t),
+\qquad
+o_{t+1}\sim Z(\cdot\mid x_{t+1},a_t),
+\]
+and the claim base updates by
+\[
+C_{t+1}=\RBP\big(C_t\cup \Gamma(o_{t+1},a_t^e)\big),
+\qquad
+\mathcal K_{t+1}=\MCC(C_{t+1}).
+\]
+\end{definition}
+
+\begin{definition}[Simulator-coupled subclass]
+\label{def:os-cmasp}
+An Observer--Situation Constrained Multi-Agent Simulation Process (\OSCMASP) is an \OSCPOSG{} whose physical transition kernel is mediated by a simulator family $\mathcal S$:
+\[
+x_{t+1}\sim P_{\mathcal S}(\cdot\mid x_t,a_t,\xi_t),
+\]
+where $\xi_t$ denotes exogenous simulator input such as traffic demand, weather, disruption state, or scenario seed.
+\end{definition}
+
+\subsection{Dominant support, certification, and admissibility}
+
+For each agent $i$ and physical action $a_i^p$, let $\operatorname{Pre}_i(a_i^p)\subseteq\Lang_\Phi$ be the action precondition set. Let $\lambda_i:X\to L$ map physical states to the observer--situation decision node at which agent $i$ evaluates support.
+
+\begin{definition}[Dominant relevant claim set]
+\label{def:drel}
+For action $a_i^p$ at state $(x,C)$, let
+\[
+Q_i(a_i^p)=\{\Fam(\varphi):\varphi\in\operatorname{Pre}_i(a_i^p)\}
+\]
+be the relevant proposition families. For each $q\in Q_i(a_i^p)$, define
+\[
+B_{i,q}(x,C)=
+\{c=(\varphi,\ell,w,\tau,\rho)\in C:
+\ell\preceq\lambda_i(x),\ \Fam(\varphi)=q\}.
+\]
+The dominant relevant claim set is
+\[
+\DomRel_i(x,C,a_i^p)
+=
+\bigcup_{q\in Q_i(a_i^p)}\operatorname{Max}_{\unrhd_q}(B_{i,q}(x,C)).
+\]
+\end{definition}
+
+\begin{definition}[Dominant support certificate]
+\label{def:certificate}
+A dominant support certificate for action $a_i^p$ at $(x,C)$ is the set $S=\DomRel_i(x,C,a_i^p)$, provided that
+\[
+\Cons(\Th_{\lambda_i(x)}(S))=1
+\]
+and
+\[
+\Th_{\lambda_i(x)}(S)\models \varphi
+\qquad\text{for every }\varphi\in\operatorname{Pre}_i(a_i^p).
+\]
+The family of such certificates is denoted $\DCert_i(x,C,a_i^p)$. Since $\DomRel_i$ is uniquely determined by $(x,C,a_i^p)$ and $\mathcal D$, $\DCert_i$ is either the singleton $\{\DomRel_i(x,C,a_i^p)\}$ or empty.
+\end{definition}
+
+\begin{remark}[No cherry-picking]
+The dominant certificate definition prevents an agent from certifying a critical action by selecting a convenient satisfiable subset while ignoring a more dominant contradictory record. If the undefeated relevant claims are mutually inconsistent, certification fails and the action must be routed through an epistemic exception act or made inadmissible.
+\end{remark}
+
+\begin{definition}[Contradiction mass]
+\label{def:kappa}
+Let $\Rel_i(x,C,a_i^p)$ be the subset of claims in $C$ whose proposition family is in $Q_i(a_i^p)$. Given nonnegative component weights $\omega(K)$,
+\[
+\kappa_i(x,C,a_i^p)=
+\sum_{K\in\MCC(C)}\omega(K)\,\1[K\cap\Rel_i(x,C,a_i^p)\neq\varnothing].
+\]
+\end{definition}
+
+\begin{definition}[Contradiction-aware admissibility]
+\label{def:admissibility}
+Let $A_i^{\mathrm{crit}}\subseteq A_i^p$ be the critical physical actions and let $\Exc_i(a_i^p)\subseteq A_i^e$ be exception acts, such as \texttt{verify}, \texttt{defer}, or \texttt{escalate}. A joint action $a=(a^p,a^e)$ is admissible at $(x,C)$, written $\mathcal F(x,C,a)=1$, iff physical feasibility holds and, for every $i$ with $a_i^p\in A_i^{\mathrm{crit}}$, either
+\[
+\DCert_i(x,C,a_i^p)\neq\varnothing
+\quad\text{and}\quad
+\kappa_i(x,C,a_i^p)\le \eta_i,
+\]
+or $a_i^e\in\Exc_i(a_i^p)$.
+\end{definition}
+
+The optimization problem can then be written as
+\[
+\max_{\pi}\;\E_{\pi}\sum_{t=0}^{T-1}\gamma^t
+\left[r(x_t,a_t^p)-\lambda_{\bot}\sum_i\kappa_i(x_t,C_t,a_{i,t}^p)-\lambda_e\sum_i c_e(a_{i,t}^e)\right]
+\]
+subject to cumulative constraints
+\[
+\E_{\pi}\sum_{t=0}^{T-1}g_j(x_t,a_t^p)\le B_j,
+\qquad j=1,\dots,m,
+\]
+and admissibility $\mathcal F(x_t,C_t,a_t)=1$ for all $t$.
+
+\section{Theoretical properties}
+\label{sec:theory}
+
+\subsection{Containment}
+
+\begin{proposition}[Containment]
+\label{prop:containment}
+The proposed model contains or projects to familiar process classes under parameter restrictions.
+\begin{enumerate}[leftmargin=1.4em]
+  \item If $L$ is a singleton, $A_i^e=\{\varnothing\}$, $\mathcal D$ is vacuous, and $\mathcal F$ is independent of $C_t$, then \OSCPOSG{} reduces to a constrained POSG; in the cooperative case it reduces to a constrained Dec-POMDP.
+  \item If the physical kernel is simulator-mediated and admissibility contains only exogenous regulatory or organizational rules, then \OSCMASP{} projects to a simulator-coupled norm-governed process.
+  \item If policies are restricted to the two-timescale hierarchical controller family used by CH-MARL/\allowbreak EcoFair, then the result is a controller family over an \OSCMASP{} environment rather than a new process class.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The restrictions remove observer--situation structure, dominance, epistemic actions, and claim-dependent feasibility. What remains is a standard constrained stochastic game or its cooperative partial-observation specialization. Simulator coupling is retained by choosing $P=P_{\mathcal S}$. Restricting the policy family affects the solver class but not the environment semantics.
+\end{proof}
+
+\subsection{Observer-collapse separation}
+
+The central theorem must avoid a common loophole: if the physical state differs across cases and the policy can observe that difference, the hidden truth may leak through non-claim features. We therefore make the controller-visible physical context explicit.
+
+\begin{definition}[Visible context and provenance-erased policies]
+\label{def:visible}
+Let $\chi:X\to\mathcal Y$ be the controller-visible physical context map. Let $\Agg(C)$ be the multiset obtained from $C$ by discarding observer--situation locations and provenance while retaining asserted formulas, credibilities, and timestamps. A policy $\pi$ is provenance-erased if
+\[
+\chi(x)=\chi(x')\text{ and }\Agg(C)=\Agg(C')
+\quad\Rightarrow\quad
+\pi(\cdot\mid x,C)=\pi(\cdot\mid x',C').
+\]
+The class of such policies is denoted $\Pi_{\mathrm{erase}}$.
+\end{definition}
+
+\begin{theorem}[Observer-collapse separation]
+\label{thm:separation}
+For every horizon $T\ge 1$, there exists a finite-horizon \OSCPOSG{} with two physical actions and a fixed dominance scheme such that
+\[
+\inf_{\pi\in\Pi_{\mathrm{erase}}}\Reg_T(\pi)\ge T/2,
+\]
+while an observer-aware policy $\pi^{\star}$ achieves $\Reg_T(\pi^{\star})=0$.
+\end{theorem}
+
+\begin{proof}
+Consider a repeated one-step problem with actions $A^p=\{\texttt{go},\texttt{hold}\}$. Let two physical states $x^+$ and $x^-$ have the same visible context, $\chi(x^+)=\chi(x^-)=y_0$. Let $\ell_H$ and $\ell_L$ be observer--situation locations. Let $q_r$ be the proposition family for berth readiness, and fix the dominance scheme so that any readiness-family claim at $\ell_H$ strictly dominates any readiness-family claim at $\ell_L$.
+
+The two possible claim bases are
+\[
+C^+=\{(ready,\ell_H,1,0,\rho_1),(\neg ready,\ell_L,1,0,\rho_2)\},
+\]
+\[
+C^-=\{(ready,\ell_L,1,0,\rho_1),(\neg ready,\ell_H,1,0,\rho_2)\}.
+\]
+They have the same provenance-erased aggregate. In state $s^+=(x^+,C^+)$, reward is one for \texttt{go} and zero for \texttt{hold}. In state $s^-=(x^-,C^-)$, reward is one for \texttt{hold} and zero for \texttt{go}. The initial state in each round is uniform over $s^+$ and $s^-$.
+
+Any $\pi\in\Pi_{\mathrm{erase}}$ must use the same action distribution in both states. If it selects \texttt{go} with probability $p$, its expected per-round reward is $\frac12p+\frac12(1-p)=\frac12$. The observer-aware policy that follows the undefeated readiness-family claim under $\mathcal D$ obtains reward one in both states. Hence the per-round regret of every provenance-erased policy is at least $1/2$, giving cumulative regret at least $T/2$.
+\end{proof}
+
+\begin{corollary}[Safety-budget separation]
+\label{cor:safety}
+There exists a safety-constrained version of the construction in Theorem~\ref{thm:separation} in which any provenance-erased policy either incurs linear safety violation or linear service regret, while an observer-aware policy incurs neither.
+\end{corollary}
+
+\begin{proof}
+Set \texttt{go} in state $s^-$ to create one unit of safety violation and set \texttt{hold} in state $s^+$ to create one unit of service regret. Since any provenance-erased policy uses the same action distribution in both states, decreasing one burden increases the other. The observer-aware policy conditions on the undefeated readiness-family claim and selects the correct action in both cases.
+\end{proof}
+
+\subsection{Certified-action soundness}
+
+\begin{theorem}[Certificate soundness]
+\label{thm:soundness}
+Fix time $t$, agent $i$, and critical physical action $a_i^p$. If $S\in\DCert_i(x_t,C_t,a_i^p)$, then there exists a classical interpretation $I$ such that
+\[
+I\models\Th_{\lambda_i(x_t)}(S)
+\quad\text{and hence}\quad
+I\models\operatorname{Pre}_i(a_i^p).
+\]
+Thus the certificate is a semantically sound explanation witness for the action preconditions at the decision node.
+\end{theorem}
+
+\begin{proof}
+By definition of dominant support certificate, $\Cons(\Th_{\lambda_i(x_t)}(S))=1$ and $\Th_{\lambda_i(x_t)}(S)$ entails every formula in $\operatorname{Pre}_i(a_i^p)$. Soundness of $\Cons$ gives a classical interpretation satisfying the supported theory; entailment then gives satisfaction of each action precondition.
+\end{proof}
+
+\begin{remark}
+\label{rem:proof-obligation}
+The theorem is intentionally modest. It establishes that a certificate is internally satisfiable, undefeated under the fixed dominance scheme, and supportive of the stated preconditions. It does not establish that the physical world truly satisfies those preconditions. That stronger claim requires assumptions about sensor fidelity, authority calibration, and simulator validity.
+\end{remark}
+
+\section{Minimal benchmark: Berth-1-Conflict}
+\label{sec:benchmark}
+
+The purpose of the benchmark is not to demonstrate final maritime performance. It is to test whether provenance-preserving semantics can separate from provenance-erased semantics under a fixed solver.
+
+\subsection{Environment}
+
+Each episode concerns a single berth admission decision. The hidden physical truth is whether the berth is ready. The visible context map $\chi_{B1}$ includes only non-discriminating operational features: vessel class, nominal time window, weather class, berth identifier class, and disruption family. It deliberately excludes the latent readiness bit and excludes observer--situation provenance. Claims are drawn from an authority-ordered set of observers: for example, harbor master, local crane-maintenance feed, AIS-derived ETA, berth operating system, and automated planner. The action set is
+\[
+A^p=\{\texttt{admit},\texttt{hold}\},
+\qquad
+A^e=\{\texttt{none},\texttt{verify},\texttt{defer},\texttt{escalate},\texttt{certify}\}.
+\]
+
+A safety violation occurs if the vessel is admitted while the undefeated readiness-family support indicates non-readiness. A service penalty occurs if the vessel is held while the undefeated readiness-family support indicates readiness. Epistemic actions incur intervention cost.
+
+\subsection{Ablation contract}
+
+All experimental conditions use the same latent episode bank and the same solver. The only manipulated object is the claim-state semantics:
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Provenance-preserving}: full observer--situation labels, pre-registered dominance, contradiction mass, and certification gates.
+  \item \textbf{Provenance-erased}: labels and provenance removed before decision.
+  \item \textbf{Random-label placebo}: labels randomized independently of authority; tests whether arbitrary metadata helps.
+  \item \textbf{Labels without gating}: labels visible, but certification/admissibility gates disabled; isolates provenance from feasibility semantics.
+  \item \textbf{Oracle visible-state}: hidden readiness exposed; sanity upper bound.
+  \item \textbf{Benign agreement}: no relevant contradictions; tests overhead when semantics are inactive.
+\end{enumerate}
+
+This design is solver-isolating. A positive result is not that a larger controller wins, but that the same controller changes behavior when the process state preserves the information that the theorem says is decision-relevant.
+
+\subsection{Metrics}
+
+The primary metrics are zero-violation regret, safety violations, service regret, epistemic intervention cost, and contradiction half-life. Emissions and fairness metrics are secondary translations. For a berth decision, an unnecessary hold can be mapped to idling emissions through a simulator-calibrated idling constant; service disparity can be measured directly through wait-time or cost differences across vessel or stakeholder classes. Ratio metrics such as Gini should be reported only with denominator diagnostics; absolute pairwise disparity is the preferred denominator-free companion.
+
+\section{Replay calibration and locked validation protocol}
+\label{sec:validation}
+
+A professional validation plan should separate three layers.
+
+\paragraph{Layer 1: semantic separation.} Run Berth-1-Conflict with paired seeds and a frozen solver. The required result is a paired difference between provenance-preserving and provenance-erased conditions on zero-violation regret or the safety--service tradeoff, while random-label placebo and benign-agreement checks behave as expected.
+
+\paragraph{Layer 2: maritime replay.} Replace synthetic claims with a replay CSV exported from the maritime twin. The replay schema must include episode identifier, step, visible-context features, latent readiness or admissibility label if available for evaluation, observer, situation, assertion, timestamp, credibility, provenance, and intervention outcome. The solver and ablation interface remain unchanged.
+
+\paragraph{Layer 3: metric lift.} Only after Layer 1 separates should the analysis translate burdens into CH-MARL-style metrics: idling emissions, service disparity, intervention spend, and fairness observables. Confidence statements should use block-level replay units keyed by traffic family, weather regime, disruption family, horizon, operating mode, and simulator version. Hoeffding-style bounds or empirical distribution bounds can be used for one-sided coverage when the block assumptions are appropriate \citep{Hoeffding1963,Massart1990}.
+
+\begin{table}[t]
+\centering
+\caption{Experimental lock items. These are fixed before local experiments.}
+\label{tab:prerun}
+\begin{tabularx}{\textwidth}{@{}p{0.25\textwidth}X@{}}
+\toprule
+Item & Required lock \\
+\midrule
+Visible context & Define $\chi_{B1}(x)$ and verify it excludes latent readiness and claim provenance. \\
+Dominance table & Pre-register observer priority by proposition family; do not tune after seeing results. \\
+Freshness windows & Fix timestamp decay and stale-claim thresholds by proposition family. \\
+Ablation set & Use the six conditions in \S\ref{sec:benchmark}; no solver changes across conditions. \\
+Episode bank & Generate or export latent episodes once; reuse across all conditions. \\
+Metrics & Primary: zero-violation regret and safety--service tradeoff. Secondary: emissions/fairness translations. \\
+Decision & Scale to full twin only if fixed-solver provenance preservation separates from erasure and placebo. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Implementation witness}
+\label{sec:implementation}
+
+The artifact package accompanying this paper contains a \texttt{Berth-1-Conflict} scaffold. Its role is contractual rather than evidentiary. In preflight mode it validates schema, manifests, ablation condition names, and output paths without generating results. Result generation is intentionally explicit. This prevents accidental synthetic smoke tests from being treated as evidence.
+
+The dominance-gated EcoFair-style wrapper is an implementation witness, not the contribution. Any MARL solver can be used if it obeys the frozen-solver ablation contract. This interpretation is supported only if the separation tracks the process-state semantics rather than the solver identity.
+
+\section{Limitations and threats to validity}
+\label{sec:limitations}
+
+First, the separation theorem is deliberately minimal. It proves that observer--situation provenance can be necessary, not that large maritime systems always exhibit the same separation. Second, dominance orders are domain artifacts. If authority or freshness rules are tuned after observing benchmark outcomes, the experiment becomes invalid. Third, certification soundness is logical soundness, not empirical truth. Physical validity still depends on calibrated sensors, reliable human authority, and simulator fidelity. Fourth, fairness and emissions translations are secondary and require replay calibration; they are not treated as primary theory claims. Fifth, OSL, EcoFair-CH-MARL, and R-CMASP are contemporary preprints rather than mature peer-reviewed baselines; they are therefore positioned as immediate technical neighbors while relying on established stochastic-control, epistemic-logic, and MARL literature for the broader scholarly spine.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\OSCMASP{} proposes a process-level account of regulated multi-agent coordination under fragmented truth. Its novelty is not a new hierarchy, belief layer, or LLM wrapper. It is the decision-theoretic status of observer--situation provenance: when contradictions are action-relevant, erasing provenance can alter regret and feasibility even under a frozen solver. The next empirical step is a locked, paired, solver-isolated \textsc{Berth-1-Conflict} run, followed by maritime-twin replay only if the minimal separation appears under the pre-registered conditions.
+
+
+\appendix
+
+\section{Proof details for the safety-budget construction}
+\label{app:safety-proof}
+
+Let $p$ be the probability that a provenance-erased policy chooses \texttt{go}. In state $s^-$, \texttt{go} creates one safety violation, so expected safety violation per round is $p/2$. In state $s^+$, \texttt{hold} creates one service-regret unit, so expected service regret per round is $(1-p)/2$. Thus for any $p$, at least one of safety violation or service regret is at least $1/4$ per round, and their sum is exactly $1/2$ per round. The observer-aware policy chooses \texttt{go} in $s^+$ and \texttt{hold} in $s^-$, so both quantities are zero.
+
+\section{Replay schema}
+\label{app:schema}
+
+A minimal replay CSV should contain the following columns:
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}p{0.22\textwidth}X@{}}
+\toprule
+Column & Meaning \\
+\midrule
+episode\_id & Stable episode identifier. \\
+step & Integer decision step. \\
+context\_json & Serialized visible context used by $\chi_{B1}$. \\
+latent\_ready & Evaluation-only readiness label, if available. \\
+observer & Observer or information source. \\
+situation & Situation identifier or regime label. \\
+claim & Formula or literal such as \texttt{ready} or \texttt{not\_ready}. \\
+credibility & Numeric confidence or calibrated source reliability. \\
+timestamp & Event or assertion timestamp. \\
+provenance & Source metadata required for audit. \\
+outcome\_json & Optional action/outcome fields from the twin. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Bibliographic positioning}
+\label{app:ref-policy}
+
+The bibliography distinguishes three classes of citation. Foundational sources establish stochastic games, Dec-POMDPs, constrained control, epistemic reasoning, truth maintenance, and logistics. Contemporary preprints establish immediate technical neighbors: OSL, EcoFair-CH-MARL, CH-MARL, and R-CMASP. Project websites, newsroom announcements, and internal deployment material do not carry technical claims in the paper. They may motivate case-study selection in a cover note, acknowledgments, or a non-archival deployment memo, but they do not substitute for scholarly references.
+
+\section{Technical supplement: budget lifts, replay certification, and operationalization}
+\label{app:extended-technical-supplement}
+
+This appendix collects the extended theory, validation machinery, and operationalization details that support the formal core. The claims here are subordinate to the main process-semantics claim: they specify how to test, calibrate, and operationalize OS-CMASP without turning the paper into a controller-stack contribution.
+
+\section{Extended non-stacking rationale}
+
+The extended rationale is organized around four design decisions.
+
+\begin{enumerate}[leftmargin=1.7em,label=\arabic*.]
+\item \textbf{State semantics.} The environment state is not only a latent physical state $x_t$ but also a claim base $C_t$ over observer--situation space. Claims are not immediately collapsed into a single fused estimate.
+\item \textbf{Action semantics.} Joint action includes both physical control acts and epistemic repair acts such as query, verify, defer, challenge, certify, and escalate.
+\item \textbf{Feasibility semantics.} A critical action is admissible only if its preconditions are support-certified under a satisfiable theory or routed through an explicit epistemic exception act.
+\item \textbf{Audit semantics.} Explanations are not post-hoc summaries of hidden computations. They are support certificates drawn from the same contradiction-aware claim state that the controller uses at decision time.
+\end{enumerate}
+
+\subsection{Non-stacking criterion and refinement ladder}
+
+To keep the novelty claim disciplined, it helps to say explicitly what \emph{would not} count as a new contribution here.
+
+\begin{definition}[Stacked architectural augmentation]
+\label{supp:def:stacking}
+Fix a base environment class
+\[
+\mathcal G_0 = \langle X,\{A_i^p\}_{i\in N},P_0,\mathcal F_0,J_0\rangle
+\]
+with latent state space $X$, physical action interface $\{A_i^p\}$, transition law $P_0$, admissibility relation $\mathcal F_0$, and objective / constraint bundle $J_0$. A proposal is a \emph{stacked architectural augmentation} of $\mathcal G_0$ iff it preserves the environment-level tuple
+\[
+(X,\{A_i^p\}_{i\in N},P_0,\mathcal F_0,J_0)
+\]
+up to observationally irrelevant reparameterization, and changes only the controller internals: policy class, auxiliary losses, memory structure, communication architecture, or post-hoc explanation module.
+\end{definition}
+
+\begin{remark}[What this definition rules out]
+\label{supp:rem:what-stacking-rules-out}
+By Definition~\ref{supp:def:stacking}, proposals of the form ``EcoFair-CH-MARL plus an OSL module'' are still stacked unless OSL changes what the environment state \emph{is}, what actions \emph{exist}, or what makes a critical action \emph{admissible}. Better performance alone would not justify a process-class claim.
+\end{remark}
+
+Under that criterion, process-class novelty is warranted only to the extent that all three of the following are true.
+
+\begin{enumerate}[leftmargin=1.7em,label=\textbf{R\arabic*:}]
+\item \textbf{State test.} Preserving observer--situation provenance changes the decision problem, not merely the quality of an internal estimate.
+\item \textbf{Feasibility test.} Certification / escalation changes which actions are executable, not merely which explanations can be shown after execution.
+\item \textbf{Solver-independence test.} The core gain survives a fixed-controller ablation in which only state semantics and admissibility semantics are changed.
+\end{enumerate}
+
+These rejection conditions are the reason the separation theorem in Section~\ref{sec:theory} matters more than any specific neural architecture.
+
+\subsection{Cautionary scope and non-claims}
+
+Because the paper is trying to move from \emph{architecture} novelty to \emph{problem-class} novelty, it is important to say explicitly what is \emph{not} being claimed.
+
+\begin{enumerate}[leftmargin=1.7em,label=\textbf{N\arabic*:}]
+\item \textbf{Not the first epistemic MARL model.} Interactive belief-state methods, common-knowledge coordination, and epistemic planning already show that epistemic structure can be control-relevant \citep{GmytrasiewiczDoshi2005,SchroederdeWitt2019MACKRL,LiuLiu2018MEP}.
+\item \textbf{Not the first simulator-coupled governed process.} R-CMASP already provides a close process-level neighbor with simulator-coupled dynamics and normative feasibility \citep{Dong2025RCMASP}.
+\item \textbf{Not a theorem about the full maritime twin.} The separation results in Section~\ref{sec:theory} are intentionally minimal. They establish the candidate distinction on berth-admission-style families, not yet on the full 16-port digital twin.
+\item \textbf{Not a claim that one dominance order is canonical.} The priority map $\pi_L$ is a modeling choice. Different ports may instantiate authority, recency, and source trust differently.
+\end{enumerate}
+
+The guarded claim is therefore narrower but not extension-shaped. If the separation theorems survive and the fixed-solver ablations in Section~\ref{supp:sec:falsification} confirm solver-independence, then OS-CMASP is a defensible \emph{candidate} process class for fragmented-truth control. If a specific empirical route fails, the appropriate refinement is to restrict the active regime to settings where provenance affects admissibility, contradiction burden, or replay-certified budget metrics under a fixed solver. The fallback is a sharper OS-CMASP subcase, not an auxiliary module attached to an existing controller.
+
+These choices position the model relative to three adjacent lines of work. First, interactive and belief-state models such as I-POMDPs enrich the state space with models of other agents, but they still treat the problem as planning over a belief state rather than over an explicit contradiction-bearing claim base \citep{GmytrasiewiczDoshi2005}. Second, common-knowledge methods such as MACKRL exploit information the agents can agree on without communication; this is powerful for decentralized coordination, but it presumes a form of agreement rather than making disagreement a first-class state object \citep{SchroederdeWitt2019MACKRL}. Third, epistemic planners with common knowledge focus on actions with epistemic preconditions and effects, but they are not formulated as simulator-coupled constrained control problems with cumulative operational objectives and feasibility gating \citep{LiuLiu2018MEP}. The closest neighboring formalism is therefore R-CMASP, not the broader epistemic-planning literature.
+
+\section{Expanded budget-bundle and replay-calibration machinery}
+\label{supp:app:expanded-budget-replay}
+\subsection{A CH-MARL-shaped budget bundle}
+\label{supp:subsec:bundle}
+
+\begin{definition}[Minimal CH-MARL-style budget bundle]
+\label{supp:def:bundle}
+Consider a berth-admission benchmark with vessel class label
+\[
+c_t\in\{A,B\}
+\]
+and binary latent readiness variable
+\[
+r_t\in\{0,1\}.
+\]
+Define the cumulative safety burden by
+\[
+V_T(\pi)
+:=
+\E_\pi\!\left[\sum_{t=0}^{T-1} \1[\mathcal F(x_t,C_t,a_t)=0]\right].
+\]
+For each vessel class $c\in\{A,B\}$, define the unnecessary ready-hold count
+\[
+U_c(T;\pi)
+:=
+\E_\pi\!\left[\sum_{t=0}^{T-1} \1[c_t=c,\ r_t=1,\ a_t^p=\mathsf{hold}]\right].
+\]
+Define idling-emission burden, service-disparity burden, and intervention spend by
+\[
+E_T(\pi):=U_A(T;\pi)+U_B(T;\pi),
+\]
+\[
+F_T(\pi):=\big|U_A(T;\pi)-U_B(T;\pi)\big|,
+\]
+\[
+I_T(\pi)
+:=
+\E_\pi\!\left[\sum_{t=0}^{T-1} \1[a_t^e\neq \varnothing]\right].
+\]
+We call
+\[
+\mathcal B_T(\pi):=(V_T(\pi),E_T(\pi),F_T(\pi),I_T(\pi))
+\]
+the minimal safety--emission--fairness--intervention bundle.
+\end{definition}
+
+\begin{remark}[Why this fairness metric is intentionally minimal]
+\label{supp:rem:minimal-fairness}
+The quantity $F_T$ is not intended to reproduce the full fairness machinery of EcoFair-CH-MARL. It is a benchmark-side service-parity proxy chosen for one reason only: it exposes a provenance-sensitive delay asymmetry in a form that can be analyzed without changing the solver. If this proxy fails to separate the provenance-preserving and provenance-erased problems, the stronger fairness story is withheld.
+\end{remark}
+
+\begin{theorem}[Two-class bundle impossibility under provenance erasure]
+\label{supp:thm:bundle-impossibility}
+For every even horizon $T\ge 2$, there exists a two-class berth-admission family of \OSCPOSG{} instances with the following properties.
+\begin{enumerate}[leftmargin=1.6em,label=(\roman*)]
+\item On every class-$A$ round, the berth is ready and the claim base admits an unambiguous dominant certificate for $ready$.
+\item On every class-$B$ round, the claim base is either $C_B^+$ or $C_B^-$ with equal probability, where
+\[
+C_B^+
+=
+\{(ready,\ell_H,1,0,\rho_1),(\neg ready,\ell_G,1,0,\rho_2)\},
+\]
+\[
+C_B^-
+=
+\{(ready,\ell_G,1,0,\rho_1),(\neg ready,\ell_H,1,0,\rho_2)\},
+\]
+with $\pi_L(\ell_H)>\pi_L(\ell_G)$ and
+\[
+\Agg(C_B^+)=\Agg(C_B^-).
+\]
+\item The reward is $1$ for the correct physical action on each round and $0$ otherwise; on class-$A$ rounds, the correct action is $\mathsf{admit}$, while on class-$B$ rounds the correct action is the action supported by the dominant claim.
+\item The action $\mathsf{admit}$ is critical, and on class-$B$ rounds it is admissible iff a dominant support certificate for $ready$ exists.
+\end{enumerate}
+Then there exists an observer-aware policy $\pi^{\star}$ such that
+\[
+\mathcal B_T(\pi^{\star})=(0,0,0,0)
+\qquad\text{and}\qquad
+J_T(\pi^{\star})=T,
+\]
+whereas no aggregated policy $\pi\in\Pi_{\mathrm{agg}}$ can satisfy
+\[
+\mathcal B_T(\pi)=(0,0,0,0).
+\]
+\end{theorem}
+
+\begin{proof}
+Consider any aggregated policy $\pi\in\Pi_{\mathrm{agg}}$. Because class-$A$ rounds are unambiguous, let
+\[
+q:=\pi(\mathsf{admit}\mid \Agg(C_A))
+\]
+denote the admission probability on class-$A$ rounds. Because
+\[
+\Agg(C_B^+)=\Agg(C_B^-),
+\]
+there is a single admission probability
+\[
+p:=\pi(\mathsf{admit}\mid \Agg(C_B^+))=\pi(\mathsf{admit}\mid \Agg(C_B^-))
+\]
+for all class-$B$ rounds without extra epistemic resolution.
+
+There are $T/2$ class-$A$ rounds and $T/2$ class-$B$ rounds. On class-$A$ rounds, every hold is an unnecessary ready-hold, so
+\[
+U_A(T;\pi)=\frac{(1-q)T}{2}.
+\]
+On class-$B$ rounds, the berth is ready in exactly half the rounds in expectation, and holding on those ready rounds creates unnecessary delay and idling, so
+\[
+U_B(T;\pi)=\frac{(1-p)T}{4}.
+\]
+Likewise, admitting on the not-ready class-$B$ rounds is inadmissible, so
+\[
+V_T(\pi)=\frac{pT}{4}.
+\]
+Since $E_T=U_A+U_B$ and $F_T=|U_A-U_B|$, the zero-bundle equalities
+\[
+V_T(\pi)=E_T(\pi)=F_T(\pi)=I_T(\pi)=0
+\]
+would imply, in particular, $V_T(\pi)=0$ and $E_T(\pi)=0$. The first forces $p=0$. The second then forces $U_A=U_B=0$, hence $q=1$ and simultaneously $U_B=(1-p)T/4=T/4$, a contradiction. Therefore no aggregated policy can satisfy the zero bundle.
+
+Now define the observer-aware policy $\pi^{\star}$ by: admit on every class-$A$ round; on class-$B$ rounds, admit in state $C_B^+$ and hold in state $C_B^-$. This policy is always admissible, never holds a ready vessel unnecessarily, never uses an epistemic exception act, and chooses the correct action on every round. Hence
+\[
+\mathcal B_T(\pi^{\star})=(0,0,0,0)
+\qquad\text{and}\qquad
+J_T(\pi^{\star})=T.
+\]
+\end{proof}
+
+\begin{corollary}[Linear budget tradeoff under provenance erasure]
+\label{supp:cor:bundle-tradeoff}
+In the family of Theorem~\ref{supp:thm:bundle-impossibility}, every aggregated policy $\pi\in\Pi_{\mathrm{agg}}$ satisfies
+\[
+V_T(\pi)+\frac{1}{2}\big(E_T(\pi)+F_T(\pi)\big)\ge \frac{T}{4}.
+\]
+Consequently, no provenance-erased aggregated policy can drive safety burden, idling-emission burden, and service-disparity burden all to $o(T)$ simultaneously.
+\end{corollary}
+
+\begin{proof}
+From the proof of Theorem~\ref{supp:thm:bundle-impossibility},
+\[
+V_T(\pi)=\frac{pT}{4}.
+\]
+Moreover,
+\[
+E_T(\pi)+F_T(\pi)
+=
+U_A+U_B+|U_A-U_B|
+=2\max\{U_A,U_B\}
+\ge 2U_B
+=\frac{(1-p)T}{2}.
+\]
+Therefore
+\[
+V_T(\pi)+\frac{1}{2}\big(E_T(\pi)+F_T(\pi)\big)
+\ge
+\frac{pT}{4}+\frac{(1-p)T}{4}
+=\frac{T}{4}.
+\]
+\end{proof}
+
+\begin{corollary}[Intervention can only buy down the burden linearly]
+\label{supp:cor:intervention-tradeoff}
+Extend the family of Theorem~\ref{supp:thm:bundle-impossibility} by allowing an epistemic action $\mathsf{resolve}$ on class-$B$ rounds. Each use of $\mathsf{resolve}$ reveals whether the current class-$B$ round is in state $C_B^+$ or $C_B^-$ before the physical action is chosen, and each use contributes one unit to $I_T$. Then every aggregated policy satisfies
+\[
+V_T(\pi)+\frac{1}{2}\big(E_T(\pi)+F_T(\pi)\big)+\frac{1}{2}I_T(\pi)
+\ge \frac{T}{4}.
+\]
+Hence a provenance-erased controller can remove the linear safety / emission / fairness burden only by paying linear intervention spend.
+\end{corollary}
+
+\begin{proof}
+Let $N_B=T/2$ be the number of class-$B$ rounds and let $M_T\le I_T(\pi)$ denote the expected number of class-$B$ rounds on which the policy invokes $\mathsf{resolve}$. On the remaining unresolved class-$B$ rounds, the policy still sees only the collapsed view $\Agg(C_B^+)=\Agg(C_B^-)$, so the same argument as in Corollary~\ref{supp:cor:bundle-tradeoff} applies on that unresolved subset. Therefore
+\[
+V_T(\pi)+\frac{1}{2}\big(E_T(\pi)+F_T(\pi)\big)
+\ge \frac{N_B-M_T}{2}
+= \frac{T}{4}-\frac{M_T}{2}.
+\]
+Since $M_T\le I_T(\pi)$,
+\[
+V_T(\pi)+\frac{1}{2}\big(E_T(\pi)+F_T(\pi)\big)+\frac{1}{2}I_T(\pi)
+\ge \frac{T}{4}.
+\]
+\end{proof}
+
+\begin{remark}[What the bundle theorem does and does not establish]
+\label{supp:rem:bundle-scope}
+Theorem~\ref{supp:thm:bundle-impossibility} and Corollaries~\ref{supp:cor:bundle-tradeoff}--\ref{supp:cor:intervention-tradeoff} are not claims about the full EcoFair digital twin or its full fairness transformer. They show a narrower fact that is directly useful for the novelty test: even in a fixed-solver berth-admission family, provenance erasure changes the feasible budget geometry. This is a process-semantics result, not a stacked-controller result.
+\end{remark}
+
+\subsection{Toward an EcoFair-aligned budget lift}
+\label{supp:subsec:budget-lift}
+
+The minimal bundle above is intentionally benchmark-native. To connect it more cautiously to EcoFair-style accounting without claiming that the full digital twin has already been analyzed, we introduce actual budget-facing metrics and state the weakest calibration assumptions under which the bundle separation survives.
+
+\begin{definition}[EcoFair-aligned benchmark metrics]
+\label{supp:def:actual-metrics}
+Fix budgets $B_E,B_F,B_I\ge 0$. Let
+\[
+\mathcal E_T^{\mathrm{idle}}(\pi)
+\]
+denote cumulative extra idling-emission units relative to immediate certified admission, let
+\[
+\mathcal D_T(\pi)
+\]
+denote a chosen service-disparity statistic for the experiment (for example, the absolute difference in class-wise mean ready-to-berth delay), and let
+\[
+\mathcal X_T^{E}(\pi):=(\mathcal E_T^{\mathrm{idle}}(\pi)-B_E)_+,
+\qquad
+\mathcal X_T^{F}(\pi):=(\mathcal D_T(\pi)-B_F)_+,
+\qquad
+\mathcal X_T^{I}(\pi):=(I_T(\pi)-B_I)_+.
+\]
+We refer to $(V_T,\mathcal X_T^{E},\mathcal X_T^{F},\mathcal X_T^{I})$ as the EcoFair-aligned safety--emission--fairness--intervention overshoot vector.
+\end{definition}
+
+\begin{definition}[Benchmark-side calibration assumptions]
+\label{supp:def:calibration}
+We say that a berth-admission benchmark family admits an $(\underline\epsilon,\underline\phi)$-calibration if there exist constants $\underline\epsilon,\underline\phi>0$ such that for every policy $\pi$ in the family,
+\[
+\mathcal E_T^{\mathrm{idle}}(\pi)\ge \underline\epsilon\, E_T(\pi)
+\qquad\text{and}\qquad
+\mathcal D_T(\pi)\ge \underline\phi\, F_T(\pi).
+\]
+The first inequality says that every unnecessary ready-hold induces at least $\underline\epsilon$ units of extra idling emissions on the benchmark. The second says that the selected fairness statistic is sensitive enough to lower-bound the class-asymmetry exposed by $F_T$.
+\end{definition}
+
+\begin{proposition}[EcoFair-aligned metric lift]
+\label{supp:prop:budget-lift}
+Assume the two-class berth-admission family of Theorem~\ref{supp:thm:bundle-impossibility} admits an $(\underline\epsilon,\underline\phi)$-calibration in the sense of Definition~\ref{supp:def:calibration}. Then every aggregated policy $\pi\in\Pi_{\mathrm{agg}}$ satisfies
+\[
+V_T(\pi)
++ \frac{1}{2\underline\epsilon}\,\mathcal E_T^{\mathrm{idle}}(\pi)
++ \frac{1}{2\underline\phi}\,\mathcal D_T(\pi)
++ \frac{1}{2} I_T(\pi)
+\ge \frac{T}{4}.
+\]
+Hence provenance erasure cannot be hidden by merely swapping in more realistic emission and service metrics, provided those metrics are benchmark-calibrated to the underlying ready-hold geometry.
+\end{proposition}
+
+\begin{proof}
+By Definition~\ref{supp:def:calibration},
+\[
+\frac{1}{2\underline\epsilon}\,\mathcal E_T^{\mathrm{idle}}(\pi)\ge \frac{1}{2}E_T(\pi)
+\qquad\text{and}\qquad
+\frac{1}{2\underline\phi}\,\mathcal D_T(\pi)\ge \frac{1}{2}F_T(\pi).
+\]
+Substituting these bounds into Corollary~\ref{supp:cor:intervention-tradeoff} yields
+\[
+V_T(\pi)
++ \frac{1}{2\underline\epsilon}\,\mathcal E_T^{\mathrm{idle}}(\pi)
++ \frac{1}{2\underline\phi}\,\mathcal D_T(\pi)
++ \frac{1}{2} I_T(\pi)
+\ge \frac{T}{4}.
+\]
+\end{proof}
+
+\begin{corollary}[EcoFair-aligned overshoot tradeoff]
+\label{supp:cor:budget-overshoot}
+Under the assumptions of Proposition~\ref{supp:prop:budget-lift}, every aggregated policy $\pi\in\Pi_{\mathrm{agg}}$ satisfies
+\[
+V_T(\pi)
++ \frac{1}{2\underline\epsilon}\,\mathcal X_T^{E}(\pi)
++ \frac{1}{2\underline\phi}\,\mathcal X_T^{F}(\pi)
++ \frac{1}{2}\,\mathcal X_T^{I}(\pi)
+\ge
+\frac{T}{4}
+- \frac{B_E}{2\underline\epsilon}
+- \frac{B_F}{2\underline\phi}
+- \frac{B_I}{2}.
+\]
+In particular, if $B_E=o(T)$, $B_F=o(T)$, and $B_I=o(T)$, then provenance-erased aggregated control cannot keep all four coordinates of the overshoot vector sublinear.
+\end{corollary}
+
+\begin{proof}
+From Proposition~\ref{supp:prop:budget-lift},
+\[
+V_T(\pi)
++ \frac{1}{2\underline\epsilon}\,\mathcal E_T^{\mathrm{idle}}(\pi)
++ \frac{1}{2\underline\phi}\,\mathcal D_T(\pi)
++ \frac{1}{2} I_T(\pi)
+\ge \frac{T}{4}.
+\]
+Using
+\[
+\mathcal E_T^{\mathrm{idle}}(\pi)
+\le \mathcal X_T^{E}(\pi)+B_E,
+\qquad
+\mathcal D_T(\pi)
+\le \mathcal X_T^{F}(\pi)+B_F,
+\qquad
+I_T(\pi)
+\le \mathcal X_T^{I}(\pi)+B_I,
+\]
+we obtain
+\[
+V_T(\pi)
++ \frac{1}{2\underline\epsilon}\,\mathcal X_T^{E}(\pi)
++ \frac{1}{2\underline\phi}\,\mathcal X_T^{F}(\pi)
++ \frac{1}{2}\,\mathcal X_T^{I}(\pi)
+\ge
+\frac{T}{4}
+- \frac{B_E}{2\underline\epsilon}
+- \frac{B_F}{2\underline\phi}
+- \frac{B_I}{2}.
+\]
+If all budgets are $o(T)$, the right-hand side remains $\Omega(T)$, so at least one coordinate of the overshoot vector must be linear in $T$.
+\end{proof}
+
+\begin{remark}[Why this lift is still cautious]
+\label{supp:rem:budget-lift-caution}
+Proposition~\ref{supp:prop:budget-lift} and Corollary~\ref{supp:cor:budget-overshoot} do not claim that the EcoFair fairness transformer itself has already been reproduced. They only say that if the chosen benchmark-side emission and disparity metrics are calibrated to the delay geometry created by unnecessary ready-holds, then the minimal bundle impossibility propagates to a more CH-MARL-shaped budget language without changing the solver identity.
+\end{remark}
+
+\subsection{Simulator-grounded calibration by counterfactual replay}
+\label{supp:subsec:sim-grounded-calibration}
+
+EcoFair's maritime digital twin already exposes the ingredients needed to replace abstract calibration rhetoric with measured quantities: hourly decision epochs, explicit queueing and idling fuel consumption when berth capacity binds, and per-vessel cost logs from which fairness diagnostics such as Gini and min--max are computed \citep{Alqithami2026EcoFair}. The least risky next step is therefore not to add more controller depth, but to use the twin itself as a measurement device while keeping the solver frozen.
+
+\begin{definition}[Twin-native idling constant]
+\label{supp:def:twin-idling-constant}
+Fix a berth-admission witness slice
+\[
+\mathcal W_{\mathrm{ready}} \subseteq X \times 2^{\Lit(\Phi)\times L\times [0,1]\times \mathbb T\times\mathcal P}
+\]
+consisting of states $(x_t,C_t)$ in which a designated vessel is physically berth-ready, immediate certified admit is feasible, and a physical hold leaves that vessel idling for one simulator step of length $\Delta t>0$. Let
+\[
+\dot e_{\mathrm{idle}}(x_t)
+\]
+be the simulator's idling-emission rate for that vessel at state $x_t$. Define
+\[
+\underline\epsilon_{\mathcal S}
+:=
+\inf_{(x_t,C_t)\in \mathcal W_{\mathrm{ready}}}
+\dot e_{\mathrm{idle}}(x_t)\,\Delta t.
+\]
+We call $\underline\epsilon_{\mathcal S}$ the twin-native idling constant.
+\end{definition}
+
+\begin{proposition}[Emission calibration from twin-native idling semantics]
+\label{supp:prop:twin-emission-calibration}
+Assume the berth-admission benchmark uses the maritime digital twin semantics of EcoFair-CH-MARL, with explicit idling-emission accumulation during queueing and a decision step of length $\Delta t$. If every unnecessary ready-hold counted by $E_T(\pi)$ occurs at some state in $\mathcal W_{\mathrm{ready}}$, then every policy $\pi$ satisfies
+\[
+\mathcal E_T^{\mathrm{idle}}(\pi)
+\ge
+\underline\epsilon_{\mathcal S}\,E_T(\pi).
+\]
+Hence the emission-side calibration constant in Definition~\ref{supp:def:calibration} can be instantiated directly from the simulator semantics rather than postulated abstractly.
+\end{proposition}
+
+\begin{proof}
+Each unnecessary ready-hold contributes at least one simulator step of idling for the held vessel, and by Definition~\ref{supp:def:twin-idling-constant} that step carries at least $\underline\epsilon_{\mathcal S}$ extra idling emissions. Summing this nonnegative contribution over all unnecessary ready-holds counted by $E_T(\pi)$ gives
+\[
+\mathcal E_T^{\mathrm{idle}}(\pi)
+\ge
+\underline\epsilon_{\mathcal S}\,E_T(\pi).
+\]
+\end{proof}
+
+\begin{definition}[Episode-matched fairness calibration record]
+\label{supp:def:episode-calibration-record}
+Fix a frozen solver and a chosen fairness proxy $\mathcal D_T$ for the berth-admission benchmark. Run the simulator for episodes indexed by $m\in\{1,\dots,M\}$ under common random seeds and log the episode-level pairs
+\[
+\mathfrak R_M
+:=
+\bigl\{(F_T^{(m)},\mathcal D_T^{(m)})\bigr\}_{m=1}^M.
+\]
+A function $L_M:\mathbb N\to\mathbb R_+$ is a lower calibration envelope for $\mathfrak R_M$ if
+\[
+L_M\bigl(F_T^{(m)}\bigr)
+\le
+\mathcal D_T^{(m)}
+\qquad\text{for all }m\in\{1,\dots,M\}.
+\]
+We say that the fairness proxy is simulator-certified at slope $\underline\phi_{\mathcal S}>0$ on an operational range $\mathcal R\subseteq\mathbb N$ if there exists a lower calibration envelope with
+\[
+L_M(f)\ge \underline\phi_{\mathcal S} f
+\qquad\text{for all }f\in\mathcal R.
+\]
+In practice, $L_M$ should be chosen as a lower confidence envelope rather than as a raw sample minimum.
+\end{definition}
+
+\begin{definition}[Quantile-certified replay slope]
+\label{supp:def:quantile-certified-slope}
+Consider only replay episodes with $F_T^{(m)}>0$, and define the realized ratio
+\[
+R^{(m)} := \frac{\mathcal D_T^{(m)}}{F_T^{(m)}}.
+\]
+Assume these ratios are exchangeable draws from a replay distribution $\Prob_{\mathcal S}$, and let
+\[
+R_{(1)}\le \cdots \le R_{(M_+)}
+\]
+be the order statistics over the $M_+$ positive-$F_T$ episodes. For a target tail level $\beta\in(0,1)$ and confidence level $1-\alpha\in(0,1)$, define
+\[
+k_{\alpha,\beta}
+:=
+\min\left\{
+ k\in\{1,\dots,M_+\}:
+ \sum_{j=0}^{k-1}\binom{M_+}{j}\beta^j(1-\beta)^{M_+-j}\le \alpha
+\right\}.
+\]
+If the set above is empty, certification at the requested $(\alpha,\beta)$ pair fails on the available replay bank. Otherwise define
+\[
+\widehat\phi^{\mathrm{LCB}}_{\beta,\alpha} := R_{(k_{\alpha,\beta})}.
+\]
+We call $\widehat\phi^{\mathrm{LCB}}_{\beta,\alpha}$ a one-sided $(1-\alpha)$-confidence lower bound for a $(1-\beta)$-coverage fairness slope.
+\end{definition}
+
+\begin{proposition}[Confidence-certified replay envelope]
+\label{supp:prop:confidence-envelope}
+Assume Definition~\ref{supp:def:quantile-certified-slope} and suppose $k_{\alpha,\beta}$ exists. Then
+\[
+\Prob\!\left[
+\Prob_{R\sim \Prob_{\mathcal S}}\!\left(R \ge \widehat\phi^{\mathrm{LCB}}_{\beta,\alpha}\right) \ge 1-\beta
+\right]
+\ge 1-\alpha.
+\]
+Equivalently, with confidence at least $1-\alpha$ over the sampled replay bank, at least a $1-\beta$ fraction of replay episodes from the same seed distribution satisfy
+\[
+\mathcal D_T \ge \widehat\phi^{\mathrm{LCB}}_{\beta,\alpha}\,F_T.
+\]
+Episodes with $F_T=0$ satisfy the inequality trivially.
+\end{proposition}
+
+\begin{proof}
+Let
+\[
+q_\beta := \sup\{q\in\mathbb R_+ : \Prob_{R\sim \Prob_{\mathcal S}}(R\ge q)\ge 1-\beta\}.
+\]
+Then $\Prob(R\le q_\beta)\ge \beta$. The event $R_{(k_{\alpha,\beta})}>q_\beta$ implies that fewer than $k_{\alpha,\beta}$ sampled ratios fall below or at $q_\beta$. Since the count of such ratios is stochastically lower-bounded by a $\mathrm{Binomial}(M_+,\beta)$ random variable,
+\[
+\Prob\!\left(R_{(k_{\alpha,\beta})}>q_\beta\right)
+\le
+\sum_{j=0}^{k_{\alpha,\beta}-1}\binom{M_+}{j}\beta^j(1-\beta)^{M_+-j}
+\le \alpha.
+\]
+Hence, with probability at least $1-\alpha$, we have $\widehat\phi^{\mathrm{LCB}}_{\beta,\alpha}=R_{(k_{\alpha,\beta})}\le q_\beta$. By definition of $q_\beta$, this implies
+\[
+\Prob_{R\sim \Prob_{\mathcal S}}\!\left(R\ge \widehat\phi^{\mathrm{LCB}}_{\beta,\alpha}\right) \ge 1-\beta.
+\]
+Replacing $R$ with $\mathcal D_T/F_T$ yields the stated inequality on all positive-$F_T$ episodes, while the zero-$F_T$ episodes satisfy it automatically.
+\end{proof}
+
+\begin{corollary}[Confidence-certified budget lift on a replay distribution]
+\label{supp:cor:confidence-budget-lift}
+Suppose Proposition~\ref{supp:prop:twin-emission-calibration} holds with twin-native idling constant $\underline\epsilon_{\mathcal S}>0$, and suppose Definition~\ref{supp:def:quantile-certified-slope} produces $\widehat\phi^{\mathrm{LCB}}_{\beta,\alpha}>0$ for the chosen fairness proxy. Then, with confidence at least $1-\alpha$ over the replay bank, at least a $1-\beta$ fraction of replay episodes satisfy
+\[
+V_T
++ \frac{1}{2\underline\epsilon_{\mathcal S}}\,\mathcal E_T^{\mathrm{idle}}
++ \frac{1}{2\widehat\phi^{\mathrm{LCB}}_{\beta,\alpha}}\,\mathcal D_T
++ \frac{1}{2} I_T
+\ge \frac{T}{4}.
+\]
+Thus a deterministic lower-envelope theorem can be replaced, on a fixed seed distribution, by a one-sided confidence statement without changing the solver identity.
+\end{corollary}
+
+\begin{proof}
+By Proposition~\ref{supp:prop:twin-emission-calibration}, every replay episode satisfies
+\[
+\mathcal E_T^{\mathrm{idle}} \ge \underline\epsilon_{\mathcal S} E_T.
+\]
+By Proposition~\ref{supp:prop:confidence-envelope}, with confidence at least $1-\alpha$, at least a $1-\beta$ fraction of replay episodes satisfy
+\[
+\mathcal D_T \ge \widehat\phi^{\mathrm{LCB}}_{\beta,\alpha} F_T.
+\]
+On that same event, Corollary~\ref{supp:cor:intervention-tradeoff} yields the stated inequality episode-wise for those replay episodes.
+\end{proof}
+
+\begin{definition}[Class-separated cost witness]
+\label{supp:def:class-separated-witness}
+Fix a replay episode with vessel classes $A$ and $B$, cardinalities $n_A:=|A|$ and $n_B:=|B|$, and realized per-vessel service-cost vector $\mathbf c=(c_1,\dots,c_n)\in\mathbb R_+^n$ with $n=n_A+n_B$. We say that the episode admits a \emph{class-separated cost witness} at baseline $c_0\ge 0$ and burden slope $\underline d>0$ if there exist nonnegative burden increments $(\delta_j)_{j\in B}$ such that
+\[
+c_i = c_0 \quad (i\in A),
+\qquad
+c_j = c_0 + \delta_j \quad (j\in B),
+\]
+and
+\[
+\sum_{j\in B}\delta_j \ge \underline d\,F_T.
+\]
+If, in addition,
+\[
+\sum_{i=1}^n c_i \le U_C
+\]
+throughout an operational range, we say the witness is \emph{range-bounded} by $U_C$.
+\end{definition}
+
+\begin{proposition}[Min--max carries a lower envelope on class-separated witnesses]
+\label{supp:prop:minmax-envelope}
+Under Definition~\ref{supp:def:class-separated-witness}, let
+\[
+\MM_T := \max_{1\le i\le n} c_i - \min_{1\le i\le n} c_i.
+\]
+Then
+\[
+\MM_T \ge \frac{\underline d}{n_B} F_T.
+\]
+Hence min--max is a proof-carrying fairness observable on this witness family.
+\end{proposition}
+
+\begin{proof}
+Because every class-$A$ vessel remains at baseline, we have
+\[
+\min_i c_i = c_0.
+\]
+Among the $n_B$ class-$B$ vessels, at least one attains burden at least the class-$B$ average, so
+\[
+\max_i c_i \ge c_0 + \frac{1}{n_B}\sum_{j\in B}\delta_j.
+\]
+Subtracting and using Definition~\ref{supp:def:class-separated-witness} gives
+\[
+\MM_T \ge \frac{1}{n_B}\sum_{j\in B}\delta_j \ge \frac{\underline d}{n_B}F_T.
+\]
+\end{proof}
+
+\begin{proposition}[Conditional Gini lower envelope on range-bounded class-separated witnesses]
+\label{supp:prop:gini-envelope}
+Under Definition~\ref{supp:def:class-separated-witness}, let
+\[
+\Gini_T := \frac{\sum_{i=1}^n\sum_{j=1}^n |c_i-c_j|}{2n\sum_{i=1}^n c_i}.
+\]
+If the witness is range-bounded by $U_C$, then
+\[
+\Gini_T \ge \frac{n_A\underline d}{nU_C} F_T.
+\]
+Hence Gini is also proof-carrying on this witness family, but only after imposing a bounded operational range.
+\end{proposition}
+
+\begin{proof}
+For every ordered pair $(i,j)\in A\times B$ we have
+\[
+|c_i-c_j| = \delta_j,
+\]
+and the same holds for every ordered pair $(j,i)\in B\times A$. Therefore the Gini numerator satisfies
+\[
+\sum_{i=1}^n\sum_{j=1}^n |c_i-c_j|
+\ge 2n_A \sum_{j\in B}\delta_j
+\ge 2n_A\underline d F_T.
+\]
+By range-boundedness,
+\[
+2n\sum_{i=1}^n c_i \le 2nU_C.
+\]
+Dividing the numerator bound by the denominator bound yields
+\[
+\Gini_T \ge \frac{n_A\underline d}{nU_C} F_T.
+\]
+
+\end{proof}
+
+\subsection{Relaxing witness assumptions under drift and spillover}
+\label{supp:subsec:relaxed-witnesses}
+
+The clean witness family above is useful for a first separation result, but it is deliberately strict: every class-$A$ vessel stays exactly at baseline and all burden sits in class $B$. A stronger novelty test is to keep the solver frozen and relax those assumptions. The next definition allows the nominally unaffected class to drift upward and absorbs multi-subqueue spillover into an aggregate contamination term.
+
+\begin{definition}[Drift-contaminated class-separated witness]
+\label{supp:def:drift-contaminated-witness}
+Fix a replay episode with vessel classes $A$ and $B$, cardinalities $n_A:=|A|$ and $n_B:=|B|$, and realized per-vessel service-cost vector $\mathbf c=(c_1,\dots,c_n)\in\mathbb R_+^n$ with $n=n_A+n_B$. We say that the episode admits a \emph{drift-contaminated class-separated witness} at baseline $c_0\ge 0$, burden slope $\underline d>0$, class-$A$ band $\overline\Delta_A\ge 0$, and class-$A$ drift slope $\overline\Lambda_A\ge 0$ if there exist nonnegative numbers $(\alpha_i)_{i\in A}$ and $(\delta_j)_{j\in B}$ such that
+\[
+c_i = c_0 + \alpha_i \quad (i\in A),
+\qquad
+0\le \alpha_i \le \overline\Delta_A,
+\]
+\[
+c_j \ge c_0 + \delta_j \quad (j\in B),
+\]
+and
+\[
+\sum_{j\in B}\delta_j \ge \underline d\,F_T,
+\qquad
+\sum_{i\in A}\alpha_i \le \overline\Lambda_A\,F_T.
+\]
+If, in addition,
+\[
+\sum_{i=1}^n c_i \le U_C
+\]
+throughout the operational range, we say the witness is \emph{range-bounded} by $U_C$.
+\end{definition}
+
+\begin{remark}[Interpretation of the contamination terms]
+\label{supp:rem:contamination-interpretation}
+The parameter $\overline\Delta_A$ measures the worst upward drift of the nominally unaffected class, while $\overline\Lambda_A$ measures the total spillover mass absorbed by that class. In a simulator study, both can arise without changing the solver: local queue coupling, tie-breaking side effects, or shared downstream bottlenecks can all raise class-$A$ costs even when the primary provenance error still falls on class $B$.
+\end{remark}
+
+\begin{proposition}[Min--max lower envelope under bounded drift contamination]
+\label{supp:prop:minmax-contaminated}
+Under Definition~\ref{supp:def:drift-contaminated-witness},
+\[
+\MM_T \ge \frac{\underline d}{n_B} F_T - \overline\Delta_A.
+\]
+Consequently, on any operational range with
+\[
+F_T \ge F_{\min}>0
+\qquad\text{and}\qquad
+\frac{\underline d}{n_B} > \frac{\overline\Delta_A}{F_{\min}},
+\]
+min--max remains proof-carrying with slope
+\[
+\underline\phi_{\MM}^{\mathrm{cont}}
+:=
+\frac{\underline d}{n_B} - \frac{\overline\Delta_A}{F_{\min}}.
+\]
+\end{proposition}
+
+\begin{proof}
+Among the $n_B$ class-$B$ vessels, at least one satisfies
+\[
+\max_{j\in B} c_j
+\ge
+c_0 + \frac{1}{n_B}\sum_{j\in B}\delta_j
+\ge
+c_0 + \frac{\underline d}{n_B}F_T.
+\]
+Every class-$A$ vessel satisfies $c_i\le c_0+\overline\Delta_A$, so the minimum over all vessels obeys
+\[
+\min_{1\le i\le n} c_i \le c_0+\overline\Delta_A.
+\]
+Therefore
+\[
+\MM_T
+=
+\max_{1\le i\le n} c_i - \min_{1\le i\le n} c_i
+\ge
+\frac{\underline d}{n_B}F_T - \overline\Delta_A.
+\]
+If $F_T\ge F_{\min}$, then
+\[
+\MM_T
+\ge
+\left(\frac{\underline d}{n_B} - \frac{\overline\Delta_A}{F_{\min}}\right)F_T,
+\]
+which is positive exactly under the stated condition.
+\end{proof}
+
+\begin{proposition}[Conditional Gini lower envelope under bounded spillover]
+\label{supp:prop:gini-contaminated}
+Under Definition~\ref{supp:def:drift-contaminated-witness}, if the witness is range-bounded by $U_C$, then
+\[
+\Gini_T
+\ge
+\frac{\max\{0,\,n_A\underline d - n_B\overline\Lambda_A\}}{nU_C}
+F_T.
+\]
+Hence Gini remains proof-carrying whenever the contamination is \emph{subcritical} in the sense that
+\[
+n_A\underline d > n_B\overline\Lambda_A.
+\]
+\end{proposition}
+
+\begin{proof}
+For every ordered pair $(i,j)\in A\times B$, the inequality $|c_j-c_i|\ge c_j-c_i$ gives
+\[
+\sum_{i\in A}\sum_{j\in B}|c_j-c_i|
+\ge
+\sum_{i\in A}\sum_{j\in B}(c_j-c_i)
+=
+ n_A\sum_{j\in B}c_j - n_B\sum_{i\in A}c_i.
+\]
+Using the witness inequalities,
+\[
+ n_A\sum_{j\in B}c_j - n_B\sum_{i\in A}c_i
+\ge
+ n_A\sum_{j\in B}(c_0+\delta_j) - n_B\sum_{i\in A}(c_0+\alpha_i)
+=
+ n_A\sum_{j\in B}\delta_j - n_B\sum_{i\in A}\alpha_i
+\ge
+ (n_A\underline d - n_B\overline\Lambda_A)F_T.
+\]
+The same argument applies to the ordered pairs $(j,i)\in B\times A$, so the full Gini numerator satisfies
+\[
+\sum_{i=1}^n\sum_{j=1}^n |c_i-c_j|
+\ge
+2\max\{0,\,n_A\underline d - n_B\overline\Lambda_A\}F_T.
+\]
+By range-boundedness,
+\[
+2n\sum_{i=1}^n c_i \le 2nU_C.
+\]
+Dividing yields the claim.
+\end{proof}
+
+\begin{corollary}[Operational-range proof-carrying regime under contamination]
+\label{supp:cor:contaminated-proof-carrying}
+Under Definition~\ref{supp:def:drift-contaminated-witness}, min--max remains proof-carrying on any operational range with $F_T\ge F_{\min}>0$ and
+\[
+\underline\phi_{\MM}^{\mathrm{cont}}
+:=
+\frac{\underline d}{n_B} - \frac{\overline\Delta_A}{F_{\min}} > 0.
+\]
+If the witness is also range-bounded by $U_C$ and
+\[
+\underline\phi_{\Gini}^{\mathrm{cont}}
+:=
+\frac{n_A\underline d - n_B\overline\Lambda_A}{nU_C} > 0,
+\]
+then Gini remains proof-carrying as well. The pristine class-separated witness of Definition~\ref{supp:def:class-separated-witness} is the special case $(\overline\Delta_A,\overline\Lambda_A)=(0,0)$.
+\end{corollary}
+
+\begin{corollary}[Ratio-normalized contaminated envelope]
+\label{supp:cor:ratio-normalized-contaminated}
+Under Definition~\ref{supp:def:drift-contaminated-witness}, suppose there exist nonnegative slope coefficients $\chi_\Delta$ and $\chi_\Lambda$ such that
+\[
+\overline\Delta_A \le \chi_\Delta F_T,
+\qquad
+\overline\Lambda_A \le \chi_\Lambda F_T.
+\]
+Then
+\[
+\MM_T \ge \left(\frac{\underline d}{n_B}-\chi_\Delta\right)F_T.
+\]
+If the witness is also range-bounded by $U_C$, then
+\[
+\Gini_T \ge \frac{\max\{0,\,n_A\underline d - n_B\chi_\Lambda\}}{nU_C}F_T.
+\]
+Hence min--max and, conditionally, Gini remain proof-carrying whenever the corresponding replay-certified slope coefficients are positive.
+\end{corollary}
+
+\begin{proof}
+Substituting $\overline\Delta_A \le \chi_\Delta F_T$ into Proposition~\ref{supp:prop:minmax-contaminated} yields the min--max inequality immediately. Substituting $\overline\Lambda_A \le \chi_\Lambda F_T$ into Proposition~\ref{supp:prop:gini-contaminated} yields the Gini inequality.
+\end{proof}
+
+\begin{remark}[Why this relaxation matters for the novelty claim]
+\label{supp:rem:relaxed-witness-novelty}
+This is the more demanding fairness test. If the lower envelope survives only on a witness family that requires a cleaner controller, then the paper drifts back toward stacking. By contrast, if the same frozen-solver replay bank yields subcritical contamination coefficients, then the metric-level fairness claim still attaches to the process semantics rather than to a larger architecture.
+\end{remark}
+
+\subsection{Matched-seed replay certification of contamination}
+\label{supp:subsec:matched-seed-contamination}
+
+The contamination parameters in Definition~\ref{supp:def:drift-contaminated-witness} are calibrated rather than left as symbolic degrees of freedom. The most conservative calibration keeps the solver frozen and compares two trajectories generated from the same simulator seed: one with provenance-preserving state semantics and one with provenance-erased aggregation. This turns contamination into an observable process-semantic delta rather than an architecture delta.
+
+\begin{definition}[Matched-seed replay contamination record]
+\label{supp:def:matched-seed-contam-record}
+Fix a simulator seed and a frozen controller family. Let $\mathbf c^{\mathrm{obs}}$ and $\mathbf c^{\mathrm{agg}}$ be the realized per-vessel service-cost vectors under, respectively, the observer-aware and provenance-erased aggregated state semantics, and let $F_T>0$ be the paired burden count on the aggregated episode. For vessel classes $A$ and $B$, define
+\[
+\Delta_{A,\max}^{\mathrm{pair}}
+:=
+\max_{i\in A} (c_i^{\mathrm{agg}} - c_i^{\mathrm{obs}})_+,
+\]
+\[
+\Lambda_A^{\mathrm{pair}}
+:=
+\sum_{i\in A} (c_i^{\mathrm{agg}} - c_i^{\mathrm{obs}})_+,
+\]
+and
+\[
+D_B^{\mathrm{pair}}
+:=
+\sum_{j\in B} (c_j^{\mathrm{agg}} - c_j^{\mathrm{obs}})_+.
+\]
+Define the observer-aware cross-class baseline slack by
+\[
+S_{AB}^{\mathrm{obs}}
+:=
+\left(
+\max_{i\in A} c_i^{\mathrm{obs}} - \min_{j\in B} c_j^{\mathrm{obs}}
+\right)_+.
+\]
+The normalized contamination / baseline-slack ratios are
+\[
+Q_\Delta := \frac{\Delta_{A,\max}^{\mathrm{pair}}}{F_T},
+\qquad
+Q_\Lambda := \frac{\Lambda_A^{\mathrm{pair}}}{F_T},
+\qquad
+Q_S := \frac{S_{AB}^{\mathrm{obs}}}{F_T},
+\]
+and the normalized paired burden ratio is
+\[
+R_B := \frac{D_B^{\mathrm{pair}}}{F_T}.
+\]
+Episodes with $F_T=0$ are excluded from the ratio calibration and satisfy the later lower-envelope inequalities trivially.
+\end{definition}
+
+\begin{definition}[Witness-dominating matched-seed replay bank]
+\label{supp:def:witness-dominating-bank}
+A matched-seed replay bank is \emph{witness-dominating} on an operational range if every aggregated episode on that range admitting Definition~\ref{supp:def:drift-contaminated-witness} has witness coefficients $(\alpha_i)_{i\in A}$ and $(\delta_j)_{j\in B}$ for which the matched observer-aware replay under the same seed satisfies
+\[
+\max_{i\in A}\alpha_i \le \Delta_{A,\max}^{\mathrm{pair}},
+\qquad
+\sum_{i\in A}\alpha_i \le \Lambda_A^{\mathrm{pair}},
+\qquad
+\sum_{j\in B}\delta_j \ge D_B^{\mathrm{pair}}.
+\]
+Thus the paired replay upper-bounds class-$A$ contamination and lower-bounds class-$B$ burden relative to the latent witness coefficients required by the structural theorems.
+\end{definition}
+
+\begin{remark}[Why the witness-dominating condition is the right caution point]
+\label{supp:rem:witness-dominating-caution}
+Definition~\ref{supp:def:witness-dominating-bank} is intentionally strong. It is the point at which the fairness-side route can fail without collapsing the process-semantics claim into vague controller stacking. If the matched-seed observer-aware replay does not dominate the latent witness baseline on the operational range of interest, then the fairness-side lower envelopes are reported as structural diagnostics rather than proof-carrying observables.
+\end{remark}
+
+\begin{definition}[Upper-confidence contamination quantiles]
+\label{supp:def:ucb-contam}
+Consider only matched-seed replay pairs with $F_T>0$. Let
+\[
+Q_{\Delta,(1)}\le \cdots \le Q_{\Delta,(M_+)},
+\qquad
+Q_{\Lambda,(1)}\le \cdots \le Q_{\Lambda,(M_+)},
+\qquad
+Q_{S,(1)}\le \cdots \le Q_{S,(M_+)}
+\]
+be the order statistics of the contamination / baseline-slack ratios from Definition~\ref{supp:def:matched-seed-contam-record}. For a target tail level $\beta\in(0,1)$ and confidence level $1-\alpha\in(0,1)$, define
+\[
+\ell_{\alpha,\beta}
+:=
+\min\left\{
+ \ell\in\{1,\dots,M_+\}:
+ \sum_{j=\ell}^{M_+}\binom{M_+}{j}(1-\beta)^j\beta^{M_+-j}\le \alpha
+\right\}.
+\]
+If the set above is empty, upper certification fails at the requested $(\alpha,\beta)$ pair. Otherwise define
+\[
+\widehat\chi_{\Delta,\beta,\alpha}^{\mathrm{UCB}} := Q_{\Delta,(\ell_{\alpha,\beta})},
+\qquad
+\widehat\chi_{\Lambda,\beta,\alpha}^{\mathrm{UCB}} := Q_{\Lambda,(\ell_{\alpha,\beta})},
+\qquad
+\widehat\chi_{S,\beta,\alpha}^{\mathrm{UCB}} := Q_{S,(\ell_{\alpha,\beta})}.
+\]
+We call these one-sided $(1-\alpha)$-confidence upper bounds for $(1-\beta)$-coverage contamination and baseline-slack slopes.
+\end{definition}
+
+\begin{proposition}[Replay-bank upper-confidence contamination bounds]
+\label{supp:prop:ucb-contam}
+Assume Definition~\ref{supp:def:ucb-contam} and treat $Q_\Delta$, $Q_\Lambda$, and $Q_S$ as exchangeable draws from a replay distribution $\Prob_{\mathcal S}$. Then
+\[
+\Prob\!\left[
+\Prob_{Q_\Delta\sim \Prob_{\mathcal S}}\!\left(Q_\Delta \le \widehat\chi_{\Delta,\beta,\alpha}^{\mathrm{UCB}}\right) \ge 1-\beta
+\right]
+\ge 1-\alpha,
+\]
+and likewise
+\[
+\Prob\!\left[
+\Prob_{Q_\Lambda\sim \Prob_{\mathcal S}}\!\left(Q_\Lambda \le \widehat\chi_{\Lambda,\beta,\alpha}^{\mathrm{UCB}}\right) \ge 1-\beta
+\right]
+\ge 1-\alpha,
+\]
+and
+\[
+\Prob\!\left[
+\Prob_{Q_S\sim \Prob_{\mathcal S}}\!\left(Q_S \le \widehat\chi_{S,\beta,\alpha}^{\mathrm{UCB}}\right) \ge 1-\beta
+\right]
+\ge 1-\alpha.
+\]
+\end{proposition}
+
+\begin{proof}
+We prove the claim for $Q_\Delta$; the $Q_\Lambda$ and $Q_S$ arguments are identical. Let
+\[
+q_{1-\beta}^{\Delta}
+:=
+\inf\{q\in\mathbb R_+ : \Prob_{Q_\Delta\sim \Prob_{\mathcal S}}(Q_\Delta \le q)\ge 1-\beta\}
+\]
+be the $(1-\beta)$-upper quantile of the contamination ratio. By minimality of the quantile,
+\[
+p^-_\Delta := \Prob(Q_\Delta < q_{1-\beta}^{\Delta}) \le 1-\beta.
+\]
+The event
+\[
+Q_{\Delta,(\ell_{\alpha,\beta})} < q_{1-\beta}^{\Delta}
+\]
+implies that at least $\ell_{\alpha,\beta}$ of the sampled ratios fall strictly below $q_{1-\beta}^{\Delta}$. The count of such samples is distributed as $\mathrm{Binomial}(M_+,p^-_\Delta)$ and is therefore stochastically upper-bounded by $\mathrm{Binomial}(M_+,1-\beta)$. Hence
+\[
+\Prob\!\left(Q_{\Delta,(\ell_{\alpha,\beta})} < q_{1-\beta}^{\Delta}\right)
+\le
+\sum_{j=\ell_{\alpha,\beta}}^{M_+}\binom{M_+}{j}(1-\beta)^j\beta^{M_+-j}
+\le \alpha.
+\]
+Therefore, with probability at least $1-\alpha$, we have
+\[
+\widehat\chi_{\Delta,\beta,\alpha}^{\mathrm{UCB}} = Q_{\Delta,(\ell_{\alpha,\beta})} \ge q_{1-\beta}^{\Delta}.
+\]
+By the definition of the quantile, this implies
+\[
+\Prob_{Q_\Delta\sim \Prob_{\mathcal S}}\!\left(Q_\Delta \le \widehat\chi_{\Delta,\beta,\alpha}^{\mathrm{UCB}}\right) \ge 1-\beta.
+\]
+\end{proof}
+
+\begin{corollary}[Joint replay-certified contamination regime under a frozen solver]
+\label{supp:cor:joint-replay-certified-contam}
+Let $\alpha_B+\alpha_\Delta+\alpha_\Lambda \le \alpha$ and $\beta_B+\beta_\Delta+\beta_\Lambda \le \beta$. Apply Definition~\ref{supp:def:quantile-certified-slope} to the paired burden ratio $R_B$ from Definition~\ref{supp:def:matched-seed-contam-record} to obtain a lower confidence burden slope
+\[
+\widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B} > 0.
+\]
+Suppose the matched-seed replay bank is witness-dominating on an operational range in the sense of Definition~\ref{supp:def:witness-dominating-bank}, and suppose the aggregated episodes on that range are range-bounded by $U_C$. Define
+\[
+\widehat\phi_{\MM}^{\mathrm{replay}}
+:=
+\frac{\widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}}{n_B}
+-
+\widehat\chi_{\Delta,\beta_\Delta,\alpha_\Delta}^{\mathrm{UCB}},
+\]
+\[
+\widehat\phi_{\Gini}^{\mathrm{replay}}
+:=
+\frac{n_A\widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B} - n_B\widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}}}{nU_C}.
+\]
+Then with confidence at least $1-\alpha$ over the replay bank, at least a $1-\beta$ fraction of matched-seed episodes satisfy
+\[
+\MM_T \ge \widehat\phi_{\MM}^{\mathrm{replay}} F_T
+\]
+whenever $\widehat\phi_{\MM}^{\mathrm{replay}}>0$. If also $\widehat\phi_{\Gini}^{\mathrm{replay}}>0$, then the same fraction of episodes satisfy
+\[
+\Gini_T \ge \widehat\phi_{\Gini}^{\mathrm{replay}} F_T.
+\]
+Thus the contamination coefficients required by Corollary~\ref{supp:cor:ratio-normalized-contaminated} can be certified from the frozen-solver replay bank rather than inserted by hand.
+\end{corollary}
+
+\begin{proof}
+Applying Proposition~\ref{supp:prop:confidence-envelope} to the paired burden ratio $R_B$ yields, with confidence at least $1-\alpha_B$, coverage at least $1-\beta_B$ for the lower bound
+\[
+R_B \ge \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}.
+\]
+Applying Proposition~\ref{supp:prop:ucb-contam} yields, with confidence at least $1-\alpha_\Delta$, coverage at least $1-\beta_\Delta$ for
+\[
+Q_\Delta \le \widehat\chi_{\Delta,\beta_\Delta,\alpha_\Delta}^{\mathrm{UCB}},
+\]
+and, with confidence at least $1-\alpha_\Lambda$, coverage at least $1-\beta_\Lambda$ for
+\[
+Q_\Lambda \le \widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}}.
+\]
+By a union bound over confidence events, all three statements hold simultaneously with confidence at least $1-\alpha$. By a second union bound over coverage fractions, they hold simultaneously on at least a $1-\beta$ fraction of matched-seed episodes. On that event, witness domination gives
+\[
+\overline\Delta_A \le \Delta_{A,\max}^{\mathrm{pair}} = Q_\Delta F_T \le \widehat\chi_{\Delta,\beta_\Delta,\alpha_\Delta}^{\mathrm{UCB}} F_T,
+\]
+\[
+\overline\Lambda_A \le \Lambda_A^{\mathrm{pair}} = Q_\Lambda F_T \le \widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}} F_T,
+\]
+and
+\[
+\underline d F_T \le \sum_{j\in B}\delta_j \quad\text{with}\quad \underline d := \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}.
+\]
+Corollary~\ref{supp:cor:ratio-normalized-contaminated} then yields the stated lower envelopes for min--max and, when positive, Gini.
+\end{proof}
+
+\subsection{A witness-free paired-replay route for min--max}
+\label{supp:subsec:witness-free-minmax}
+
+The witness-dominating replay condition above remains useful for Gini and for reusing the contaminated-witness structural theorems. But it is still a latent condition. The cleaner min--max route dispenses with that latent step entirely and uses only directly observable matched-seed quantities.
+
+\begin{proposition}[Observable paired-replay min--max lower bound]
+\label{supp:prop:paired-minmax}
+For any matched-seed replay pair with $F_T>0$,
+\[
+\MM(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{D_B^{\mathrm{pair}}}{n_B}
+-
+\Delta_{A,\max}^{\mathrm{pair}}
+-
+S_{AB}^{\mathrm{obs}}.
+\]
+Equivalently, if a replay episode satisfies
+\[
+R_B \ge d,
+\qquad
+Q_\Delta \le \chi_\Delta,
+\qquad
+Q_S \le \chi_S,
+\]
+then
+\[
+\MM(\mathbf c^{\mathrm{agg}})
+\ge
+\left(\frac{d}{n_B}-\chi_\Delta-\chi_S\right)F_T.
+\]
+\end{proposition}
+
+\begin{proof}
+Let $j^{\star}\in B$ attain the maximum positive paired burden increment, so that
+\[
+(c_{j^{\star}}^{\mathrm{agg}}-c_{j^{\star}}^{\mathrm{obs}})_+
+\ge
+\frac{1}{n_B}\sum_{j\in B}(c_j^{\mathrm{agg}}-c_j^{\mathrm{obs}})_+
+=
+\frac{D_B^{\mathrm{pair}}}{n_B}.
+\]
+Hence
+\[
+c_{j^{\star}}^{\mathrm{agg}}
+\ge
+c_{j^{\star}}^{\mathrm{obs}} + \frac{D_B^{\mathrm{pair}}}{n_B}.
+\]
+Also, by definition of $\Delta_{A,\max}^{\mathrm{pair}}$,
+\[
+\max_{i\in A} c_i^{\mathrm{agg}}
+\le
+\max_{i\in A} c_i^{\mathrm{obs}} + \Delta_{A,\max}^{\mathrm{pair}}.
+\]
+Therefore
+\[
+\MM(\mathbf c^{\mathrm{agg}})
+=
+\max_k c_k^{\mathrm{agg}} - \min_\ell c_\ell^{\mathrm{agg}}
+\ge
+c_{j^{\star}}^{\mathrm{agg}} - \max_{i\in A} c_i^{\mathrm{agg}}
+\]
+\[
+\ge
+\frac{D_B^{\mathrm{pair}}}{n_B}
+-
+\Delta_{A,\max}^{\mathrm{pair}}
+-
+\left(\max_{i\in A} c_i^{\mathrm{obs}} - c_{j^{\star}}^{\mathrm{obs}}\right).
+\]
+Since $c_{j^{\star}}^{\mathrm{obs}}\ge \min_{j\in B} c_j^{\mathrm{obs}}$,
+\[
+\max_{i\in A} c_i^{\mathrm{obs}} - c_{j^{\star}}^{\mathrm{obs}}
+\le
+\left(\max_{i\in A} c_i^{\mathrm{obs}} - \min_{j\in B} c_j^{\mathrm{obs}}\right)_+
+=
+S_{AB}^{\mathrm{obs}}.
+\]
+This proves the first inequality. Dividing by $F_T$ gives the second.
+\end{proof}
+
+\begin{corollary}[Witness-free replay-certified min--max under a frozen solver]
+\label{supp:cor:witness-free-minmax}
+Let $\alpha_B+\alpha_\Delta+\alpha_S \le \alpha$ and $\beta_B+\beta_\Delta+\beta_S \le \beta$. Apply Definition~\ref{supp:def:quantile-certified-slope} to the paired burden ratio $R_B$ from Definition~\ref{supp:def:matched-seed-contam-record} to obtain a lower-confidence burden slope
+\[
+\widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B} > 0.
+\]
+Apply Definition~\ref{supp:def:ucb-contam} to obtain replay-certified upper bounds
+\[
+\widehat\chi_{\Delta,\beta_\Delta,\alpha_\Delta}^{\mathrm{UCB}},
+\qquad
+\widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}.
+\]
+Define
+\[
+\widehat\phi_{\MM}^{\mathrm{pair}}
+:=
+\frac{\widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}}{n_B}
+-
+\widehat\chi_{\Delta,\beta_\Delta,\alpha_\Delta}^{\mathrm{UCB}}
+-
+\widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}.
+\]
+Then with confidence at least $1-\alpha$ over the replay bank, at least a $1-\beta$ fraction of matched-seed episodes satisfy
+\[
+\MM(\mathbf c^{\mathrm{agg}})
+\ge
+\widehat\phi_{\MM}^{\mathrm{pair}}F_T
+\]
+whenever $\widehat\phi_{\MM}^{\mathrm{pair}}>0$.
+\end{corollary}
+
+\begin{proof}
+Applying Proposition~\ref{supp:prop:confidence-envelope} to $R_B$ yields, with confidence at least $1-\alpha_B$, coverage at least $1-\beta_B$ for
+\[
+R_B \ge \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}.
+\]
+Applying Proposition~\ref{supp:prop:ucb-contam} yields, with confidence at least $1-\alpha_\Delta$, coverage at least $1-\beta_\Delta$ for
+\[
+Q_\Delta \le \widehat\chi_{\Delta,\beta_\Delta,\alpha_\Delta}^{\mathrm{UCB}},
+\]
+and, with confidence at least $1-\alpha_S$, coverage at least $1-\beta_S$ for
+\[
+Q_S \le \widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}.
+\]
+By a union bound over confidence events, all three statements hold simultaneously with confidence at least $1-\alpha$. By a second union bound over coverage fractions, they hold simultaneously on at least a $1-\beta$ fraction of matched-seed episodes. Proposition~\ref{supp:prop:paired-minmax} then yields
+\[
+\MM(\mathbf c^{\mathrm{agg}})
+\ge
+\left(
+\frac{\widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}}{n_B}
+-
+\widehat\chi_{\Delta,\beta_\Delta,\alpha_\Delta}^{\mathrm{UCB}}
+-
+\widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}
+\right)F_T.
+\]
+\end{proof}
+
+\subsection{A more conservative witness-free paired-replay route for Gini}
+\label{supp:subsec:witness-free-gini}
+
+The same paired-replay ingredients can also be pushed into Gini without returning to the latent witness-dominating route. The price is a looser certification path: Gini needs an operational-range bound on the total aggregated service cost, and the observer-aware cross-class slack now enters with a larger combinatorial coefficient.
+
+\begin{proposition}[Observable paired-replay Gini lower bound]
+\label{supp:prop:paired-gini}
+Assume the aggregated replay episode is range-bounded by $U_C$, i.e.
+\[
+\sum_{k=1}^n c_k^{\mathrm{agg}} \le U_C.
+\]
+Then for any matched-seed replay pair with $F_T>0$,
+\[
+\Gini(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{\max\{0,\,
+ n_A D_B^{\mathrm{pair}}
+ - n_B \Lambda_A^{\mathrm{pair}}
+ - n_A n_B S_{AB}^{\mathrm{obs}}
+\}}{nU_C}.
+\]
+Equivalently, if a replay episode satisfies
+\[
+R_B \ge d,
+\qquad
+Q_\Lambda \le \chi_\Lambda,
+\qquad
+Q_S \le \chi_S,
+\]
+then
+\[
+\Gini(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{\max\{0,\,
+ n_A d - n_B \chi_\Lambda - n_A n_B \chi_S
+\}}{nU_C}\,F_T.
+\]
+\end{proposition}
+
+\begin{proof}
+Let
+\[
+J^+ := \{j\in B : c_j^{\mathrm{agg}} > c_j^{\mathrm{obs}}\},
+\qquad
+g_j := c_j^{\mathrm{agg}} - c_j^{\mathrm{obs}} \quad (j\in J^+),
+\qquad
+h_i := (c_i^{\mathrm{agg}} - c_i^{\mathrm{obs}})_+ \quad (i\in A).
+\]
+Then
+\[
+D_B^{\mathrm{pair}} = \sum_{j\in J^+} g_j.
+\]
+For any $i\in A$ and $j\in J^+$ we have
+\[
+c_i^{\mathrm{agg}} \le c_i^{\mathrm{obs}} + h_i,
+\qquad
+c_j^{\mathrm{agg}} = c_j^{\mathrm{obs}} + g_j,
+\]
+so
+\[
+c_j^{\mathrm{agg}} - c_i^{\mathrm{agg}}
+\ge
+g_j - h_i - (c_i^{\mathrm{obs}} - c_j^{\mathrm{obs}})_+.
+\]
+Hence
+\[
+(c_j^{\mathrm{agg}} - c_i^{\mathrm{agg}})_+
+\ge
+\left(g_j - h_i - (c_i^{\mathrm{obs}} - c_j^{\mathrm{obs}})_+\right)_+.
+\]
+Summing over $A \times J^+$ and using $\sum_r z_r^+ \ge (\sum_r z_r)_+$ yields
+\[
+\sum_{i\in A}\sum_{j\in J^+}(c_j^{\mathrm{agg}} - c_i^{\mathrm{agg}})_+
+\ge
+\left(
+ n_A \sum_{j\in J^+} g_j
+ - |J^+| \sum_{i\in A} h_i
+ - \sum_{i\in A}\sum_{j\in J^+}(c_i^{\mathrm{obs}} - c_j^{\mathrm{obs}})_+
+\right)_+.
+\]
+By definition,
+\[
+\sum_{j\in J^+} g_j = D_B^{\mathrm{pair}},
+\qquad
+\sum_{i\in A} h_i = \Lambda_A^{\mathrm{pair}},
+\qquad
+|J^+| \le n_B.
+\]
+Moreover,
+\[
+(c_i^{\mathrm{obs}} - c_j^{\mathrm{obs}})_+ \le S_{AB}^{\mathrm{obs}}
+\]
+for every $i\in A$ and $j\in B$, so
+\[
+\sum_{i\in A}\sum_{j\in J^+}(c_i^{\mathrm{obs}} - c_j^{\mathrm{obs}})_+
+\le
+n_A |J^+| S_{AB}^{\mathrm{obs}}
+\le
+n_A n_B S_{AB}^{\mathrm{obs}}.
+\]
+Therefore
+\[
+\sum_{i\in A}\sum_{j\in J^+}(c_j^{\mathrm{agg}} - c_i^{\mathrm{agg}})_+
+\ge
+\max\{0,\,
+ n_A D_B^{\mathrm{pair}} - n_B \Lambda_A^{\mathrm{pair}} - n_A n_B S_{AB}^{\mathrm{obs}}
+\}.
+\]
+Now
+\[
+\sum_{p=1}^n\sum_{q=1}^n |c_p^{\mathrm{agg}} - c_q^{\mathrm{agg}}|
+=
+2 \sum_{p=1}^n\sum_{q=1}^n (c_q^{\mathrm{agg}} - c_p^{\mathrm{agg}})_+
+\]
+and the full positive-part sum dominates the restricted cross-class sum over $A \times J^+$. Hence the Gini numerator is at least
+\[
+2\max\{0,\,
+ n_A D_B^{\mathrm{pair}} - n_B \Lambda_A^{\mathrm{pair}} - n_A n_B S_{AB}^{\mathrm{obs}}
+\}.
+\]
+Using the range bound,
+\[
+2n \sum_{k=1}^n c_k^{\mathrm{agg}} \le 2n U_C.
+\]
+Dividing yields the first inequality. The second follows by substituting
+\[
+D_B^{\mathrm{pair}} = R_B F_T,
+\qquad
+\Lambda_A^{\mathrm{pair}} = Q_\Lambda F_T,
+\qquad
+S_{AB}^{\mathrm{obs}} = Q_S F_T.
+\]
+\end{proof}
+
+\begin{corollary}[Witness-free replay-certified Gini under a frozen solver]
+\label{supp:cor:witness-free-gini}
+Assume the aggregated episodes on the operational range of interest are range-bounded by $U_C$. Let
+\[
+\alpha_B+\alpha_\Lambda+\alpha_S \le \alpha,
+\qquad
+\beta_B+\beta_\Lambda+\beta_S \le \beta.
+\]
+Apply Definition~\ref{supp:def:quantile-certified-slope} to the paired burden ratio $R_B$ from Definition~\ref{supp:def:matched-seed-contam-record} to obtain a lower-confidence burden slope
+\[
+\widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}>0.
+\]
+Apply Definition~\ref{supp:def:ucb-contam} to obtain replay-certified upper bounds
+\[
+\widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}},
+\qquad
+\widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}.
+\]
+Define
+\[
+\widehat\phi_{\Gini}^{\mathrm{pair}}
+:=
+\frac{
+\max\{0,\,
+ n_A \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}
+ - n_B \widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}}
+ - n_A n_B \widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}
+\}
+}{nU_C}.
+\]
+Then with confidence at least $1-\alpha$ over the replay bank, at least a $1-\beta$ fraction of matched-seed episodes satisfy
+\[
+\Gini(\mathbf c^{\mathrm{agg}})
+\ge
+\widehat\phi_{\Gini}^{\mathrm{pair}} F_T.
+\]
+In particular, Gini admits a witness-free paired-replay certification path whenever the replay-certified coefficient above is positive.
+\end{corollary}
+
+\begin{proof}
+Applying Proposition~\ref{supp:prop:confidence-envelope} to $R_B$ yields, with confidence at least $1-\alpha_B$, coverage at least $1-\beta_B$ for
+\[
+R_B \ge \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}.
+\]
+Applying Proposition~\ref{supp:prop:ucb-contam} yields, with confidence at least $1-\alpha_\Lambda$, coverage at least $1-\beta_\Lambda$ for
+\[
+Q_\Lambda \le \widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}},
+\]
+and, with confidence at least $1-\alpha_S$, coverage at least $1-\beta_S$ for
+\[
+Q_S \le \widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}.
+\]
+By a union bound over confidence events, all three statements hold simultaneously with confidence at least $1-\alpha$. By a second union bound over coverage fractions, they hold simultaneously on at least a $1-\beta$ fraction of matched-seed episodes. Proposition~\ref{supp:prop:paired-gini} then yields
+\[
+\Gini(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{
+\max\{0,\,
+ n_A \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}
+ - n_B \widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}}
+ - n_A n_B \widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}
+\}
+}{nU_C}\,F_T.
+\]
+\end{proof}
+
+\begin{remark}[Why this does not promote Gini to the paper's main proof carrier]
+\label{supp:rem:witness-free-gini-caution}
+Corollary~\ref{supp:cor:witness-free-gini} matters because it removes the latent witness-dominating step for Gini as well. But it is still a weaker route than Corollary~\ref{supp:cor:witness-free-minmax}. The bound is looser, it depends on an operational-range denominator bound $U_C$, and the observer-aware cross-class slack enters with an $n_A n_B$ factor. Accordingly, Gini remains secondary unless the replay-certified coefficient $\widehat\phi_{\Gini}^{\mathrm{pair}}$ stays stably positive under calibration stress. If that coefficient collapses, Gini is treated as a diagnostic or reporting metric rather than a proof-carrying one.
+\end{remark}
+
+\subsection{A denominator-free companion to Gini}
+\label{supp:subsec:apd-companion}
+
+If the only obstruction is Gini's denominator, the cautious response is not to force Gini into the paper's proof-carrying core. The cleaner move is to expose the denominator-free quantity that Gini already contains.
+
+\begin{definition}[Absolute pairwise disparity]
+\label{supp:def:apd}
+For any nonnegative service-cost vector $\mathbf c=(c_1,\dots,c_n)$, define
+\[
+\APD(\mathbf c)
+:=
+\frac{1}{2n}\sum_{p=1}^n\sum_{q=1}^n |c_p-c_q|.
+\]
+Equivalently,
+\[
+\APD(\mathbf c)=\Gini(\mathbf c)\sum_{k=1}^n c_k.
+\]
+Thus $\APD$ is not a different fairness notion from Gini. It is the denominator-free companion obtained by removing the total-cost normalization.
+\end{definition}
+
+\begin{proposition}[Observable paired-replay lower bound for absolute pairwise disparity]
+\label{supp:prop:paired-apd}
+For any matched-seed replay pair with $F_T>0$,
+\[
+\APD(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{\max\{0,\,
+ n_A D_B^{\mathrm{pair}}
+ - n_B \Lambda_A^{\mathrm{pair}}
+ - n_A n_B S_{AB}^{\mathrm{obs}}
+\}}{n}.
+\]
+Equivalently, if a replay episode satisfies
+\[
+R_B \ge d,
+\qquad
+Q_\Lambda \le \chi_\Lambda,
+\qquad
+Q_S \le \chi_S,
+\]
+then
+\[
+\APD(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{\max\{0,\,
+ n_A d - n_B \chi_\Lambda - n_A n_B \chi_S
+\}}{n}\,F_T.
+\]
+\end{proposition}
+
+\begin{proof}
+The proof is the numerator part of Proposition~\ref{supp:prop:paired-gini} before any denominator bound is applied. That proof shows
+\[
+\sum_{p=1}^n\sum_{q=1}^n |c_p^{\mathrm{agg}} - c_q^{\mathrm{agg}}|
+\ge
+2\max\{0,\,
+ n_A D_B^{\mathrm{pair}}
+ - n_B \Lambda_A^{\mathrm{pair}}
+ - n_A n_B S_{AB}^{\mathrm{obs}}
+\}.
+\]
+Dividing by $2n$ yields
+\[
+\APD(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{\max\{0,\,
+ n_A D_B^{\mathrm{pair}}
+ - n_B \Lambda_A^{\mathrm{pair}}
+ - n_A n_B S_{AB}^{\mathrm{obs}}
+\}}{n}.
+\]
+Substituting
+\[
+D_B^{\mathrm{pair}} = R_B F_T,
+\qquad
+\Lambda_A^{\mathrm{pair}} = Q_\Lambda F_T,
+\qquad
+S_{AB}^{\mathrm{obs}} = Q_S F_T
+\]
+gives the normalized form.
+\end{proof}
+
+\begin{corollary}[Witness-free replay-certified absolute pairwise disparity under a frozen solver]
+\label{supp:cor:witness-free-apd}
+Let
+\[
+\alpha_B+\alpha_\Lambda+\alpha_S \le \alpha,
+\qquad
+\beta_B+\beta_\Lambda+\beta_S \le \beta.
+\]
+Apply Definition~\ref{supp:def:quantile-certified-slope} to the paired burden ratio $R_B$ from Definition~\ref{supp:def:matched-seed-contam-record} to obtain a lower-confidence burden slope
+\[
+\widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}>0.
+\]
+Apply Definition~\ref{supp:def:ucb-contam} to obtain replay-certified upper bounds
+\[
+\widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}},
+\qquad
+\widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}.
+\]
+Define
+\[
+\widehat\phi_{\APD}^{\mathrm{pair}}
+:=
+\frac{
+\max\{0,\,
+ n_A \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}
+ - n_B \widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}}
+ - n_A n_B \widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}
+\}
+}{n}.
+\]
+Then with confidence at least $1-\alpha$ over the replay bank, at least a $1-\beta$ fraction of matched-seed episodes satisfy
+\[
+\APD(\mathbf c^{\mathrm{agg}})
+\ge
+\widehat\phi_{\APD}^{\mathrm{pair}} F_T.
+\]
+In particular, $\APD$ admits a witness-free replay certification path with no operational-range denominator cap.
+\end{corollary}
+
+\begin{proof}
+Applying Proposition~\ref{supp:prop:confidence-envelope} to $R_B$ yields, with confidence at least $1-\alpha_B$, coverage at least $1-\beta_B$ for
+\[
+R_B \ge \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}.
+\]
+Applying Proposition~\ref{supp:prop:ucb-contam} yields, with confidence at least $1-\alpha_\Lambda$, coverage at least $1-\beta_\Lambda$ for
+\[
+Q_\Lambda \le \widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}},
+\]
+and, with confidence at least $1-\alpha_S$, coverage at least $1-\beta_S$ for
+\[
+Q_S \le \widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}.
+\]
+By a union bound over confidence events, all three statements hold simultaneously with confidence at least $1-\alpha$. By a second union bound over coverage fractions, they hold simultaneously on at least a $1-\beta$ fraction of matched-seed episodes. Proposition~\ref{supp:prop:paired-apd} then yields
+\[
+\APD(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{
+\max\{0,\,
+ n_A \widehat d^{\mathrm{LCB}}_{\beta_B,\alpha_B}
+ - n_B \widehat\chi_{\Lambda,\beta_\Lambda,\alpha_\Lambda}^{\mathrm{UCB}}
+ - n_A n_B \widehat\chi_{S,\beta_S,\alpha_S}^{\mathrm{UCB}}
+\}
+}{n}\,F_T.
+\]
+\end{proof}
+
+\begin{remark}[Why APD is a proof-carrying companion, not a new headline metric]
+\label{supp:rem:apd-companion}
+Corollary~\ref{supp:cor:witness-free-apd} matters because it removes the operational-range denominator cap from the Gini-adjacent route. But that does not mean $\APD$ should replace Gini in reporting. The right interpretation is narrower: $\APD$ is the proof-carrying companion of Gini when denominator instability makes the normalized statistic too brittle. If $\APD$ certifies while Corollary~\ref{supp:cor:witness-free-gini} fails, the correct conclusion is not that the process-semantic disparity disappeared; it is that the denominator side of Gini is not stable enough to carry proof on that operational range.
+\end{remark}
+
+\begin{remark}[How the Gini/APD split should be used]
+\label{supp:rem:gini-apd-split}
+The clean fairness hierarchy is now: direct service proxy first, witness-free min--max second, and the Gini/APD pair only after that. Within that pair, Gini remains the more familiar headline statistic, while $\APD$ is the safer proof carrier because it depends only on the cross-class numerator structure. This keeps the novelty claim attached to process semantics and replay-certified burden, not to a particular normalization convention.
+\end{remark}
+
+\subsection{Replay-certifying the Gini/APD denominator gap}
+\label{supp:subsec:gini-apd-gap}
+
+The remaining uncertainty in the Gini/APD pair is now local. Both statistics share the same cross-class numerator, but only Gini divides by the total aggregated service cost. The technical question is therefore not whether the two notions disagree philosophically. The technical question is whether the denominator side is stable enough on the positive-burden operational range that Gini and APD differ only by an almost-constant replay-certified scale.
+
+\begin{definition}[Positive-burden total-cost ratio]
+\label{supp:def:positive-burden-total-cost}
+For any matched-seed replay pair with $F_T>0$, define the aggregated total-cost ratio
+\[
+Q_C := \frac{\sum_{k=1}^n c_k^{\mathrm{agg}}}{F_T}.
+\]
+Over a replay bank, let
+\[
+Q_{C,(1)}\le \cdots \le Q_{C,(M_+)}
+\]
+be the order statistics of these positive-burden ratios.
+\end{definition}
+
+\begin{definition}[Replay-certified denominator band]
+\label{supp:def:replay-denominator-band}
+Fix tail/confidence pairs $(\beta_L,\alpha_L)$ and $(\beta_U,\alpha_U)$ in $(0,1)^2$. Using the same lower-tail index construction as Definition~\ref{supp:def:quantile-certified-slope} and the same upper-tail index construction as Definition~\ref{supp:def:ucb-contam}, applied now to the order statistics of $Q_C$, define
+\[
+\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{LCB}} := Q_{C,(k_{\alpha_L,\beta_L})},
+\qquad
+\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}} := Q_{C,(\ell_{\alpha_U,\beta_U})}.
+\]
+If either certification index set is empty, denominator-band certification fails at the requested confidence/coverage levels. Otherwise we say the replay bank certifies a positive-burden denominator band whenever
+\[
+0<\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{LCB}}\le \widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}}.
+\]
+Define the associated replay-certified denominator distortion factor and normalized gap by
+\[
+\Gamma_C^{\mathrm{replay}}
+:=
+\frac{\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}}}{\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{LCB}}},
+\qquad
+\Delta_C^{\mathrm{replay}}
+:=
+1-\frac{1}{\Gamma_C^{\mathrm{replay}}}.
+\]
+\end{definition}
+
+\begin{proposition}[Replay-certified denominator band on the positive-burden operational range]
+\label{supp:prop:replay-denominator-band}
+Assume the ratios $Q_C$ from Definition~\ref{supp:def:positive-burden-total-cost} are exchangeable draws from a replay distribution $\Prob_{\mathcal S}$. Let
+\[
+\alpha_L+\alpha_U\le \alpha,
+\qquad
+\beta_L+\beta_U\le \beta.
+\]
+If the denominator-band certification in Definition~\ref{supp:def:replay-denominator-band} succeeds, then with confidence at least $1-\alpha$ over the replay bank, at least a $1-\beta$ fraction of positive-burden replay episodes satisfy
+\[
+\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{LCB}}
+\le
+Q_C
+\le
+\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}}.
+\]
+\end{proposition}
+
+\begin{proof}
+The lower statement is the same order-statistic argument as Proposition~\ref{supp:prop:confidence-envelope}, with $R$ replaced by $Q_C$. The upper statement is the same order-statistic argument as Proposition~\ref{supp:prop:ucb-contam}, with $Q_\Delta$ replaced by $Q_C$. A union bound over the two confidence events yields confidence at least $1-\alpha$, and a second union bound over the two coverage statements yields coverage at least $1-\beta$.
+\end{proof}
+
+\begin{proposition}[Replay-certified Gini/APD conversion]
+\label{supp:prop:gini-apd-conversion}
+Fix a positive-burden replay episode satisfying the denominator band of Proposition~\ref{supp:prop:replay-denominator-band}. Then
+\[
+\frac{\APD(\mathbf c^{\mathrm{agg}})}{\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}} F_T}
+\le
+\Gini(\mathbf c^{\mathrm{agg}})
+\le
+\frac{\APD(\mathbf c^{\mathrm{agg}})}{\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{LCB}} F_T}.
+\]
+Equivalently, on every such episode the Gini/APD conversion uncertainty is multiplicatively controlled by $\Gamma_C^{\mathrm{replay}}$:
+\[
+\Gini(\mathbf c^{\mathrm{agg}})
+\in
+\left[
+\frac{1}{\Gamma_C^{\mathrm{replay}}},1
+\right]
+\frac{\APD(\mathbf c^{\mathrm{agg}})}{\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{LCB}} F_T}.
+\]
+\end{proposition}
+
+\begin{proof}
+By Definition~\ref{supp:def:apd},
+\[
+\Gini(\mathbf c^{\mathrm{agg}})
+=
+\frac{\APD(\mathbf c^{\mathrm{agg}})}{\sum_{k=1}^n c_k^{\mathrm{agg}}}
+=
+\frac{\APD(\mathbf c^{\mathrm{agg}})}{Q_C F_T}.
+\]
+Applying the denominator band
+\[
+\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{LCB}}
+\le
+Q_C
+\le
+\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}}
+\]
+and dividing through yields the first inequality. The second is just the same inequality rewritten in terms of
+\[
+\Gamma_C^{\mathrm{replay}}
+=
+\frac{\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}}}{\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{LCB}}}.
+\]
+\end{proof}
+
+\begin{corollary}[Replay-certified inheritance of Gini from APD]
+\label{supp:cor:apd-to-gini}
+Let the confidence/coverage budgets used in Corollary~\ref{supp:cor:witness-free-apd} and Proposition~\ref{supp:prop:replay-denominator-band} sum to at most $(\alpha,\beta)$. If both certifications succeed, then with confidence at least $1-\alpha$ over the replay bank, at least a $1-\beta$ fraction of positive-burden matched-seed episodes satisfy
+\[
+\Gini(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{\widehat\phi_{\APD}^{\mathrm{pair}}}{\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}}}.
+\]
+Hence a denominator-free APD certificate can be converted into a Gini certificate without imposing a fixed exogenous range cap; the conversion quality is governed by the replay-certified denominator distortion factor $\Gamma_C^{\mathrm{replay}}$.
+\end{corollary}
+
+\begin{proof}
+Corollary~\ref{supp:cor:witness-free-apd} yields, on the certified coverage event,
+\[
+\APD(\mathbf c^{\mathrm{agg}})
+\ge
+\widehat\phi_{\APD}^{\mathrm{pair}} F_T.
+\]
+Proposition~\ref{supp:prop:gini-apd-conversion} gives
+\[
+\Gini(\mathbf c^{\mathrm{agg}})
+\ge
+\frac{\APD(\mathbf c^{\mathrm{agg}})}{\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{UCB}} F_T}.
+\]
+Combining these inequalities yields the claim. The confidence and coverage levels follow by union bounds over the APD and denominator-band certification events.
+\end{proof}
+
+\begin{remark}[How to interpret the replay-certified denominator distortion]
+\label{supp:rem:gini-apd-gap}
+The quantity $\Gamma_C^{\mathrm{replay}}$ is the missing operational diagnostic. If $\Gamma_C^{\mathrm{replay}}\approx 1$ on the range of interest, then Gini and APD differ only by an almost-constant replay-certified scale and the choice between them is mostly about reporting convention. If $\Gamma_C^{\mathrm{replay}}$ is wide, then denominator instability is itself a measured twin property: APD may still carry proof while Gini should fall back to reporting or diagnostic status. That is the right place for caution. It attaches the weakness to a certified denominator effect, not to the process-semantic numerator structure.
+\end{remark}
+
+\begin{remark}[Why this is the cleaner novelty test for min--max]
+\label{supp:rem:witness-free-minmax-novelty}
+Corollary~\ref{supp:cor:witness-free-minmax} is stronger, conceptually, than Corollary~\ref{supp:cor:joint-replay-certified-contam} for the min--max statistic. It uses the same frozen controller, the same seed distribution, and only directly observable paired-replay quantities. No latent witness coefficients need to be reconstructed or dominated. If this witness-free route is not certified, min--max is reported as a diagnostic statistic rather than a proof-carrying claim.
+\end{remark}
+
+\begin{remark}[Why the witness-dominating route is still useful]
+\label{supp:rem:replay-cert-novelty}
+Corollary~\ref{supp:cor:joint-replay-certified-contam} now sits in a more clearly auxiliary role. It is still useful for tying the replay path back to the contaminated-witness structural theorems and for checking whether the stricter structural story agrees with the fully observable paired-replay one. But it is not needed for the cleanest fairness-side test. That role belongs to Corollary~\ref{supp:cor:witness-free-minmax} and, on a more conservative path, Corollary~\ref{supp:cor:witness-free-gini}. The witness-dominating route should therefore be treated as a structural cross-check rather than as part of the primary fairness evidence.
+\end{remark}
+
+\begin{remark}[What should carry the proof on the fairness side]
+\label{supp:rem:fairness-envelope}
+The proof-carrying fairness observable need not be the same statistic used for headline fairness reporting. A direct service proxy such as disadvantaged-class ready-to-berth delay or class-conditional excess queue hours remains the safest choice, and Proposition~\ref{supp:prop:confidence-envelope} turns its replay calibration into a one-sided confidence statement. However, the paper is now asymmetric in a more precise way. Min--max has two routes: a structural route through the contaminated-witness theorems and a cleaner witness-free route through Corollary~\ref{supp:cor:witness-free-minmax}. Gini now has two secondary routes as well: the direct witness-free bound of Corollary~\ref{supp:cor:witness-free-gini}, and the APD-to-Gini inheritance route of Corollary~\ref{supp:cor:apd-to-gini}. The latter is more informative operationally because it turns denominator stability into the replay-certified distortion factor $\Gamma_C^{\mathrm{replay}}$. The APD companion in Corollary~\ref{supp:cor:witness-free-apd} remains the safer proof carrier because it depends only on the cross-class numerator structure. Outside those explicit conditions, headline disparity statistics are reported as diagnostics rather than proof-carrying observables. This keeps the novelty claim attached to process semantics rather than to a chosen fairness transformer.
+\end{remark}
+
+\begin{proposition}[Conditional simulator-grounded budget lift]
+\label{supp:prop:sim-grounded-budget-lift}
+Fix the two-class berth-admission family of Theorem~\ref{supp:thm:bundle-impossibility}. Suppose Proposition~\ref{supp:prop:twin-emission-calibration} holds with twin-native idling constant $\underline\epsilon_{\mathcal S}>0$, and suppose the chosen fairness proxy $\mathcal D_T$ is simulator-certified at slope $\underline\phi_{\mathcal S}>0$ on the operational range realized by that family in the sense of Definition~\ref{supp:def:episode-calibration-record}. Then every aggregated policy $\pi\in\Pi_{\mathrm{agg}}$ satisfies
+\[
+V_T(\pi)
++ \frac{1}{2\underline\epsilon_{\mathcal S}}\,\mathcal E_T^{\mathrm{idle}}(\pi)
++ \frac{1}{2\underline\phi_{\mathcal S}}\,\mathcal D_T(\pi)
++ \frac{1}{2} I_T(\pi)
+\ge \frac{T}{4}.
+\]
+Consequently, Corollary~\ref{supp:cor:budget-overshoot} applies with $(\underline\epsilon,\underline\phi)=(\underline\epsilon_{\mathcal S},\underline\phi_{\mathcal S})$ whenever the budgets are evaluated on the same operational range.
+\end{proposition}
+
+\begin{proof}
+By Proposition~\ref{supp:prop:twin-emission-calibration},
+\[
+\mathcal E_T^{\mathrm{idle}}(\pi)
+\ge
+\underline\epsilon_{\mathcal S} E_T(\pi).
+\]
+By simulator certification of the fairness proxy on the operational range,
+\[
+\mathcal D_T(\pi)
+\ge
+\underline\phi_{\mathcal S} F_T(\pi).
+\]
+Substituting these inequalities into Corollary~\ref{supp:cor:intervention-tradeoff} yields
+\[
+V_T(\pi)
++ \frac{1}{2\underline\epsilon_{\mathcal S}}\,\mathcal E_T^{\mathrm{idle}}(\pi)
++ \frac{1}{2\underline\phi_{\mathcal S}}\,\mathcal D_T(\pi)
++ \frac{1}{2} I_T(\pi)
+\ge \frac{T}{4}.
+\]
+The final statement follows by replacing $(\underline\epsilon,\underline\phi)$ with $(\underline\epsilon_{\mathcal S},\underline\phi_{\mathcal S})$ in Corollary~\ref{supp:cor:budget-overshoot}.
+\end{proof}
+
+\begin{remark}[Why this is more careful than a blanket fairness theorem]
+\label{supp:rem:sim-grounded-caution}
+The simulator-grounded lift is deliberately asymmetric. The emission side is inherited directly from the twin's idling semantics. The fairness side is not asserted universally; it is promoted only after the lower-envelope check succeeds on the relevant operational range. If that envelope fails, the stronger fairness-lift claim is removed and the narrower safety--emission or safety--emission--intervention statement is used.
+\end{remark}
+
+
+\subsection{Robustifying replay certification against dependence and seed shift}
+\label{supp:subsec:seed-shift-robust}
+
+The replay-certified burden, contamination, and denominator statements above all use order statistics under an exchangeability assumption. That is the cleanest starting point, but it is also the first empirical seam a reviewer should question. In a maritime digital twin, matched-seed replays may come in dependent clusters: multiple checkpoints from one long rollout, several weather perturbations attached to the same traffic seed, or batches of episodes produced by one scenario-generator state. A second seam is deployment shift: the seed law used in operations may be near, but not identical to, the calibration law used to build the replay bank. Neither issue should be hidden behind architecture gains. The conservative response is to move the certification protocol itself to the block level and then state explicitly how much coverage is lost under bounded seed shift.
+
+\begin{definition}[Seed blocks and conservative block summaries]
+\label{supp:def:seed-blocks}
+Fix a replay bank generated under one frozen solver and partition it into disjoint \emph{seed blocks}
+\[
+\mathcal B_1,\dots,\mathcal B_M,
+\]
+where each block may contain multiple matched-seed episodes produced from one seed family, one contiguous rollout segment, or one scenario-generator state. Let $Z(e)$ be any episode-level statistic used in a replay certificate.
+
+For a statistic that should appear in a lower certificate, define the conservative block summary
+\[
+\underline Z_m := \inf_{e\in \mathcal B_m} Z(e).
+\]
+For a statistic that should appear in an upper certificate, define the conservative block summary
+\[
+\overline Z_m := \sup_{e\in \mathcal B_m} Z(e).
+\]
+Thus every lower-certificate quantity is pessimistically reduced inside each block, and every upper-certificate quantity is pessimistically inflated inside each block.
+\end{definition}
+
+\begin{definition}[Blockwise replay certification]
+\label{supp:def:blockwise-cert}
+For any lower-certified statistic $Z$, apply the order-statistic construction of Definition~\ref{supp:def:quantile-certified-slope} to the block summaries $\underline Z_1,\dots,\underline Z_M$, and denote the resulting blockwise lower-confidence bound by
+\[
+\widehat z^{\mathrm{blk\textrm{-}LCB}}_{\beta,\alpha}.
+\]
+For any upper-certified statistic $U$, apply the order-statistic construction of Definition~\ref{supp:def:ucb-contam} to the block summaries $\overline U_1,\dots,\overline U_M$, and denote the resulting blockwise upper-confidence bound by
+\[
+\widehat u^{\mathrm{blk\textrm{-}UCB}}_{\beta,\alpha}.
+\]
+For denominator certification, apply Definition~\ref{supp:def:replay-denominator-band} to the block summaries of $Q_C$ and write the resulting band and distortion factor as
+\[
+\widehat q_{C,\beta_L,\alpha_L}^{\mathrm{blk\textrm{-}LCB}},
+\qquad
+\widehat q_{C,\beta_U,\alpha_U}^{\mathrm{blk\textrm{-}UCB}},
+\qquad
+\Gamma_C^{\mathrm{blk}}.
+\]
+If the relevant order-statistic indices do not exist at the block count $M$, then blockwise certification fails at the requested confidence/coverage levels.
+\end{definition}
+
+\begin{proposition}[Within-block dependence robustification]
+\label{supp:prop:block-robust}
+Assume the seed blocks from Definition~\ref{supp:def:seed-blocks} are exchangeable draws from a block law $\Prob_{\mathcal S}^{\mathrm{blk}}$, while episodes within each block may be arbitrarily dependent. Then every order-statistic certification result used in this section remains valid after replacing episode-level statistics by their conservative block summaries. In particular, with confidence at least $1-\alpha$ over the block bank, at least a $1-\beta$ fraction of seed blocks satisfy the corresponding certified lower/upper bounds.
+
+Moreover, on every certified block, every episode in that block inherits the same bound.
+\end{proposition}
+
+\begin{proof}
+The previous proofs use only exchangeability of the objects fed to the order statistics. Replacing episode-level observations by the conservative block summaries from Definition~\ref{supp:def:seed-blocks} therefore yields the same order-statistic arguments at the block level. The final inheritance statement is immediate: if $\underline Z_m\ge c$, then every episode $e\in \mathcal B_m$ satisfies $Z(e)\ge c$; if $\overline U_m\le c$, then every episode $e\in \mathcal B_m$ satisfies $U(e)\le c$.
+\end{proof}
+
+\begin{definition}[Bounded seed-shift radius]
+\label{supp:def:seed-shift}
+Let $\Prob_{\mathrm{dep}}^{\mathrm{blk}}$ denote a deployment block law on the same block-summary space used for calibration. We say deployment is \emph{$\varepsilon_{\mathrm{seed}}$-close} to calibration whenever
+\[
+d_{\mathrm{TV}}\!\left(\Prob_{\mathrm{dep}}^{\mathrm{blk}},\Prob_{\mathcal S}^{\mathrm{blk}}\right)
+\le
+\varepsilon_{\mathrm{seed}},
+\]
+where $d_{\mathrm{TV}}$ is total-variation distance.
+\end{definition}
+
+\begin{proposition}[Seed-shift transfer of certified block events]
+\label{supp:prop:seed-shift-transfer}
+Let $E$ be any measurable event on the block-summary space. If
+\[
+\Prob_{\mathcal S}^{\mathrm{blk}}(E)\ge 1-\beta
+\]
+and Definition~\ref{supp:def:seed-shift} holds with radius $\varepsilon_{\mathrm{seed}}$, then
+\[
+\Prob_{\mathrm{dep}}^{\mathrm{blk}}(E)
+\ge
+1-\beta-\varepsilon_{\mathrm{seed}}.
+\]
+Thus any replay-certified block event transfers to deployment at the cost of an explicit coverage degradation of at most $\varepsilon_{\mathrm{seed}}$.
+\end{proposition}
+
+\begin{proof}
+By the defining property of total-variation distance,
+\[
+\big|\Prob_{\mathrm{dep}}^{\mathrm{blk}}(E)-\Prob_{\mathcal S}^{\mathrm{blk}}(E)\big|
+\le
+ d_{\mathrm{TV}}\!\left(\Prob_{\mathrm{dep}}^{\mathrm{blk}},\Prob_{\mathcal S}^{\mathrm{blk}}\right)
+\le
+\varepsilon_{\mathrm{seed}}.
+\]
+Hence
+\[
+\Prob_{\mathrm{dep}}^{\mathrm{blk}}(E)
+\ge
+\Prob_{\mathcal S}^{\mathrm{blk}}(E)-\varepsilon_{\mathrm{seed}}
+\ge
+1-\beta-\varepsilon_{\mathrm{seed}}.
+\]
+\end{proof}
+
+\begin{corollary}[Shift-aware replay certification of fairness and denominator events]
+\label{supp:cor:shift-aware-replay}
+Fix any replay-certified event $E$ built from the direct service proxy, the witness-free min--max route, the witness-free Gini route, the APD route, or the denominator band / Gini--APD conversion route, and suppose its calibration proof has been upgraded to blockwise certification by Proposition~\ref{supp:prop:block-robust}. If the resulting block-level coverage is at least $1-\beta$ with confidence at least $1-\alpha$, and deployment is $\varepsilon_{\mathrm{seed}}$-close in the sense of Definition~\ref{supp:def:seed-shift}, then with confidence at least $1-\alpha$ over the calibration bank,
+\[
+\Prob_{\mathrm{dep}}^{\mathrm{blk}}(E)
+\ge
+1-\beta-\varepsilon_{\mathrm{seed}}.
+\]
+In particular, if the denominator-band event is certified blockwise, then the same shift-adjusted coverage statement holds for the blockwise distortion factor $\Gamma_C^{\mathrm{blk}}$ and the induced APD-to-Gini conversion interval.
+\end{corollary}
+
+\begin{proof}
+Apply Proposition~\ref{supp:prop:block-robust} to obtain the block-level calibration statement and then Proposition~\ref{supp:prop:seed-shift-transfer} with that certified event $E$.
+\end{proof}
+
+\begin{remark}[What this robustness layer does and does not buy]
+\label{supp:rem:seed-shift-caution}
+This subsection does not solve arbitrary simulator drift. It does something narrower and more useful: it isolates the empirical fragility of replay certification from the semantic novelty claim. If certification survives only after collapsing to large blocks or if the best plausible shift radius $\varepsilon_{\mathrm{seed}}$ is large, then the direct proxy, min--max, Gini, and APD routes should all weaken accordingly, potentially falling back to reporting-only status. That is acceptable. The point is to attach the weakness to the replay protocol and seed law, not to blur it into a controller-stack story.
+\end{remark}
+
+
+\subsection{Twin-specific block units and seed-shift diagnostics}
+\label{supp:subsec:twin-specific-shift}
+
+The previous subsection made replay certification robust to arbitrary within-block dependence, but it left two practical choices abstract: what counts as a seed block in the maritime twin, and how the seed-shift radius $\varepsilon_{\mathrm{seed}}$ should be estimated. This subsection makes both choices explicit enough to be implemented while keeping the claim conservative. The goal is not to prove that the simulator perfectly represents deployment. The goal is to make the replay-transfer loss a measured, falsifiable property of the twin interface.
+
+\begin{definition}[Maritime replay descriptor and block key]
+\label{supp:def:maritime-block-key}
+For each matched-seed replay episode $e$, let
+\[
+D(e)=(T_e,W_e,\Delta_e,H_e,M_e,V_e)
+\]
+be its \emph{maritime replay descriptor}, where:
+\begin{itemize}[leftmargin=1.7em]
+\item $T_e$ is a traffic-family descriptor, such as vessel-arrival pattern, cargo-class mix, and demand intensity bucket;
+\item $W_e$ is a weather / metocean regime descriptor, such as wind, tide, visibility, and storm bucket;
+\item $\Delta_e$ is a disruption-family descriptor, such as crane outage, berth closure, customs delay, ETA shock, or yard congestion bucket;
+\item $H_e$ is the decision-horizon and epoch-granularity descriptor;
+\item $M_e$ is the terminal / operating-mode descriptor, such as berth cluster, equipment policy, or human-dispatch mode;
+\item $V_e$ is the scenario-generator and simulator-version identifier.
+\end{itemize}
+A \emph{maritime block key} is a pre-registered coarsening map
+\[
+K:\mathcal D\to \mathcal K,
+\]
+where $\mathcal K$ is a finite set of block labels. The seed blocks used in Definition~\ref{supp:def:seed-blocks} are then
+\[
+\mathcal B_k:=\{e:K(D(e))=k\}, \qquad k\in\mathcal K.
+\]
+The map $K$ must be fixed before computing any replay certificate.
+\end{definition}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.20\textwidth}X X@{}}
+\toprule
+\textbf{Key component} & \textbf{Example buckets} & \textbf{Reason for blocking} \\
+\midrule
+Traffic family $T$ & Low / medium / high arrival intensity; cargo-class mix; feeder vs mainline profile & Controls queue pressure and the class-conditional service-cost baseline. \\
+Weather regime $W$ & Calm, visibility-constrained, wind/tide-constrained, storm-disrupted & Controls idling, berth feasibility, and the value of verification. \\
+Disruption family $\Delta$ & Crane outage, berth closure, ETA conflict, customs delay, yard congestion & Controls which observer--situation contradictions are operationally critical. \\
+Horizon $H$ & Episode length and decision epoch & Prevents short-horizon certificates from being reused as long-horizon guarantees. \\
+Mode $M$ & Terminal cluster, dispatch policy, authority mode & Captures changes in who can certify, escalate, or override. \\
+Version $V$ & Simulator build, scenario-generator hash, data snapshot & Prevents silent mixture of non-comparable replay regimes. \\
+\bottomrule
+\end{tabularx}
+\caption{A concrete maritime block key for replay certification. The key is intentionally operational rather than architectural: it groups episodes by scenario-generation and port-operating conditions, not by controller internals.}
+\label{supp:tab:maritime-block-key}
+\end{table}
+
+\begin{remark}[Why the block key is part of the process claim]
+\label{supp:rem:block-key-not-controller}
+The block key in Definition~\ref{supp:def:maritime-block-key} is not a learned representation and does not modify the solver. It is a measurement convention for the replay bank. That distinction is important: if certificates only hold after changing the controller, the evidence is architectural; if they hold under a frozen controller after changing only the scenario semantics and block summaries, the evidence is process-semantic.
+\end{remark}
+
+\begin{definition}[Scenario-key and within-key seed shift]
+\label{supp:def:key-within-shift}
+Let $\Prob_{\mathrm{cal}}$ and $\Prob_{\mathrm{dep}}$ be calibration and deployment laws on the block-summary space, and let $K$ be the maritime block key. Write $p_{\mathrm{cal}}$ and $p_{\mathrm{dep}}$ for the induced laws on $\mathcal K$, and write $\Prob_{\mathrm{cal}}(\cdot\mid k)$ and $\Prob_{\mathrm{dep}}(\cdot\mid k)$ for the corresponding conditional block-summary laws. Define
+\[
+\varepsilon_{\mathrm{key}}
+:=
+ d_{\mathrm{TV}}(p_{\mathrm{cal}},p_{\mathrm{dep}}),
+\]
+and define a residual within-key shift budget $\varepsilon_{\mathrm{within}}$ such that
+\[
+\sum_{k\in\mathcal K}
+\min\{p_{\mathrm{cal}}(k),p_{\mathrm{dep}}(k)\}
+ d_{\mathrm{TV}}\!\left(
+ \Prob_{\mathrm{cal}}(\cdot\mid k),
+ \Prob_{\mathrm{dep}}(\cdot\mid k)
+ \right)
+\le
+\varepsilon_{\mathrm{within}}.
+\]
+The twin-specific seed-shift radius is
+\[
+\varepsilon_{\mathrm{seed}}^{\mathrm{twin}}
+:=
+\min\{1,\varepsilon_{\mathrm{key}}+\varepsilon_{\mathrm{within}}\}.
+\]
+\end{definition}
+
+\begin{proposition}[Key/residual decomposition of seed shift]
+\label{supp:prop:key-residual-shift}
+Under Definition~\ref{supp:def:key-within-shift},
+\[
+ d_{\mathrm{TV}}(\Prob_{\mathrm{cal}},\Prob_{\mathrm{dep}})
+ \le
+ \varepsilon_{\mathrm{seed}}^{\mathrm{twin}}.
+\]
+Consequently, Proposition~\ref{supp:prop:seed-shift-transfer} can be applied with $\varepsilon_{\mathrm{seed}}=\varepsilon_{\mathrm{seed}}^{\mathrm{twin}}$.
+\end{proposition}
+
+\begin{proof}
+Use the standard coupling decomposition. First couple the block keys drawn from $p_{\mathrm{cal}}$ and $p_{\mathrm{dep}}$ maximally; the mismatch probability is $d_{\mathrm{TV}}(p_{\mathrm{cal}},p_{\mathrm{dep}})=\varepsilon_{\mathrm{key}}$. Conditional on matching key $k$, couple the block summaries maximally under the two conditional laws; the conditional mismatch probability is the corresponding conditional total-variation distance. Averaging over the matched-key mass gives at most $\varepsilon_{\mathrm{within}}$. Hence the total mismatch probability is at most $\varepsilon_{\mathrm{key}}+\varepsilon_{\mathrm{within}}$, which upper-bounds total variation between the full block-summary laws. Capping at one gives the stated radius.
+\end{proof}
+
+\begin{definition}[Finite-key upper-confidence radius]
+\label{supp:def:finite-key-radius}
+Suppose $\mathcal K$ has cardinality $K_0$. Let $n_{\mathrm{cal}}$ calibration blocks and $n_{\mathrm{dep}}$ deployment-comparison blocks be summarized by empirical key laws $\widehat p_{\mathrm{cal}}$ and $\widehat p_{\mathrm{dep}}$. For confidence level $1-\alpha$, define
+\[
+\rho(n,K_0,\alpha)
+:=
+\frac{K_0}{2}
+\sqrt{\frac{\log(4K_0/\alpha)}{2n}},
+\]
+and
+\[
+\widehat\varepsilon_{\mathrm{key}}^{\mathrm{UCB}}
+:=
+\min\!\left\{1,
+ d_{\mathrm{TV}}(\widehat p_{\mathrm{cal}},\widehat p_{\mathrm{dep}})
+ +\rho(n_{\mathrm{cal}},K_0,\alpha)
+ +\rho(n_{\mathrm{dep}},K_0,\alpha)
+\right\}.
+\]
+Given an independently justified residual bound $\widehat\varepsilon_{\mathrm{within}}^{\mathrm{UCB}}$, define
+\[
+\widehat\varepsilon_{\mathrm{seed}}^{\mathrm{twin,UCB}}
+:=
+\min\{1,
+\widehat\varepsilon_{\mathrm{key}}^{\mathrm{UCB}}
++
+\widehat\varepsilon_{\mathrm{within}}^{\mathrm{UCB}}
+\}.
+\]
+\end{definition}
+
+\begin{proposition}[Conservative finite-key seed-shift certificate]
+\label{supp:prop:finite-key-radius}
+Assume the calibration and deployment-comparison block keys are independent samples from their respective finite key laws. Then, with probability at least $1-\alpha$ over the key samples,
+\[
+\varepsilon_{\mathrm{key}}
+\le
+\widehat\varepsilon_{\mathrm{key}}^{\mathrm{UCB}}.
+\]
+If the residual bound $\widehat\varepsilon_{\mathrm{within}}^{\mathrm{UCB}}$ also holds, then
+\[
+ d_{\mathrm{TV}}(\Prob_{\mathrm{cal}},\Prob_{\mathrm{dep}})
+\le
+\widehat\varepsilon_{\mathrm{seed}}^{\mathrm{twin,UCB}}.
+\]
+\end{proposition}
+
+\begin{proof}
+For each key $k\in\mathcal K$, Hoeffding's inequality and a union bound imply that, with probability at least $1-\alpha/2$, all calibration key frequencies satisfy
+\[
+|p_{\mathrm{cal}}(k)-\widehat p_{\mathrm{cal}}(k)|
+\le
+\sqrt{\frac{\log(4K_0/\alpha)}{2n_{\mathrm{cal}}}}.
+\]
+The same bound holds for the deployment-comparison key frequencies with probability at least $1-\alpha/2$. On the intersection of these events, the triangle inequality for total variation gives
+\[
+ d_{\mathrm{TV}}(p_{\mathrm{cal}},p_{\mathrm{dep}})
+\le
+ d_{\mathrm{TV}}(\widehat p_{\mathrm{cal}},\widehat p_{\mathrm{dep}})
++
+\frac{1}{2}\sum_{k\in\mathcal K}|p_{\mathrm{cal}}(k)-\widehat p_{\mathrm{cal}}(k)|
++
+\frac{1}{2}\sum_{k\in\mathcal K}|p_{\mathrm{dep}}(k)-\widehat p_{\mathrm{dep}}(k)|,
+\]
+which yields the stated upper-confidence radius. The final statement follows from Proposition~\ref{supp:prop:key-residual-shift}.
+\end{proof}
+
+\begin{definition}[Operational residual diagnostics]
+\label{supp:def:within-diagnostics}
+The residual term $\widehat\varepsilon_{\mathrm{within}}^{\mathrm{UCB}}$ is treated as a stress parameter unless it is supported by within-key diagnostics. For each key $k$, compare calibration and deployment-comparison blocks using the same frozen solver and the same block-summary coordinates that enter the replay certificates: burden LCBs, contamination UCBs, APD/Gini denominator ratios, intervention counts, and false-certification indicators. If a within-key diagnostic fails, the corresponding key is either split into a finer key or assigned a larger residual budget.
+\end{definition}
+
+\begin{corollary}[Twin-specific shift-aware replay transfer]
+\label{supp:cor:twin-specific-transfer}
+Let $E$ be any blockwise replay-certified event from Corollary~\ref{supp:cor:shift-aware-replay}. If the maritime block key is fixed as in Definition~\ref{supp:def:maritime-block-key} and the finite-key seed-shift certificate in Proposition~\ref{supp:prop:finite-key-radius} succeeds, then with confidence reduced by the key-certification level,
+\[
+\Prob_{\mathrm{dep}}^{\mathrm{blk}}(E)
+\ge
+1-\beta-
+\widehat\varepsilon_{\mathrm{seed}}^{\mathrm{twin,UCB}}.
+\]
+Thus the coverage loss used in the replay transfer can be reported as a twin-specific, block-key-dependent quantity rather than as an abstract free parameter.
+\end{corollary}
+
+\begin{remark}[How to use the radius in the paper]
+\label{supp:rem:radius-use}
+The certificate is intentionally one-sided and conservative. A small value of $\widehat\varepsilon_{\mathrm{seed}}^{\mathrm{twin,UCB}}$ supports carrying replay-certified fairness or denominator claims to the deployment comparison range. A large value does not refute the process semantics; it says that the chosen calibration bank is not close enough to the deployment seed law to carry those empirical certificates. In that case, the correct response is to expand or reweight the replay bank, split the block key, or weaken the fairness/denominator claims. It is not to add another controller layer.
+\end{remark}
+
+\subsection{Certified actions and explanation soundness}
+
+\begin{theorem}[Certified-action soundness]
+\label{supp:thm:certificate-soundness}
+Fix time $t$, agent $i$, and physical action $a_i^p$. Suppose $S\subseteq C_t$ is a support certificate for $a_i^p$ at decision node $\lambda_i(x_t)$. Then there exists a classical propositional interpretation $I$ such that
+\[
+I\models \Th_{\lambda_i(x_t)}(S),
+\]
+and in particular
+\[
+I\models Pre_i(a_i^p).
+\]
+Therefore, every certified action admits a semantically sound explanation witness at its decision node.
+\end{theorem}
+
+\begin{proof}
+Because $S$ is a support certificate, $\Th_{\lambda_i(x_t)}(S)$ is propositionally satisfiable by Definition~\ref{def:certificate}. By OSL semantic soundness, satisfiability of the supported theory at a lattice element implies the existence of a classical interpretation satisfying that theory \citep{Alqithami2026OSL}. Thus there exists $I$ such that
+\[
+I\models \Th_{\lambda_i(x_t)}(S).
+\]
+Again by Definition~\ref{def:certificate},
+\[
+Pre_i(a_i^p)\subseteq \Th_{\lambda_i(x_t)}(S),
+\]
+so the same $I$ satisfies every precondition of $a_i^p$. Hence the emitted certificate is a sound explanation witness for the physical action.
+\end{proof}
+
+\subsection{Bounded-overhead inheritance}
+
+\begin{proposition}[Regret and violation transfer under bounded epistemic interventions]
+\label{supp:prop:inheritance}
+Let $\pi^{base}$ be any baseline feasible controller on an \OSCPOSG{} subcase that ignores epistemic exceptions. Let $\pi^{os}$ be the contradiction-aware wrapper that follows $\pi^{base}$ except on at most $M_T$ decision epochs, where it replaces the proposed physical action by an epistemic exception act.
+
+Assume that each such intervention changes cumulative operational reward by at most $\Delta$ and changes cumulative constraint cost $g_j$ by at most $\beta_j$. Then
+\[
+\Reg_T(\pi^{os})
+\le
+\Reg_T(\pi^{base})+\Delta M_T,
+\]
+and for each constraint index $j$,
+\[
+\Viol_j^{(T)}(\pi^{os})
+\le
+\Viol_j^{(T)}(\pi^{base})+\beta_j M_T.
+\]
+Consequently, if $M_T=o(T)$, the wrapper preserves the baseline asymptotic average-regret and average-violation rates.
+\end{proposition}
+
+\begin{proof}
+Write $R_T(\pi)$ for cumulative reward of policy $\pi$. Since $\pi^{os}$ differs from $\pi^{base}$ on at most $M_T$ epochs and each deviation changes total reward by at most $\Delta$,
+\[
+R_T(\pi^{os})\ge R_T(\pi^{base})-\Delta M_T.
+\]
+Let $R_T^{\star}$ be the reward of an optimal feasible policy. Then
+\[
+\Reg_T(\pi^{os})
+=
+R_T^{\star}-R_T(\pi^{os})
+\le
+R_T^{\star}-R_T(\pi^{base})+\Delta M_T
+=
+\Reg_T(\pi^{base})+\Delta M_T.
+\]
+The same decomposition applies coordinate-wise to cumulative constraint costs. If the intervention changes the total cost in coordinate $j$ by at most $\beta_j$ on each of at most $M_T$ epochs, then
+\[
+\Viol_j^{(T)}(\pi^{os})
+\le
+\Viol_j^{(T)}(\pi^{base})+\beta_j M_T.
+\]
+Dividing by $T$ yields the asymptotic statement whenever $M_T=o(T)$.
+\end{proof}
+
+
+\subsection{Contradiction burden and half-life}
+
+\begin{definition}[Contradiction burden]
+\label{supp:def:contradiction-burden}
+The contradiction burden at time $t$ is
+\[
+B_t:=\sum_{K\in \MCC(C_t)} \omega(K).
+\]
+This is the total weighted mass of active contradiction components in the current claim base.
+\end{definition}
+
+\begin{definition}[Clearing time of a contradiction component]
+\label{supp:def:clearing-time}
+Let $K$ be a contradiction component that first appears at time $b(K)$. Its \emph{clearing time} is
+\[
+\begin{aligned}
+t_{\mathrm{clr}}(K)
+:=
+\inf\Big\{t\ge b(K):&\ K\notin \MCC(C_t) \\
+&\text{or }\forall i,\forall a_i^p\in A_i^{\mathrm{crit}},\
+K\cap \Rel_i(x_t,C_t,a_i^p)\neq\varnothing \\
+&\hspace{8.2em}\Rightarrow a_i^e\in \Exc_i(a_i^p)
+\Big\}.
+\end{aligned}
+\]
+Thus a contradiction is cleared once it is either resolved from the claim base or safely routed away from critical physical execution by epistemic exception acts.
+\end{definition}
+
+\begin{definition}[Shock half-life]
+\label{supp:def:half-life}
+For a contradiction shock injected at time $t_0$, define the shock half-life by
+\[
+\tau_{1/2}(t_0)
+:=
+\inf\big\{h\ge 0 : B_{t_0+h}\le \tfrac{1}{2} B_{t_0}\big\}.
+\]
+In episodic evaluation, the reported contradiction half-life is the mean or median of $\tau_{1/2}(t_0)$ over all tagged contradiction shocks.
+\end{definition}
+
+\begin{remark}
+\label{supp:rem:half-life-measurement}
+If new unrelated contradictions can enter after $t_0$, then empirical half-life should be computed over the tagged contradiction burden generated by the original shock rather than over all contradictions globally. This avoids penalizing a policy for independent events that arrive after the measured shock.
+\end{remark}
+
+\section{Additional related-work comparisons}
+\label{supp:sec:related}
+
+This section makes the novelty boundary explicit. The question is not whether there exist prior models that reason about other agents, beliefs, common knowledge, or norms. There are several. The question is whether there exists a simulator-coupled constrained multi-agent process in which observer--situation-indexed contradictions are first-class state variables, action preconditions, and audit objects. The closest neighboring lines are the following.
+
+\subsection{Interactive belief-state models}
+
+I-POMDPs extend POMDPs to multi-agent settings by incorporating models of other agents into the state space and maintaining beliefs over both the physical environment and the models of other agents \citep{GmytrasiewiczDoshi2005}. That is structurally important because it shows how multi-agent uncertainty can be lifted into the state itself rather than handled as an afterthought. However, the object being maintained is still a nested belief state. Contradictions are not preserved as named components with provenance and lattice coordinates, and action admissibility is not defined in terms of contradiction-aware certification.
+
+\subsection{Common-knowledge coordination}
+
+MACKRL shows that common knowledge can support powerful decentralized coordination without learned communication protocols, via a hierarchical policy tree conditioned on what groups of agents can independently reconstruct from their observations \citep{SchroederdeWitt2019MACKRL}. That line is close in spirit because it elevates an epistemic notion from background intuition to control primitive. The difference is that MACKRL is built around \emph{agreed} information. OS-CMASP is built around \emph{disagreed} information: provenance-bearing claims that may remain incompatible until the policy spends effort to resolve them, route around them, or escalate them.
+
+\subsection{Multi-agent epistemic planning}
+
+Epistemic planning work, including planners with common knowledge such as MEPC, studies actions with epistemic preconditions and effects and can explicitly represent higher-order and common-knowledge reasoning \citep{LiuLiu2018MEP}. This is the closest line on the knowledge-representation side. The gap is that epistemic planning is usually not framed as stochastic, simulator-coupled, constrained control with cumulative operational objectives, fairness penalties, and online feasibility gating. In other words, epistemic planning is close on semantic content but not on process class.
+
+\subsection{Simulator-coupled, norm-governed processes}
+
+R-CMASP is the nearest formal neighbor. It augments stochastic games and Dec-POMDPs with simulator-coupled transitions, role-specialized agents, structured observability and communication, and a normative feasibility layer over joint actions \citep{Dong2025RCMASP}. Relative to that model, the proposed delta is sharp:
+
+\begin{enumerate}[leftmargin=1.7em,label=\arabic*.]
+\item the state contains an explicit claim base over observer--situation lattice nodes;
+\item contradiction components are first-class objects obtained by MCC rather than implicit inconsistencies inside local beliefs;
+\item admissibility of critical actions depends on support certificates or epistemic exception acts; and
+\item the formalism admits an observer-collapse separation theorem showing that erasing provenance can force linear regret.
+\end{enumerate}
+
+This is the strongest comparison in the paper. If those four deltas cannot be maintained, the OS-CMASP active regime should be narrowed and the missing delta should be stated explicitly, rather than recasting the work as an OSL module for an existing controller.
+
+\subsection{Current CH-MARL / EcoFair baseline}
+
+EcoFair-CH-MARL and the broader CHMARL project already provide the domain baseline and deployment narrative for maritime coordination: a two-tier planner / executor split, real-time budgeted optimization, fairness-aware rewards, and an emphasis on explainability, auditability, and human authority \citep{Alqithami2026EcoFair,Alqithami2025CHMARL}. The present work does not attempt to improve that controller within the same ontology. Instead, it asks whether the maritime environment itself should be represented differently: not as a single operational state with noisy observations, but as an operational state plus a contradiction-bearing claim state over observer--situation space.
+
+\subsection{Concise novelty statement}
+
+The cleanest novelty statement I know how to defend is the following:
+
+\begin{quote}
+\textbf{Defensible novelty statement.} Relative to EcoFair-CH-MARL, the contribution is not a better two-tier controller. Relative to R-CMASP, the contribution is not merely simulator coupling plus norms. Relative to belief-state and common-knowledge models, the contribution is not merely richer epistemic structure. The contribution is a candidate process class in which fragmented truth is explicit in the state, contradiction repair is explicit in the action space, and certification / escalation is explicit in the feasibility relation.
+\end{quote}
+
+That statement is stronger than ``we add OSL to CH-MARL'' but narrower than ``nothing like this exists''; it is intentionally written as a candidate rather than a settled class claim. The separation theorem is what determines whether the stronger interpretation is deserved.
+
+\section{Detailed minimal separation benchmark: Berth-1-Conflict}
+\label{supp:sec:benchmark}
+
+The empirical program begins with a deliberately small benchmark rather than the full 16-port / 50-vessel digital twin. The benchmark instantiates Theorem~\ref{thm:separation} while remaining legible to reviewers. We call it \textsc{Berth-1-Conflict}.
+
+\subsection{Benchmark purpose}
+
+The benchmark should answer one narrow question:
+
+\begin{quote}
+When a high-impact maritime action depends on conflicting reports from differently prioritized observers, does preserving observer--situation provenance reduce regret and unsafe actions relative to controllers that only see aggregated content?
+\end{quote}
+
+If the answer is not clearly yes on this minimal benchmark, there is little value in scaling to the full maritime twin.
+
+\subsection{Environment skeleton}
+
+The environment contains a single arriving vessel and a single berth. The hidden physical state includes berth readiness, crane availability, and vessel ETA consistency. Observers include an AIS feed, a terminal operating system or strategic berth plan, a harbor master report, a crane maintenance system, and a human dispatcher. Situations distinguish at least ``global planning'', ``local operational update'', and ``override / exception'' contexts.
+
+Physical actions are
+\[
+A^p=\{\mathsf{admit},\mathsf{hold},\mathsf{reroute}\}.
+\]
+Epistemic actions are
+\[
+A^e=\{\mathsf{queryMaint},\mathsf{queryLocal},\mathsf{certify},\mathsf{defer},\mathsf{escalate}\}.
+\]
+Critical actions are $\mathsf{admit}$ and, when modeled, $\mathsf{reroute}$.
+
+The vocabulary may begin with
+\[
+\Phi=\{ready,\neg ready, craneOK,\neg craneOK, etaOnTime,\neg etaOnTime\}.
+\]
+Each observation is translated into one or more claim records of the form $(\varphi,\ell,w,\tau,\rho)$ and inserted into the claim base before RBP and MCC are applied.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.22\textwidth}X}
+\toprule
+\textbf{Component} & \textbf{Initial benchmark instantiation} \\
+\midrule
+Physical state & Berth readiness, crane health, vessel arrival window, queue cost, emissions cost. \\
+Observers & AIS feed, terminal operating system / strategic berth plan, harbor master, crane maintenance system, human dispatcher. \\
+Situations & Strategic planning, local operational update, exception / override context. \\
+Physical acts & Admit vessel, hold vessel, reroute vessel (optional in first version). \\
+Epistemic acts & Query maintenance, request local confirmation, certify action, defer, escalate. \\
+Constraints & Safety violation cost, waiting-time cost, idling-emissions cost, optional fairness term if multiple vessel classes are added later. \\
+Explanation object & Support certificate for any admitted or rerouted action. \\
+\bottomrule
+\end{tabularx}
+\caption{Proposed first benchmark for instantiating the observer-collapse separation result in a maritime setting.}
+\label{supp:tab:benchmark-components}
+\end{table}
+
+
+\subsection{Controller-visible context map for \textsc{Berth-1-Conflict}}
+\label{supp:subsec:b1-chi}
+
+The separation theorem is meaningful only if the hidden operational truth is not leaked through ordinary physical features. We therefore instantiate the visible-context map explicitly.
+
+Let the one-berth latent physical state be
+\[
+x=(b,c,e,q,z,v,m,t),
+\]
+where $b\in\{0,1\}$ is true berth readiness, $c\in\{0,1\}$ is true crane availability, $e$ is the realized arrival-window status, $q$ is queue length, $z$ is public weather / disruption regime, $v$ is vessel class, $m$ is operating mode, and $t$ is a time bucket. The controller-visible non-claim context is
+\[
+\chi_{B1}(x)=\big(q,z,v,m,t,\operatorname{slot}(x),\operatorname{etaBin}(x)\big),
+\]
+where $\operatorname{slot}(x)$ is the scheduled berth window and $\operatorname{etaBin}(x)$ is the publicly exposed ETA bucket. Crucially, $b$ and $c$ are not components of $\chi_{B1}$; they are available only through claim records generated by the relevant observers.
+
+A minimal authority-conflict pair for the theorem is
+\[
+x^+=(b=1,c=1,e,q,z,v,m,t),
+\qquad
+x^-=(b=0,c=1,e,q,z,v,m,t),
+\]
+with the same visible context
+\[
+\chi_{B1}(x^+)=\chi_{B1}(x^-).
+\]
+Let $\ell_H$ denote the harbor-master local-update node and $\ell_P$ the strategic-plan node, with $\pi_L(\ell_H)>\pi_L(\ell_P)$. Define
+\[
+C^+=\{(ready,\ell_H,1,\tau,\rho_H),\;(\neg ready,\ell_P,1,\tau,\rho_P)\},
+\]
+\[
+C^-=\{(ready,\ell_P,1,\tau,\rho_P),\;(\neg ready,\ell_H,1,\tau,\rho_H)\}.
+\]
+Then
+\[
+\Agg(C^+)=\Agg(C^-),
+\]
+but the dominant support certificate for $ready$ exists only in $C^+$. This is the concrete benchmark instantiation of Theorem~\ref{thm:separation}: the aggregated controller sees the same non-claim context and the same unordered content, while the provenance-aware controller sees the authority reversal.
+
+\begin{proposition}[Benchmark realization of the observer-collapse construction]
+\label{supp:prop:b1-realizes-separation}
+Under the state pair and claim bases above, any policy in $\Pi_{\mathrm{agg}}$ must assign the same distribution over $\{\mathsf{admit},\mathsf{hold}\}$ in $s^+=(x^+,C^+)$ and $s^-=(x^-,C^-)$. A provenance-aware policy can choose $\mathsf{admit}$ in $s^+$ and $\mathsf{hold}$ in $s^-$. If $\mathsf{admit}$ requires a dominant support certificate for $ready$, then $\mathsf{admit}$ is admissible in $s^+$ and inadmissible in $s^-$.
+\end{proposition}
+
+\begin{proof}
+The first statement follows from $\chi_{B1}(x^+)=\chi_{B1}(x^-)$ and $\Agg(C^+)=\Agg(C^-)$. The second statement follows because $\ell_H$ dominates $\ell_P$. In $C^+$, the highest-priority comparable claim supports $ready$, so $ready$ has a dominance-safe witness and $\mathsf{admit}$ can be certified. In $C^-$, the highest-priority comparable claim supports $\neg ready$, so no dominance-safe witness for $ready$ exists. Hence the admissibility status of $\mathsf{admit}$ differs across two states that are identical to a label-collapsed policy.
+\end{proof}
+
+\subsection{Pre-registered maritime dominance order}
+\label{supp:subsec:dominance-prereg}
+
+The dominance relation should be specified before training or replay. Otherwise, the paper risks fitting authority after seeing outcomes. For the first benchmark, use a proposition-family priority table rather than a single universal trust ranking. This is still compatible with Definition~\ref{def:dominance}: for each proposition family, instantiate a fixed $\pi_L^{(\varphi)}$ and then use the same lexicographic tie-breakers--priority, recency, credibility--inside that family.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}p{0.28\textwidth}X}
+\toprule
+\textbf{Proposition family} & \textbf{Dominance order, highest first} & \textbf{Reason for pre-registration} \\
+\midrule
+$ready$ & Human dispatcher override $>$ harbor master local update $>$ terminal operating system local berth status $>$ strategic berth plan / schedule-derived readiness & Berth readiness is an operational-local fact; a fresh local authority should dominate a stale global plan. \\
+$craneOK$ & Crane operator or maintenance override $>$ crane maintenance system $>$ terminal operating system equipment status $>$ strategic plan & Crane availability is equipment-local; maintenance provenance should dominate planning assumptions. \\
+$etaOnTime$ & Harbor master / pilot update $>$ fresh AIS-derived ETA $>$ carrier schedule $>$ strategic plan & ETA is trajectory-local and time-sensitive; recency matters after source authority. \\
+$weatherSafe$ & Port safety officer / dispatcher override $>$ local sensor nowcast $>$ port-approved weather feed $>$ strategic weather assumption & Safety-critical weather judgments should prioritize local exception authority and current sensing. \\
+\bottomrule
+\end{tabularx}
+\caption{Pre-registered proposition-family dominance order for the minimal maritime benchmark. The table is not a learned component; it is part of the environment specification being tested.}
+\label{supp:tab:dominance-prereg}
+\end{table}
+
+For reproducibility, the benchmark should publish the exact rank values, freshness windows, and tie-breaking rules. A minimal version is:
+\[
+\mathrm{rank}_{\varphi}(c)=\big(\pi_L^{(\varphi)}(\ell),\operatorname{fresh}_{\varphi}(\tau;t),w\big),
+\]
+ordered lexicographically, where $\operatorname{fresh}_{\varphi}(\tau;t)=1$ if the claim is inside the pre-registered freshness window for proposition family $\varphi$ and $0$ otherwise. The timestamp $\tau$ can still be used as a secondary tie-breaker among fresh claims. This keeps the benchmark from silently converting ``authority'' into an outcome-fitted score.
+
+\begin{remark}[Typed dominance is a benchmark instantiation, not a new layer]
+The proposition-family priority table is not an additional controller module. It is an explicit environment-side semantics for how claims become dominance-safe witnesses. If changing this table after seeing results is necessary for separation, the process-class claim should be considered unsupported.
+\end{remark}
+
+\subsubsection*{Numerical default for the first pre-registration}
+\label{supp:subsec:numerical-dominance-default}
+
+The table above gives the qualitative order. For the first implementation, use the following numerical template unless a port-specific operating rule is declared before any training run:
+\[
+\pi_L^{(\varphi)}(\ell)\in\{5,4,3,2,1\},
+\]
+where $5$ denotes authorized human override, $4$ denotes the proposition-family local authority, $3$ denotes a local system of record, $2$ denotes an external operational feed, and $1$ denotes a strategic-plan or schedule-derived assumption. Ties are broken by freshness and then credibility.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.18\textwidth}>{\centering\arraybackslash}p{0.18\textwidth}>{\centering\arraybackslash}p{0.18\textwidth}X}
+\toprule
+\textbf{Family} & \textbf{Fresh window} & \textbf{Stale penalty} & \textbf{Default interpretation} \\
+\midrule
+$ready$ & 30 minutes & freshness bit drops from 1 to 0 & Berth-readiness reports stale quickly enough that a planning assumption should not dominate a fresh local update. \\
+$craneOK$ & 15 minutes & freshness bit drops from 1 to 0 & Equipment-state claims are treated as short-lived unless maintenance explicitly certifies persistence. \\
+$etaOnTime$ & 10 minutes & freshness bit drops from 1 to 0 & ETA claims are trajectory-sensitive and should be refreshed frequently under disruption. \\
+$weatherSafe$ & 10 minutes & freshness bit drops from 1 to 0 & Weather/safety claims are short-lived; stale favorable weather must not certify critical entry. \\
+\bottomrule
+\end{tabularx}
+\par\vspace{0.25em}
+{\small\emph{Default freshness windows for the first one-berth benchmark. These are experimental defaults, not claims about a specific port.}}
+\end{center}
+
+The numerical values are intentionally simple. Their role is to make the first benchmark reproducible and falsifiable, not to encode a universal maritime authority model. In the full twin, these values is replaced by documented operational policy or by a sensitivity grid declared before replay.
+
+\subsection{Fixed-solver ablation contract}
+\label{supp:subsec:fixed-solver-contract}
+
+The empirical test must isolate state semantics from architecture. The following contract defines the pre-registered design for the first benchmark.
+
+\begin{enumerate}[leftmargin=1.7em,label=\textbf{A\arabic*:}]
+\item \textbf{Same solver.} Use the same policy class, optimizer, reward, training budget, random seeds, and action interface across provenance-preserving and provenance-erased conditions.
+\item \textbf{Same physical observations.} Both conditions receive the same $\chi_{B1}(x)$ and the same literal / credibility / timestamp content. The only removed information in the collapsed condition is observer--situation label and provenance.
+\item \textbf{Same admissibility budget.} If the provenance-preserving condition uses certification or escalation for critical admits, the collapsed condition must face the same safety budget. It may hold, query, or escalate, but it cannot execute an uncertified critical admit for free.
+\item \textbf{Placebo labels.} Include a condition in which labels are randomly permuted independently of truth. This should collapse toward the aggregated baseline; otherwise the experiment may be exploiting label artifacts rather than provenance semantics.
+\item \textbf{Oracle sanity check.} Expose $b$ directly through $\chi$ in a non-deployment oracle condition; the provenance gap should shrink or disappear.
+\end{enumerate}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.31\textwidth}X}
+\toprule
+\textbf{Condition} & \textbf{Information available} & \textbf{Interpretation} \\
+\midrule
+Provenance-preserving & $\chi_{B1}(x)$ plus full claim records $(\varphi,\ell,w,\tau,\rho)$ & Tests the proposed process semantics. \\
+Provenance-erased & $\chi_{B1}(x)$ plus $\Agg(C)$ & Main collapsed-state baseline. \\
+Labels without gating & Full claim records, but no certificate-based admissibility & Separates provenance-bearing state from feasibility semantics. \\
+Random-label placebo & Full-size labels assigned independently of truth & Tests whether gains rely on meaningful observer--situation structure. \\
+Oracle visible-state & $\chi_{B1}(x)$ augmented with true readiness $b$ & Sanity check; should reduce the provenance advantage. \\
+\bottomrule
+\end{tabularx}
+\par\vspace{0.25em}
+{\small\emph{Ablation conditions for the first benchmark. The solver must remain fixed so that any separation is attributable to process semantics rather than controller growth.}}
+\end{center}
+
+The decision criterion is deliberately strict. The process-semantics claim is empirically supported by the first benchmark only if the provenance-preserving condition separates from provenance-erased and random-label conditions under the same solver, while the oracle condition closes the gap and the benign-agreement scenarios show limited epistemic overhead. If those checks fail, the next analytical step is an active-regime diagnosis: determine whether failure came from leakage through visible context, a non-action-relevant dominance order, insufficient contradiction burden, or a solver that never queries the certificate semantics. The interpretation remains process-semantic; only the benchmark claim narrows.
+
+\subsection{Environment-step protocol}
+\label{supp:subsec:b1-step-protocol}
+
+To keep the implementation aligned with the theorem, the environment step should be written as a process-semantic transform rather than as a new controller. One episode step is:
+
+\begin{enumerate}[leftmargin=1.7em,label=\textbf{E\arabic*:}]
+\item \textbf{Latent update.} Maintain latent state $x_t=(b_t,c_t,e_t,q_t,z_t,v_t,m_t,t)$ and expose only $y_t=\chi_{B1}(x_t)$ to the controller.
+\item \textbf{Claim generation.} Generate observer reports using the scenario family. Each report becomes a claim record $(\varphi,\ell,w,\tau,\rho)$.
+\item \textbf{Epistemic state update.} Apply $C_t^+=\RBP(C_t\cup \Gamma(o_t,a_{t-1}^e))$ and compute $\MCC(C_t^+)$.
+\item \textbf{Ablation projection.} Produce the condition-specific input: full $C_t^+$, collapsed $\Agg(C_t^+)$, randomly permuted labels, or oracle-augmented $\chi_{B1}$.
+\item \textbf{Frozen solver call.} Use the same solver to propose physical action $a_t^p$ and optional epistemic action $a_t^e$.
+\item \textbf{Admissibility check.} For critical actions, test dominant support certificates using the pre-registered dominance order. If certification fails, the only admissible alternatives are hold, defer, query, or escalate according to the condition's action interface.
+\item \textbf{Physical transition and accounting.} Apply the accepted action in the simulator and record reward, safety violation, idling-emission proxy, service-delay proxy, epistemic intervention count, contradiction half-life, and certificate validity.
+\end{enumerate}
+
+This protocol is the implementation analogue of the non-stacking criterion: only the state projection and feasibility semantics change across ablations; the solver identity does not.
+
+\subsection{Minimum viable experiment protocol}
+\label{supp:subsec:b1-experiment-protocol}
+
+A conservative first run should be paired-seed and scenario-balanced.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}X}
+\toprule
+\textbf{Protocol item} & \textbf{Default setting} \\
+\midrule
+Scenario families & Authority conflict, freshness conflict, context conflict, human override, benign agreement. \\
+Pairing & Every random seed is replayed under all ablation conditions. \\
+Training budget & Same number of environment steps, optimizer updates, and random seeds for every learned condition. \\
+Primary endpoint & Zero-violation constrained regret on authority and freshness conflicts. \\
+Secondary endpoints & Critical-action violation rate, false-certification rate, contradiction half-life, intervention cost, waiting time, idling-emission proxy, and service-delay proxy. \\
+Placebo expectation & Random-label placebo should behave like provenance-erased or worse. \\
+Oracle expectation & Oracle visible-state should close most of the provenance gap, verifying that hidden truth was available only through claim provenance. \\
+Benign-agreement expectation & Provenance-preserving certification introduces only limited epistemic overhead when reports agree. \\
+\bottomrule
+\end{tabularx}
+\par\vspace{0.25em}
+{\small\emph{Minimum viable experiment protocol for deciding whether to scale beyond the one-berth benchmark.}}
+\end{center}
+
+The first result to plot should be simple: cumulative zero-violation regret versus horizon for authority-conflict seeds, with one curve per ablation condition. The process-class claim is not strengthened by adding controller complexity; it is strengthened if the same controller separates only when observer--situation provenance is preserved.
+
+
+\subsection{Executable scaffold, paired ablation, and replay adapter}
+\label{supp:subsec:executable-scaffold}
+
+The accompanying materials include a runnable scaffold, \texttt{code/berth1\_conflict.py}. The file is deliberately dependency-free and implements the theorem-facing constraint that hidden readiness and the other critical precondition truths are excluded from the visible context map $\chi_{B1}(x)$ and can enter the ordinary controller only through claim records. The same dominance-gated solver is used in all non-oracle conditions; the ablation changes only claim-state semantics or certification availability.
+
+The harness uses a paired episode bank: each ablation condition evaluates the same latent trajectory, and randomized placebo operations use separate per-step ablation random streams so they cannot perturb the latent state sequence. The default executable path is preflight rather than evidence generation. Synthetic or replay evaluations must be invoked explicitly after the ablation contract is locked.
+
+The scaffold exposes six conditions:
+\begin{enumerate}[leftmargin=1.7em,label=\arabic*.]
+\item \texttt{provenance\_preserving}: observer labels, situation labels, ranks, freshness, and provenance are available to the certificate rule;
+\item \texttt{provenance\_erased}: observer--situation labels are erased and the same solver falls back to a safe hold when it cannot certify;
+\item \texttt{random\_label\_placebo}: labels are randomly reassigned within proposition families while literals are preserved;
+\item \texttt{labels\_without\_gating}: provenance is visible, but certificate-based admissibility is disabled, isolating the safety role of the gate;
+\item \texttt{oracle\_visible\_state}: hidden precondition truth is deliberately exposed as a sanity upper bound;
+\item \texttt{benign\_agreement}: claim literals are made coherent while labels are preserved, measuring overhead when contradiction is absent.
+\end{enumerate}
+
+Before running anything locally, the paper does not include numerical scaffold outputs. The role of the executable at this stage is to lock the interface and invariants, not to supply evidence. The locked contract is therefore:
+
+\begin{enumerate}[leftmargin=1.7em,label=\textbf{C\arabic*:}]
+\item \textbf{No bundled result files.} The released package contains source, schema templates, and preflight tooling, but no synthetic summary CSVs or diagnostics JSON that could be mistaken for experiment results.
+\item \textbf{Preflight by default.} Running \texttt{berth1\_conflict.py} without an explicit \texttt{--mode run} performs static checks only: visible-context leakage, replay-schema validity, condition-list consistency, and paired-bank metadata.
+\item \textbf{Synthetic results require acknowledgement.} Running on the built-in synthetic generator requires \texttt{--allow-synthetic-results}. This prevents quick scaffolding runs from becoming undeclared evidence.
+\item \textbf{Replay results require a manifest.} Maritime-twin replay should be accompanied by a run manifest recording the replay file hash, condition set, solver version, dominance table version, scenario-key definition, and output prefix.
+\item \textbf{The same ablation interface must be preserved.} The first local run should compare exactly the six conditions listed above; adding a new controller is disallowed until this fixed-solver comparison is reported.
+\end{enumerate}
+
+This lock-first posture is part of the non-stacking design. The benchmark is more credible when the ablation interface is fixed before any local result is inspected.
+
+The same script now supports a replay adapter. A maritime twin can emit a claim-level CSV with required columns
+\[
+\texttt{seed,t,ready,scenario,prop,value,observer,situation},
+\]
+and optional fields for the other preconditions, visible context keys, credibility, timestamp, and provenance. The command
+\begin{quote}
+\small
+\texttt{python3 -S berth1\_conflict.py --mode run}\\
+\texttt{\ \ --replay-csv twin\_replay\_claims.csv}\\
+\texttt{\ \ --out-prefix twin\_replay\_v1}\\
+\texttt{\ \ --manifest twin\_replay\_v1.manifest.json}
+\end{quote}
+then runs the same ablation interface on replayed claims. The point is to replace the synthetic generator while preserving the fixed-solver comparison contract.
+
+\subsection{Scenario families}
+
+The benchmark should contain a small number of interpretable scenario families rather than an undifferentiated random scenario mixture.
+
+\begin{enumerate}[leftmargin=1.7em,label=\textbf{S\arabic*:}]
+\item \textbf{Authority conflict.} A high-priority local observer says the berth is not ready, while a lower-priority global feed says it is ready.
+\item \textbf{Freshness conflict.} Two observers of similar nominal authority disagree, but one claim is stale.
+\item \textbf{Context conflict.} A proposition holds under the planning situation but not under the current operational situation.
+\item \textbf{Human override.} The automated support set is insufficient or contradictory, forcing escalation to a dispatcher.
+\item \textbf{Benign agreement.} All relevant observers agree, so the epistemic wrapper should stay mostly dormant and preserve baseline efficiency.
+\end{enumerate}
+
+These scenarios test not only accuracy under disagreement but also restraint: the system does not over-query or over-escalate when the claim state is already coherent.
+
+\subsection{Baselines}
+
+The comparison set should be narrow and principled.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.26\textwidth}X}
+\toprule
+\textbf{Baseline} & \textbf{Purpose} \\
+\midrule
+Aggregated-state CH-MARL controller & Uses fused features only; tests whether provenance erasure hurts. \\
+Observer-aware controller without admissibility gating & Sees provenance, but does not require certification or exception acts; isolates the value of state semantics alone. \\
+Full OS-CMASP controller & Uses provenance-bearing claims, contradiction mass, and certification / escalation gating. \\
+R-CMASP-style governed baseline & Adds simulator coupling and norm-gating without OSL-indexed contradiction state; tests the value of the explicit claim-state formulation. \\
+\bottomrule
+\end{tabularx}
+\par\vspace{0.25em}
+{\small\emph{Minimal baseline suite for the first separation-oriented benchmark.}}
+\end{center}
+
+If it is easy to do so, an additional common-knowledge baseline can be included, but only if it is implemented honestly enough to avoid straw-manning MACKRL-style coordination.
+
+\subsection{Metrics}
+
+The benchmark should report more than reward. The key metrics are:
+
+\begin{itemize}[leftmargin=1.5em]
+\item cumulative regret relative to the best contradiction-aware policy;
+\item critical-action violation rate;
+\item false-certification rate;
+\item contradiction half-life (time from contradiction appearance to a contradiction-resolved or contradiction-routed state);
+\item escalation precision (fraction of escalations that are actually needed);
+\item epistemic intervention cost (queries, deferrals, or escalations per episode);
+\item throughput / waiting-time / emissions where those are meaningful in the toy setup.
+\end{itemize}
+
+The important visual should be a regret or violation curve showing a clear gap between aggregated-state controllers and provenance-preserving controllers under authority and freshness conflict, while showing only a small overhead gap under benign agreement.
+
+\subsection{Hypotheses}
+
+The benchmark is strong enough if it tests the following hypotheses.
+
+\begin{enumerate}[leftmargin=1.7em,label=\textbf{H\arabic*:}]
+\item \textbf{Separation.} Aggregated-state policies incur strictly higher regret than provenance-aware policies under repeated authority conflict.
+\item \textbf{Safety.} Certification / escalation gating reduces unsafe admits relative to observer-aware policies without gating.
+\item \textbf{Restraint.} In benign-agreement scenarios, the full OS-CMASP policy incurs only a small epistemic overhead.
+\item \textbf{Auditability.} The fraction of critical admits accompanied by valid support certificates approaches one whenever escalation is not used.
+\end{enumerate}
+
+\subsection{Path to the full maritime twin}
+
+Only after the minimal benchmark works should the approach be ported into the larger maritime digital twin. The scaling path is straightforward: vessel ETA, berth readiness, crane maintenance, customs release, yard readiness, and weather become claim-generating subsystems; the strategic layer allocates verification and escalation budget in addition to emission and fairness budget; and the operational layer executes physical control while remaining subject to contradiction-aware admissibility. At that point, the evaluation can inherit the original EcoFair metrics and add contradiction-sensitive ones such as contradiction half-life and false-certification rate.
+
+\subsection{Experimental lock-in protocol}\label{supp:subsec:prerun-lock}
+
+\section{Active-regime diagnosis and solver-isolation plan}
+\label{supp:sec:falsification}
+
+A strong process-semantics claim requires a clear diagnostic logic. The relevant test is whether the OS-CMASP gain survives when the controller family is held as fixed as possible.
+
+\subsection{What would narrow the active OS-CMASP regime?}
+
+The following outcomes do not reclassify the paper as a controller add-on. They narrow the active regime and identify which semantic condition must be strengthened.
+
+\begin{enumerate}[leftmargin=1.7em,label=\textbf{F\arabic*:}]
+\item \textbf{No state separation.} A controller given only $\Agg(C_t)$ matches the observer-aware controller on the separation benchmark without extra violations.
+\item \textbf{No feasibility separation.} Removing certificate-based admissibility changes only the explanation logs but not the executable action set or violation profile.
+\item \textbf{Solver-only gains.} Performance gains appear only when swapping in a richer controller architecture, and disappear when the same base controller is evaluated under collapsed versus provenance-preserving state semantics.
+\end{enumerate}
+
+Any one of these would mean that the tested route failed to isolate process semantics. The response is to revise the active-regime assumptions, visible-context map, dominance order, or certificate preconditions while keeping the solver fixed.
+
+\subsection{Ablation logic that isolates novelty}
+
+The benchmark in Section~\ref{supp:sec:benchmark} is therefore evaluated under a deliberately strict ablation matrix:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+State semantics & Admissibility semantics & Controller family \\
+\midrule
+Collapsed $\Agg(C_t)$ & no certification gate & fixed base controller \\
+Collapsed $\Agg(C_t)$ & certification gate if definable & same fixed base controller \\
+Provenance-preserving $C_t$ & no certification gate & same fixed base controller \\
+Provenance-preserving $C_t$ & certification gate & same fixed base controller \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The non-stacking read is justified only if the shift from the first row to the fourth row cannot be reproduced by architecture changes alone, and if at least part of the gain already appears when moving from collapsed to provenance-preserving state semantics under the same solver.
+
+\subsection{Interpretive rule}
+
+The controller is treated as an implementation witness, not as the contribution. If the same base solver behaves differently because the environment state now contains contradiction-bearing provenance and the admissibility relation now depends on certification, that supports the process-class claim. If all gains require a different network stack, then the result remains a ``better controller'' result rather than a process-semantics result.
+
+\section{Operationalization: dominance-gated EcoFair}\label{supp:sec:operationalization}
+\label{supp:sec:controller}
+
+The formalism above is an environment class, not a solver prescription. The least risky implementation path is therefore not to invent a wholly new controller stack, but to use the smallest possible operationalization that can witness the new semantics. A contradiction-aware wrapper around EcoFair-CH-MARL is useful precisely because it keeps the solver story conservative while the paper tests the stronger claim that state semantics and admissibility semantics have changed \citep{Alqithami2026EcoFair}.
+
+\subsection{Controller decomposition}
+
+Let the strategic layer produce budgets, fairness multipliers, or routing envelopes via a policy
+\[
+\pi^{S}_{\Theta}(b_t\mid z_t),
+\]
+where $z_t$ denotes strategic observations. Let the operational layer propose physical actions through
+\[
+\pi^{O}_{\theta}(a_t^{\mathrm{base}}\mid o_t,b_t),
+\]
+where $o_t$ are local operational observations and $b_t$ are the current strategic boundary conditions.
+
+Add a gate policy
+\[
+G_{\psi}:(x_t,C_t,a_t^{\mathrm{base}})\mapsto (a_t^p,a_t^e,S_t),
+\]
+where $S_t$ is either a dominant support certificate or the empty set. The gate does not replace EcoFair's strategic and operational logic. It decides whether a proposed critical action can be certified, is replaced by a safe fallback, or must be paired with an epistemic exception act.
+
+\subsection{One-step execution template}
+
+A practical one-step implementation is:
+\begin{enumerate}[leftmargin=1.7em,label=\arabic*.]
+\item Update the claim base using the latest observations:
+\[
+C_t \leftarrow \RBP\big(C_{t-1}\cup \Gamma(o_t,\varnothing)\big),
+\qquad
+\mathcal K_t\leftarrow \MCC(C_t).
+\]
+\item Run the strategic planner to obtain current budgets or multipliers $b_t$.
+\item Let the operational controller propose $a_t^{\mathrm{base}}\sim \pi^{O}_{\theta}(\cdot\mid o_t,b_t)$.
+\item For each critical component of $a_t^{\mathrm{base}}$, search for a certificate in $\DCert_i(x_t,C_t,a_i^{\mathrm{base}})$ and compute contradiction mass $\kappa_i(x_t,C_t,a_i^{\mathrm{base}})$.
+\item If a dominant support certificate exists and the contradiction mass is below threshold, set
+\[
+a_t^p\leftarrow a_t^{\mathrm{base}},
+\qquad
+a_t^e\leftarrow \mathsf{certify},
+\qquad
+S_t\leftarrow S^{\star}.
+\]
+\item Otherwise, invoke the gate policy to choose an epistemic exception act, e.g.
+\[
+a_t^e\sim \pi^{E}_{\psi}(\cdot\mid x_t,C_t,a_t^{\mathrm{base}}),
+\]
+and pair it with a safe fallback physical action such as $\mathsf{hold}$, $\mathsf{defer}$, or a no-op.
+\item Execute $(a_t^p,a_t^e)$ in the simulator, update constraint multipliers using the realized physical transition, and log $S_t$ for audit.
+\end{enumerate}
+
+\begin{proposition}[Gate-safety by construction]
+\label{supp:prop:gate-safety}
+Fix a controller of the form described above and suppose the gate $G_{\psi}$ obeys the following rule on every decision epoch:
+\begin{enumerate}[leftmargin=1.6em,label=(\roman*)]
+\item if a proposed critical action $a_i^{\mathrm{base}}\in A_i^{\mathrm{crit}}$ admits some dominant support certificate
+\[
+S\in \DCert_i(x_t,C_t,a_i^{\mathrm{base}})
+\]
+with
+\[
+\kappa_i(x_t,C_t,a_i^{\mathrm{base}})\le \eta_i,
+\]
+then the gate may emit that critical action together with $a_i^e\in \Exc_i(a_i^{\mathrm{base}})$ chosen as $\mathsf{certify}$;
+\item otherwise, the gate must replace the proposed critical action by either
+\begin{enumerate}[leftmargin=1.6em,label=(\alph*)]
+\item a non-critical safe fallback physical action, or
+\item an epistemic exception act paired with a physically safe fallback.
+\end{enumerate}
+\end{enumerate}
+Then every executed joint action is admissible, i.e.
+\[
+\mathcal F(x_t,C_t,a_t)=1
+\]
+for all $t$.
+\end{proposition}
+
+\begin{proof}
+If case (i) holds, admissibility follows directly from Definition~\ref{def:admissibility}: the critical action is supported by a dominant certificate and its contradiction mass is below threshold. If case (ii) holds, the gate does not execute an uncertified critical action. By hypothesis, it instead emits either a non-critical safe fallback or an epistemic exception act paired with such a fallback. Definition~\ref{def:admissibility} only imposes certification-or-exception conditions on critical actions. Hence the executed joint action remains admissible.\qedhere
+\end{proof}
+
+\begin{remark}[What gate-safety does not prove]
+\label{supp:rem:gate-safety-limit}
+Proposition~\ref{supp:prop:gate-safety} is intentionally narrow. It guarantees admissibility by construction, not optimality, minimal intervention, or calibrated escalation behavior. Those stronger properties remain empirical or require additional assumptions.
+\end{remark}
+
+\begin{proposition}[Frozen-solver bundle transfer]
+\label{supp:prop:bundle-transfer}
+Fix the strategic and operational layers of the dominance-gated EcoFair wrapper and let $\pi^{\mathrm{gate}}$ denote the resulting policy. Suppose the gate activates on at most $M_T$ decision epochs, where an activation means either blocking an uncertified critical admit or pairing the executed action with an epistemic exception. Assume each activation contributes at most $\delta_E$ extra idling-emission units and at most $\delta_F$ extra service-disparity units relative to the frozen base action, and contributes at most one unit to intervention spend. Then
+\[
+V_T(\pi^{\mathrm{gate}})=0,
+\qquad
+I_T(\pi^{\mathrm{gate}})\le M_T,
+\]
+\[
+E_T(\pi^{\mathrm{gate}})
+\le
+E_T(\pi^{\mathrm{base}})+\delta_E M_T,
+\qquad
+F_T(\pi^{\mathrm{gate}})
+\le
+F_T(\pi^{\mathrm{base}})+\delta_F M_T.
+\]
+In particular, if $M_T=o(T)$, the gate can enforce zero safety burden while preserving sublinear average intervention, emission, and fairness overhead relative to the frozen base controller.
+\end{proposition}
+
+\begin{proof}
+Zero safety burden follows from Proposition~\ref{supp:prop:gate-safety}: the gate never executes an uncertified critical action. By assumption, each activation contributes at most one unit to intervention spend and bounded overhead $\delta_E,\delta_F$ in the emission and fairness metrics. Summing those bounds over at most $M_T$ activations yields the stated inequalities.
+\end{proof}
+
+
+\begin{proposition}[Frozen-solver transfer to budget overshoot metrics]
+\label{supp:prop:overshoot-transfer}
+Fix budgets $B_E,B_F,B_I\ge 0$ and suppose the dominance-gated wrapper is evaluated with the EcoFair-aligned metrics of Definition~\ref{supp:def:actual-metrics}. Let $\pi^{\mathrm{base}}$ denote the frozen strategic/operational controller and $\pi^{\mathrm{gate}}$ the wrapped controller. If each gate activation increases cumulative extra idling emissions by at most $\bar\epsilon$, increases the chosen disparity statistic by at most $\bar\phi$, and contributes at most one unit to intervention spend, then
+\[
+\mathcal X_T^{E}(\pi^{\mathrm{gate}})
+\le
+\mathcal X_T^{E}(\pi^{\mathrm{base}})+\bar\epsilon M_T,
+\]
+\[
+\mathcal X_T^{F}(\pi^{\mathrm{gate}})
+\le
+\mathcal X_T^{F}(\pi^{\mathrm{base}})+\bar\phi M_T,
+\qquad
+\mathcal X_T^{I}(\pi^{\mathrm{gate}})
+\le
+\mathcal X_T^{I}(\pi^{\mathrm{base}})+ M_T,
+\]
+while still satisfying
+\[
+V_T(\pi^{\mathrm{gate}})=0.
+\]
+Thus, under a frozen solver, moving to the provenance-preserving process semantics can enforce zero safety burden with budget overshoot growing at most linearly in the number of gate activations.
+\end{proposition}
+
+\begin{proof}
+Zero safety burden follows from Proposition~\ref{supp:prop:gate-safety}. Let $\mathcal E_T^{\mathrm{idle}}$ and $\mathcal D_T$ denote the actual benchmark-side emission and disparity metrics. By assumption,
+\[
+\mathcal E_T^{\mathrm{idle}}(\pi^{\mathrm{gate}})
+\le
+\mathcal E_T^{\mathrm{idle}}(\pi^{\mathrm{base}})+\bar\epsilon M_T,
+\qquad
+\mathcal D_T(\pi^{\mathrm{gate}})
+\le
+\mathcal D_T(\pi^{\mathrm{base}})+\bar\phi M_T,
+\]
+and
+\[
+I_T(\pi^{\mathrm{gate}})
+\le
+I_T(\pi^{\mathrm{base}})+M_T.
+\]
+For any scalar $u$ and budget $B$, the map $u\mapsto (u-B)_+$ is $1$-Lipschitz, so
+\[
+\mathcal X_T^{E}(\pi^{\mathrm{gate}})
+=
+(\mathcal E_T^{\mathrm{idle}}(\pi^{\mathrm{gate}})-B_E)_+
+\le
+(\mathcal E_T^{\mathrm{idle}}(\pi^{\mathrm{base}})-B_E)_+ + \bar\epsilon M_T
+=
+\mathcal X_T^{E}(\pi^{\mathrm{base}})+\bar\epsilon M_T,
+\]
+and similarly for $\mathcal X_T^{F}$ and $\mathcal X_T^{I}$.
+\end{proof}
+
+\begin{remark}[Why the transfer result helps the novelty case]
+\label{supp:rem:overshoot-transfer}
+Proposition~\ref{supp:prop:overshoot-transfer} still does not make the gate the contribution. Its role is narrower: it shows that once the solver is frozen, any observed safety gain with controlled budget overshoot can be attributed to the changed process semantics rather than to a larger policy class.
+\end{remark}
+
+\subsection{Training options}
+
+The safest first experiment is staged training.
+\begin{enumerate}[leftmargin=1.7em,label=\arabic*.]
+\item Train or reuse the EcoFair strategic and operational layers on the original reward and constraint structure.
+\item Freeze those layers initially.
+\item Train the gate policy $G_{\psi}$ to minimize contradiction-sensitive regret, violation events, and epistemic intervention cost on top of the frozen base controller.
+\item Only after the gate demonstrates separation on \textsc{Berth-1-Conflict} should joint fine-tuning be attempted.
+\end{enumerate}
+
+This sequencing keeps the empirical story clean. If the provenance-preserving gate beats aggregated-state baselines on the minimal benchmark, the gain can be attributed to the new process semantics rather than to an uncontrolled architecture change.
+
+\subsection{Interpretation of the implementation witness}
+
+The dominance-gated EcoFair wrapper is not itself the paper's novelty. It is only an implementation witness for the new process semantics. That distinction matters. If the wrapper fails while the fixed-solver ablations in Section~\ref{supp:sec:falsification} also fail, then the correct conclusion is that that implementation witness has not isolated process semantics. If the wrapper succeeds but only after major architectural changes, the result is still ambiguous. The cleanest outcome is narrower: a conservative wrapper is enough to expose a difference that already comes from provenance-bearing state and certificate-based feasibility.
+
+\section{Validation roadmap and refinement rule}
+\label{supp:sec:next}
+
+At this stage, no additional controller components or result-like claims are introduced. The next work is to validate, narrow, or stress-test the process-semantics claim under a frozen solver, with the experimental lock in Section~\ref{supp:subsec:prerun-lock} treated as binding. The validation sequence is as follows.
+
+\begin{enumerate}[leftmargin=1.7em,label=\arabic*.]
+\item \textbf{Lock the observation model for the separation theorem.} The separation requires the latent physical cases to share the same controller-visible non-claim context $\chi(x)$ while differing in the provenance-bearing claim base. If the benchmark exposes the hidden berth-readiness variable directly, the theorem no longer tests fragmented truth.
+\item \textbf{Make dominance domain-specific.} Replace the abstract priority map $\pi_L$ with a maritime priority specification covering local authority, operational context, recency, and optional calibrated source trust. This should be declared before replay experiments, not fitted afterward.
+\item \textbf{Run the one-berth fixed-solver ablation first.} Compare provenance-preserving and provenance-erased inputs under the same controller, training budget, policy class, reward, and scenario seeds. Do not scale to the 16-port twin until the one-berth separation is clean.
+\item \textbf{Validate the maritime block key.} The proposed key covers traffic family, weather regime, disruption family, horizon, operating mode, and simulator version. Split any key whose within-block replay diagnostics fail; otherwise the seed-block certificate is too coarse.
+\item \textbf{Certify the metric lifts.} Ground emissions through the twin-native idling constant. Treat service disparity in the following order: direct service proxy first, witness-free min--max second, APD third, and Gini only when the replay-certified denominator distortion is narrow and stable.
+\item \textbf{Stress-test dependence and seed shift.} Report blockwise coverage, the finite-key scenario-mixture radius, and a sensitivity curve over the residual within-key shift parameter. The result should show how much coverage is lost under plausible deployment shift.
+\item \textbf{Keep the solver secondary.} If the gain appears only after changing the controller architecture, learning objective, or policy class, the result is implementation-specific and cannot be used as process-class evidence.
+\end{enumerate}
+
+The refinement rule is simple. The process-class framing is justified where the fixed-solver, provenance-preserving condition separates from the provenance-erased condition on feasibility, regret, or bundle burden. Where it does not separate, the result is reported as a boundary case for OS-CMASP: provenance was present but not operationally active under the declared visible context, dominance order, contradiction burden, and replay distribution. This is still a process-semantics result; it is not a reason to recast the work as a controller add-on.
+
+\section*{Distilled thesis}
+\addcontentsline{toc}{section}{Distilled thesis}
+\label{app:distilled-thesis}
+
+The core thesis is that regulated maritime coordination is not always adequately modeled as constrained control over a fused operational state. In disruption-heavy settings, the action-relevant state can include incompatible claims indexed by observer, situation, authority, freshness, and provenance. \OSCMASP{} makes those claims part of the environment state, makes epistemic repair part of the action space, and makes support certification or escalation part of critical-action feasibility. The central novelty test is solver-independent: erasing observer--situation provenance can force regret, feasibility loss, or budget burden in an active-regime benchmark where an observer-aware policy avoids that burden under the same visible non-claim context and the same solver family. Emission and fairness claims remain secondary unless they are carried by simulator-grounded replay certificates rather than by additional controller machinery.
+
+\bibliographystyle{unsrtnat}
+\bibliography{refs}
+
+\end{document}
