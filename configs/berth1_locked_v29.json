@@ -1,0 +1,18 @@
+{
+  "experiment": "Berth-1-Conflict",
+  "version": "v29",
+  "frozen_solver": "berth1-fixed-solver-v22",
+  "dominance_table": "maritime-dominance-v22",
+  "visible_context_excludes": ["ready", "crane_ok", "eta_on_time", "weather_safe"],
+  "conditions": [
+    "provenance_preserving",
+    "provenance_erased",
+    "random_label_placebo",
+    "labels_without_gating",
+    "oracle_visible_state",
+    "benign_agreement"
+  ],
+  "primary_contrast": "provenance_preserving_vs_provenance_erased",
+  "metrics_primary": ["mean_regret", "safety_violations", "waiting_cost", "intervention_cost", "false_certifications"],
+  "share_outputs": ["*_summary.csv", "*_paired.csv", "*_diagnostics.json", "*.manifest.json", "*_report.md", "*_regret_bar.png"]
+}

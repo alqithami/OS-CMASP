@@ -1,31 +1,18 @@
-PYTHON ?= python
-OUT ?= outputs
-MANIFEST ?= $(OUT)/preflight_manifest.json
-
-.PHONY: setup test preflight replay-template paper clean package
+.PHONY: setup test preflight paper clean
 
 setup:
-	$(PYTHON) -m pip install --upgrade pip
-	$(PYTHON) -m pip install -e .[dev]
+	python -m pip install --upgrade pip
+	python -m pip install -e .[dev]
 
 test:
-	$(PYTHON) -m compileall src tests
-	$(PYTHON) -m unittest discover -s tests -v
+	python -m compileall src scripts
 
 preflight:
-	mkdir -p $(OUT)
-	$(PYTHON) -m os_cmasp.berth1_conflict --mode preflight --manifest $(MANIFEST)
-
-replay-template:
-	$(PYTHON) -m os_cmasp.berth1_conflict --write-template data/templates/berth1_replay_template.csv
+	scripts/run_berth1_preflight.sh
 
 paper:
 	cd manuscript && latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
 
 clean:
-	rm -rf build dist *.egg-info .pytest_cache .ruff_cache outputs
 	cd manuscript && latexmk -C || true
-
-package:
-	mkdir -p dist
-	git archive --format=zip --output=dist/os-cmasp-repo-snapshot.zip HEAD
+	find . -name '__pycache__' -type d -prune -exec rm -rf {} +

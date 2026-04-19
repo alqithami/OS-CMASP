@@ -14,6 +14,9 @@
 \usepackage[nameinlink,noabbrev]{cleveref}
 \usepackage[numbers,sort&compress]{natbib}
 
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
 \hypersetup{
   colorlinks=true,
   linkcolor=blue!45!black,
@@ -67,7 +70,7 @@
 \newtheorem{remark}[definition]{Remark}
 
 \title{Observer--Situation Constrained Multi-Agent Simulation Processes\\[-0.15em]
-\large Control under fragmented truth in regulated maritime coordination}
+\large Control under Fragmented Operational Truth}
 \author{Anonymous Authors}
 \date{April 2026}
 
@@ -76,9 +79,9 @@
 
 
 \begin{abstract}
-Regulated multi-agent logistics problems are usually modeled as constrained control under partial observability: agents estimate a latent operational state, optimize throughput or cost, and enforce safety, emission, or service constraints. This paper develops a different process semantics for socio-technical settings in which the decision-relevant object is not only a hidden state, but a set of incompatible, provenance-bearing claims made by heterogeneous observers under different situations. We define an Observer--Situation Constrained Partially Observable Stochastic Game (\OSCPOSG) and its simulator-coupled subclass, \OSCMASP. In these models the state contains both physical dynamics and a formula-valued observer--situation claim base; epistemic actions such as query, verify, defer, certify, and escalate are first-class actions; and critical physical actions are admissible only when supported by dominance-calibrated, consistency-checked certificates or routed through explicit exception acts.
+Regulated multi-agent logistics is commonly formulated as constrained control under partial observability: agents infer a latent operational state, optimize physical actions, and enforce safety, emission, or service constraints. This paper studies a complementary failure mode in which the operational problem is not merely hidden but \emph{perspectivally fragmented}: incompatible reports about the same fact coexist because they originate from different observers, systems, timestamps, or operating situations. We introduce Observer--Situation Constrained Partially Observable Stochastic Games (\OSCPOSG) and the simulator-coupled subclass \OSCMASP. In these processes, the state contains a physical component and a formula-valued claim base indexed by observer--situation provenance; agents may take physical and epistemic actions; and critical physical actions are admissible only when supported by dominance-calibrated, consistency-checked certificates or routed through explicit exception acts.
 
-The contribution is process-semantic rather than architectural. We prove containment results relating the model to standard constrained partially observable stochastic games, an observer-collapse separation theorem showing that provenance erasure can induce linear regret under identical controller-visible context, a safety-budget corollary, and a certificate-soundness theorem for admissible critical actions. We then specify \textsc{Berth-1-Conflict}, a minimal maritime benchmark and frozen-solver ablation protocol for testing whether provenance-preserving claim semantics separate from provenance-erased alternatives before full maritime-digital-twin scale-up. Emission and fairness translations are treated as secondary, replay-certified validation claims rather than as the primary novelty. The resulting paper is a formal process-class proposal for control under fragmented truth, not a performance claim over a larger controller stack.
+The contribution is process-semantic rather than architectural. We prove containment results, an observer-collapse separation theorem showing that provenance erasure can induce linear regret under identical controller-visible context, a safety-budget separation corollary, and a certificate-soundness theorem for admissible critical actions. We then define \textsc{Berth-1-Conflict}, a minimal maritime benchmark and frozen-solver ablation protocol for testing whether provenance-preserving claim semantics separate from provenance-erased alternatives before full maritime-digital-twin scale-up. Emission and fairness translations are treated as secondary replay-certified validation claims. The resulting manuscript is a formal process-class proposal for control under fragmented operational truth, not a performance claim over a larger controller stack.
 \end{abstract}
 
 \noindent\textbf{Keywords:} multi-agent reinforcement learning; constrained stochastic games; simulator-coupled decision processes; epistemic action; truth maintenance; maritime logistics; fairness constraints; provenance-aware control.
@@ -89,27 +92,35 @@ The contribution is process-semantic rather than architectural. We prove contain
 
 \paragraph{Evidence status.} The current paper is a theory-and-protocol manuscript. It intentionally contains no local performance claims. Numerical evidence enters only after the visible-context map, dominance order, replay schema, condition set, and paired-seed protocol are locked.
 
+
 \section{Introduction}
 \label{sec:introduction}
 
-Maritime logistics is a natural stress test for multi-agent control. Vessels, trucks, cranes, yards, weather feeds, maintenance systems, and human operators interact under time pressure; actions affect emissions, safety, service delay, and equity across heterogeneous participants. The standard modeling move is to regard such systems as constrained partially observed control problems: agents receive noisy observations of a latent operational state and optimize actions subject to feasibility, budget, or safety constraints. This move is powerful, and it connects directly to stochastic games \citep{Shapley1953,Littman1994}, decentralized partially observable control \citep{Bernstein2002,OliehoekAmato2016}, constrained MDPs \citep{Altman1999}, and modern constrained or safe reinforcement learning \citep{Achiam2017,GarciaFernandez2015,Chow2018}.
+Maritime coordination is usually written as a problem of constrained control under partial observability. A controller observes imperfect signals about berth status, vessel arrival, crane availability, weather, yard capacity, emissions exposure, and service delay, and then chooses physical actions subject to feasibility and budget constraints. This view connects cleanly to stochastic games \citep{Shapley1953,Littman1994}, decentralized partially observable control \citep{Bernstein2002,OliehoekAmato2016}, common-information control \citep{Nayyar2013}, constrained MDPs \citep{Altman1999}, and safe reinforcement learning \citep{GarciaFernandez2015,Achiam2017,Alshiekh2018}. It is also the natural language of many recent MARL systems for logistics and sustainability.
 
-However, real port operations also exhibit a different failure mode. The issue is often not simply that the state is hidden. It is that the organization temporarily contains multiple incompatible but provenance-bearing descriptions of the same operational fact: an AIS-derived ETA conflicts with a pilot report; a berth-management system reports readiness while a crane-maintenance feed marks the same berth unavailable; a weather alert invalidates a planned emissions-feasible routing decision; or a human override contradicts an automated recommendation. Collapsing these reports into a single denoised estimate can erase the very information required to decide whether to act, verify, defer, or escalate.
+This paper studies a different failure mode. In port operations the difficulty is often not only that the state is hidden, but that the organization temporarily contains several incompatible descriptions of the same operational fact. An AIS forecast may predict on-time arrival while a pilot report contradicts it; a berth-management system may say that a berth is ready while a crane-maintenance feed says the berth is not operational; a regional weather source may clear a plan that a local sensor or human dispatcher rejects; or a strategic schedule may remain visible after a local operator has already overridden it. These are not merely independent noisy observations of a latent variable. They are provenance-bearing claims whose source, situation, freshness, and authority can determine whether an action is admissible.
 
-This paper proposes a process semantics for that regime. We call the model an Observer--Situation Constrained Multi-Agent Simulation Process (\OSCMASP). Its core move is to put \emph{fragmented truth} into the state: the environment state contains a physical component and a claim base indexed by observer--situation locations. A claim is not merely a feature value; it is a record of what was asserted, by whom or by which information source, under which situation, with what timestamp and provenance. Contradictions between comparable observer--situation records become first-class objects. The system can take physical actions, but it can also take epistemic actions such as query, verify, certify, defer, and escalate. A critical physical action is admissible only if its preconditions are supported by a consistency-checked certificate whose relevant claims are not defeated by the pre-registered dominance scheme, or if the action is routed through an explicit exception act.
+A standard response is to fuse the reports into a posterior estimate. That response is appropriate when the only decision-relevant object is the latent physical state. It is not appropriate when the unresolved contradiction itself changes the feasible action set. For example, admitting a vessel under unresolved berth-readiness conflict may be unsafe; holding a vessel under a resolved but provenance-erased conflict may be unnecessarily costly; and escalating to a human dispatcher may be required precisely because a critical precondition lacks dominant support. In such cases the controller needs not only a belief about the world, but a representation of which claims support the action and which undefeated claims block it.
 
-This is deliberately not a new controller stack. Multi-agent reinforcement learning already has rich algorithmic machinery: actor--critic methods \citep{Lowe2017,Foerster2018COMA}, value-factorization methods \citep{Sunehag2018VDN,Rashid2018QMIX}, common-knowledge policies \citep{SchroederdeWitt2019MACKRL}, and constrained hierarchical CH-MARL variants for sustainability and fairness \citep{Alqithami2025CHMARL,Alqithami2026EcoFair}. The present contribution is prior to solver choice: it asks whether the process observed by any solver should be a single latent state with noisy observations, or a physical state plus an explicit contradiction-bearing claim base.
+The research question is therefore:
+\begin{quote}
+\emph{Can constrained multi-agent control be formulated so that observer--situation provenance and unresolved contradictions are first-class state and feasibility objects, rather than metadata attached after a fused-state controller has already acted?}
+\end{quote}
 
-\paragraph{Contributions.} This paper makes four contributions.
+We answer by defining Observer--Situation Constrained Partially Observable Stochastic Games (\OSCPOSG) and the simulator-coupled subclass Observer--Situation Constrained Multi-Agent Simulation Processes (\OSCMASP). The process state contains a physical component and a formula-valued claim base indexed by observer--situation provenance. Agents may take physical actions and epistemic actions such as query, verify, certify, defer, or escalate. Critical physical actions are admissible only when supported by a dominance-calibrated, consistency-checked certificate over the claim base, or when routed through an explicit exception act. Thus provenance is not an explanation attached to a policy; it is part of the process semantics that determines which actions are feasible.
+
+This positioning matters because much nearby work already covers pieces of the space. Dec-POMDPs and POSGs already handle hidden state and local observations. Common-information methods and recent information-sharing MARL already study what can be learned when agents communicate or share histories. Epistemic planning already reasons about knowledge-changing actions. Truth-maintenance and belief-revision systems already maintain consistency under changing assumptions. Data-fusion and provenance systems already reason about conflicting sources. Safe RL and shielding already restrict unsafe actions. \OSCMASP{} is not presented as a replacement for those lines. Its narrower claim is that none of these, by itself, treats observer--situation-indexed contradiction components as simultaneous state variables, action-precondition objects, and audit certificates inside a constrained simulator-coupled stochastic game.
+
+\paragraph{Contributions.} The paper makes five contributions.
 \begin{enumerate}[leftmargin=1.6em]
   \item It defines \OSCPOSG{} and \OSCMASP, process classes in which formula-valued observer--situation claims, proposition-family dominance, contradiction components, epistemic repair actions, and certification-based admissibility are part of the formal model.
+  \item It states an anti-stacking boundary: the contribution is not a new high-level controller, belief module, LLM wrapper, or explanation interface. It is a change in process semantics; solver choice is intentionally secondary.
   \item It proves an observer-collapse separation theorem: for a family of finite-horizon problems with identical controller-visible context and identical aggregated claim content, any policy invariant to observer--situation provenance suffers linear regret, while an observer-aware policy achieves zero regret. A safety-budget corollary shows that provenance erasure can also force a constraint tradeoff.
-  \item It gives a certification soundness theorem connecting action explanations to satisfiable support sets over observer--situation claims.
-  \item It specifies Berth-1-Conflict, a minimal maritime benchmark and ablation protocol designed to test process semantics under a frozen solver, before scaling to a larger maritime digital twin.
+  \item It proves certificate soundness for admissible critical actions: when an action is certified by a dominant, consistency-checked support set, the emitted explanation is a satisfiable witness for the action preconditions.
+  \item It specifies \textsc{Berth-1-Conflict}, a minimal maritime benchmark and fixed-solver ablation protocol that tests whether provenance-preserving process semantics separate from provenance-erased alternatives before scaling to a full maritime digital twin.
 \end{enumerate}
 
-\paragraph{Scope.} The paper does not claim that observer--situation semantics always improve performance, nor that every port-planning problem requires this formalism. The claim is conditional and falsifiable: when the correctness or admissibility of a critical action depends on provenance-bearing contradictions, provenance erasure can change the attainable control problem even if the solver is held fixed.
-
+\paragraph{Scope.} The paper does not claim that every port-planning instance requires observer--situation semantics. If provenance never changes admissibility, certificates, exception requirements, or feasible value, then the active OS-CMASP regime is absent and a fused-state model may be sufficient. The validation protocol is therefore designed to identify where the semantics are operationally active, not to assert universal superiority.
 
 \section{Claim hierarchy and non-stacking scope}
 \label{sec:claim-hierarchy}
@@ -143,51 +154,96 @@ An \OSCMASP{} instance is \emph{provenance-active} for a policy class $\Pi$ and 
 
 This definition clarifies the active empirical regime. The maritime twin should be used to identify where provenance is operationally active, not to argue that every scenario requires the full observer--situation semantics.
 
+
 \section{Related work and precise delta}
 \label{sec:related}
 
-\subsection{Decentralized stochastic control and common information}
+The main paper has to clear a high bar: many neighboring literatures already represent partial information, communication, knowledge, belief revision, source reliability, or safety constraints. The delta of \OSCMASP{} is therefore stated negatively and constructively. Negatively, the paper does not claim novelty for merely adding beliefs, communication, explanations, or safety filters to CH-MARL. Constructively, it introduces a process semantics in which unresolved observer--situation contradictions directly affect state, admissibility, regret, and auditability.
 
-Stochastic games provide the classical basis for multi-agent decision-making under uncertainty \citep{Shapley1953,Littman1994}; MDPs and POMDPs provide the single-agent foundations for stochastic control under full or partial state information \citep{Puterman1994,Kaelbling1998}. Dec-POMDPs and related decentralized control models formalize cooperative decision-making under partial observability, and exact finite-horizon solution is NEXP-hard even for small teams \citep{Bernstein2002,OliehoekAmato2016}. Common-information approaches identify shared histories or public information that can coordinate decentralized decision-making \citep{Nayyar2013}. These models motivate the present work, but they usually treat information as observations or histories over a single underlying state. \OSCMASP{} instead preserves a structured claim base in which mutually incompatible reports may coexist until resolved or certified.
+\subsection{POSGs, Dec-POMDPs, and information structure}
 
-\subsection{Constrained and safe reinforcement learning}
+Stochastic games and POSGs model sequential multi-agent decision-making under uncertainty \citep{Shapley1953,Littman1994}. Dec-POMDPs formalize cooperative decentralized control under partial observability and are computationally hard even in finite-horizon settings \citep{Bernstein2002,OliehoekAmato2016}. Common-information formulations show how shared histories can transform decentralized problems into coordinator-style belief problems \citep{Nayyar2013}. Recent provable MARL work studies information sharing in POSGs and approximate common information as a route to tractability \citep{LiuZhang2023InfoSharing}.
 
-Constrained MDP theory studies optimal control subject to cumulative cost constraints \citep{Altman1999}. Constrained and safe RL extend this perspective to learned policies and approximate optimization \citep{Achiam2017,GarciaFernandez2015,Chow2018}. EcoFair-CH-MARL applies this family of ideas to sustainability- and fairness-constrained multi-agent coordination, using a hierarchical controller, primal--dual budget updates, and fairness-aware rewards \citep{Alqithami2026EcoFair}. \OSCMASP{} is complementary. It does not replace budget constraints; it adds a different source of admissibility: critical actions may require provenance-aware support certificates or exception acts when the claim base contains relevant contradictions.
+These models are directly relevant, but their ordinary object is a hidden state plus observations or shared histories. \OSCMASP{} can be viewed as changing the information structure itself: the state includes a claim base whose observer--situation labels cannot always be collapsed into a sufficient statistic without changing admissibility. The observer-collapse theorem is meant to isolate this point. It is not a claim that Dec-POMDPs cannot encode provenance in principle; any finite object can be appended to a state. The claim is that, once provenance-bearing contradiction is decision-relevant, it should be part of the process definition and benchmark contract rather than an informal feature added to a fused-state controller.
 
-\subsection{Multi-agent RL algorithms}
+\subsection{Constrained RL, safe RL, and shielding}
 
-Modern MARL offers many solver families, including centralized-training/decentralized-execution actor--critic methods \citep{Lowe2017,Foerster2018COMA}, value decomposition and monotonic factorization \citep{Sunehag2018VDN,Rashid2018QMIX}, and common-knowledge coordination policies \citep{SchroederdeWitt2019MACKRL}. These methods are important baselines for implementation, but they are not the target contribution here. The proposed ablation protocol holds the solver fixed and changes only the claim-state semantics. This design is intended to distinguish process-class novelty from architecture stacking.
+Constrained MDPs provide the classical basis for cumulative budget constraints \citep{Altman1999}. Safe RL and constrained policy optimization study how to optimize reward while limiting unsafe or budget-violating behavior \citep{GarciaFernandez2015,Achiam2017,Chow2018}. Shielding methods synthesize monitors that prevent or correct unsafe actions according to formal specifications \citep{Alshiekh2018,Carr2023ShieldingPOMDP}. EcoFair-CH-MARL uses related ideas in a maritime CH-MARL setting, with emissions budgets, fairness penalties, and a hierarchical controller \citep{Alqithami2025CHMARL,Alqithami2026EcoFair}.
 
-\subsection{Epistemic reasoning, truth maintenance, and perspective-aware cognition}
+The distinction is that \OSCMASP{} does not add another safety layer above the policy. It changes what the shield or admissibility relation is allowed to inspect. A standard shield typically asks whether an action violates a state/property specification. In \OSCMASP, a critical action may be blocked because the support for its preconditions is defeated by a fresher, more authoritative, or situation-specific contrary claim. This makes the certificate and exception mechanism provenance-sensitive, not merely state-sensitive.
 
-Epistemic logic and common knowledge provide formal accounts of what agents know, what they know about each other's knowledge, and how information updates change epistemic states \citep{Fagin1995,HalpernMoses1990,vanDitmarsch2007,Baltag1998}. Interactive POMDPs incorporate models of other agents into sequential planning under uncertainty \citep{GmytrasiewiczDoshi2005}. Multi-agent epistemic planning studies action planning over epistemic states \citep{LiuLiu2018MEP}. Truth-maintenance and belief-revision systems study how to maintain consistency under changing or contradictory assertions \citep{Doyle1979,deKleer1986,AGM1985}. Situation calculus provides a logical basis for reasoning about actions and changing worlds \citep{Reiter2001}.
+\subsection{MARL solver families}
 
-The Observer--Situation Lattice (OSL) is especially relevant because it gives a finite complete lattice over observer--situation pairs, with Relativized Belief Propagation and Minimal Contradiction Decomposition \citep{Alqithami2026OSL}. \OSCMASP{} uses that semantic idea as part of a stochastic control process: observer--situation records are not only beliefs or explanations; they constrain which physical actions are admissible and which epistemic actions are needed.
+Modern cooperative MARL includes centralized-training/decentralized-execution actor--critic methods \citep{Lowe2017,Foerster2018COMA}, value-decomposition methods \citep{Sunehag2018VDN,Rashid2018QMIX}, and common-knowledge coordination policies \citep{SchroederdeWitt2019MACKRL}. These are solver families. They are important for later implementations, but they are not the novelty target. The benchmark protocol therefore freezes the solver and varies only claim-state semantics. If provenance-preserving and provenance-erased variants do not separate under the frozen solver and paired scenario bank, the process-semantics claim is not supported by that benchmark, regardless of whether a stronger architecture could be made to perform well.
 
-\subsection{Simulator-coupled and logistics models}
+\subsection{Epistemic logic, epistemic planning, and interactive beliefs}
 
-Simulator-coupled decision processes are increasingly important in regulated domains where dynamics are mediated by domain engines rather than closed-form transition kernels. R-CMASP is the closest process-level neighbor: it adds simulator-coupled transitions, structured roles, typed communication, and normative feasibility to multi-agent decision-making \citep{Dong2025RCMASP}. The distinction is that \OSCMASP{} makes fragmented truth explicit in the state and in action admissibility.
+Epistemic logic, dynamic epistemic logic, and common knowledge formalize how agents reason about knowledge and belief \citep{Fagin1995,HalpernMoses1990,vanDitmarsch2007,Baltag1998}. Epistemic planning uses knowledge-changing actions and event models to plan in multi-agent informational domains \citep{BolanderAndersen2011,Bolander2017Gentle,LiuLiu2018MEP,Liberman2020TermModal}. Interactive POMDPs model other agents inside sequential decision-making \citep{GmytrasiewiczDoshi2005}. These lines are conceptually close because they treat information as part of agency rather than a post-hoc explanation.
 
-In logistics and maritime operations, operations-research models have long studied terminals, cargo routing, and empty-container repositioning \citep{Steenken2004,SongDong2012}. MARL has also been applied to resource balancing in complex logistics networks \citep{Li2019LogisticsMARL} and to reinforcement-learning approaches for empty-container repositioning \citep{Xu2024ECRRL}. These works motivate the maritime benchmark but do not address the observer--situation provenance issue directly.
+The difference is operational coupling. \OSCMASP{} is not primarily about nested beliefs or epistemic goals. It is about regulated stochastic control where epistemic actions compete with physical actions under waiting costs, emissions proxies, safety constraints, and simulator-mediated dynamics. A query, certification, or escalation act matters because it changes which physical actions are admissible and which costs are incurred. The framework therefore combines epistemic support with constrained control rather than replacing control with epistemic planning.
 
-\begin{table}[t]
+\subsection{Truth maintenance, belief revision, and non-monotonic support}
+
+Truth-maintenance systems track the reasons for beliefs and update belief sets when assumptions change \citep{Doyle1979,deKleer1986,McAllester1990TMS}. AGM belief revision provides axioms for theory change under new information \citep{AGM1985}. Abstract argumentation studies attack and acceptability relations among arguments \citep{Dung1995Argumentation}. These literatures are essential background for the contradiction and dominance components of the model.
+
+\OSCMASP{} differs by making contradiction components control-relevant. Minimal contradiction decomposition, dominance, and consistency checks are not only used to maintain a coherent belief base. They enter the feasibility relation for critical physical actions and the regret analysis for provenance erasure. In that sense the claim base is not a passive knowledge store; it is part of the stochastic game's state and action-precondition semantics.
+
+\subsection{Provenance, trust, and multi-source data fusion}
+
+Database and workflow provenance record where data came from and how derived facts were produced \citep{Buneman2001Provenance,Cheney2009Provenance,Moreau2013PROV}. Multi-source information fusion studies how to combine information from heterogeneous, possibly conflicting sources, including source reliability and conflict resolution \citep{HallLlinas1997Fusion,Li2024MSIF,DongNaumann2009DataFusion}. Evidence-theoretic and subjective-logic approaches also provide tools for representing uncertainty and source trust \citep{Dempster1967,Shafer1976,Josang2016SubjectiveLogic}.
+
+The usual fusion objective is to infer or select a best estimate of the world. \OSCMASP{} instead preserves conflict when conflict is itself decision-relevant. A controller may need to hold, verify, or escalate not because the posterior probability is low, but because the dominant support certificate is absent or defeated. This is why the benchmark includes a provenance-erased condition: if fusion or aggregation is sufficient, erasure should not harm admissible performance in the paired setting.
+
+\subsection{Simulator-coupled processes and maritime logistics}
+
+R-CMASP is the closest process-level neighbor because it treats simulator coupling, structured roles, typed communication, and normative feasibility as part of a multi-agent decision process \citep{Dong2025RCMASP}. \OSCMASP{} extends that style of modeling in a different direction: the simulator-coupled process also carries a formula-valued claim base, dominance scheme, contradiction components, and certificate-based admissibility.
+
+Maritime and logistics research provides the application substrate. Container terminal operations and empty-container repositioning have a long OR literature \citep{Steenken2004,SongDong2012}; MARL has been used for resource balancing in logistics networks \citep{Li2019LogisticsMARL}; and recent reinforcement-learning work studies empty-container repositioning \citep{Xu2024ECRRL}. These papers motivate the operational costs and constraints, but they do not make observer--situation provenance an action-feasibility object.
+
+\begin{table}[H]
 \centering
-\caption{Positioning of \OSCMASP{} relative to nearby model classes.}
-\label{tab:delta}
-\begin{tabularx}{\textwidth}{@{}p{0.23\textwidth}p{0.30\textwidth}X@{}}
+\caption{Existing mechanisms already cover many pieces of the problem. The OS-CMASP delta is not any single ingredient; it is the process-level coupling of provenance-bearing claim state, contradiction-aware admissibility, epistemic exception actions, and fixed-solver semantic ablation.}
+\label{tab:related-delta-expanded}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{0.24\textwidth}L{0.35\textwidth}X@{}}
 \toprule
-Model family & Primary object & Difference in \OSCMASP{} \\
+Existing line & What it already handles & OS-CMASP delta \\
 \midrule
-Dec-POMDP / POSG & Hidden state, local observations, decentralized policies & Keeps incompatible provenance-bearing claim records in state rather than only hidden-state beliefs. \\
-Constrained RL / CH-MARL & Cumulative budgets, primal--dual updates, safe/fair rewards & Adds certification and epistemic exception acts as admissibility conditions for critical actions. \\
-Epistemic planning / I-POMDP & Knowledge, belief, and models of other agents & Embeds observer--situation semantics inside a constrained stochastic control process. \\
-Truth maintenance / belief revision & Consistency maintenance under changing assertions & Couples contradiction components to action feasibility and regret. \\
-Simulator-coupled MAS & Domain simulator plus organizational rules & Adds fragmented-truth state semantics and contradiction-aware certification. \\
+POSG / Dec-POMDP / common information & Hidden state, local observations, histories, information sharing, and shared-information reductions. & The claim base is part of state; observer--situation provenance is not silently fused away, and erasure is a formal ablation. \\
+Constrained RL / shielding & Budgeted control, formal safety guards, and unsafe-action blocking. & Critical actions need dominant support certificates or explicit exception acts; the guard is provenance-sensitive. \\
+Epistemic planning / I-POMDP & Knowledge-changing actions, nested beliefs, and models of other agents. & Epistemic actions are embedded in simulator-coupled constrained stochastic control with operational costs. \\
+Truth maintenance / belief revision & Consistency maintenance, assumption tracking, and theory change. & Contradiction components affect physical-action admissibility, regret, and audit certificates. \\
+Data fusion / provenance / trust & Source identity, reliability, evidence combination, and conflict resolution. & Conflict may be preserved because the unresolved conflict itself can require holding, verification, or escalation. \\
+Maritime OR / logistics RL & Routing, capacity, repositioning, emissions proxies, and service metrics. & The maritime benchmark tests whether information conflict is an active process variable rather than ordinary noise. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
+\paragraph{Precise novelty statement.} The novelty claim is not that observer labels, epistemic actions, provenance, or safety constraints are individually new. The claim is that their combination defines a distinct process semantics: a constrained simulator-coupled stochastic game whose state contains observer--situation-indexed formulas, whose critical actions require dominant consistency certificates or exception acts, and whose benchmark tests that semantics under a frozen solver.
 
+\section{Running example: berth-readiness under conflicting provenance}
+\label{sec:running-example}
+
+Consider a vessel approaching a berth. The physical question is simple: should the system admit the vessel now or hold it? The informational situation is not simple. A berth-management system may report \emph{ready}; a crane-maintenance feed may report \emph{not ready}; an AIS-derived ETA forecast may be fresh but indirect; and a human harbor master may issue a later confirmation. A fused-state controller can aggregate these reports into one readiness probability. That may be sufficient when reports are merely noisy. It is insufficient when the policy must also know which report is authoritative for admission, which contradictions are unresolved, and whether a high-impact action is admissible without verification.
+
+\begin{table}[H]
+\centering
+\caption{Illustrative claim base for a single berth-admission decision. The point is not the specific ranking; the point is that the ranking must be pre-registered and visible to the process.}
+\label{tab:running-example}
+\small
+\begin{tabularx}{\textwidth}{@{}L{0.24\textwidth}L{0.17\textwidth}L{0.14\textwidth}Y@{}}
+\toprule
+Source / observer & Situation & Formula & Control relevance \\
+\midrule
+Berth operating system & nominal window & $ready(b)$ & Supports \texttt{admit}, but can be defeated by higher-priority local maintenance evidence. \\
+Crane maintenance feed & crane outage & $\neg ready(b)$ & Defeats readiness for safety-critical admission when within the freshness window. \\
+AIS ETA service & vessel approach & $arrives\_soon(v)$ & Affects service cost and emissions from holding, but does not by itself certify berth readiness. \\
+Harbor master & local confirmation & $ready(b)$ & May dominate automated reports under the pre-registered maritime dominance scheme. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+In \OSCMASP{}, the admission decision is not based only on whether $ready(b)$ has high posterior probability. It also depends on whether the support set for $ready(b)$ is undefeated under the dominance scheme, whether contradictory relevant claims remain active, and whether the action is critical enough to require certification or escalation. This running example is used throughout the paper: the minimal benchmark in \cref{sec:benchmark} is the smallest stochastic game that preserves this structure while stripping away full-port complexity.
 
 \section{Notation and modeling commitments}
 \label{sec:notation}
@@ -216,6 +272,24 @@ $\Agg(C)$ & Aggregation that erases observer--situation labels and provenance; u
 \end{table}
 
 Two modeling commitments are fixed before benchmark execution. First, $\chi$ must exclude the hidden truth variable that the theorem is intended to protect. Second, $\mathcal D$ must be declared before training or replay, so that authority, freshness, and source priority cannot be tuned after outcomes are observed.
+
+\begin{table}[H]
+\centering
+\caption{Semantic roles separated by the model. This table is intended as a reader check against accidental reversion to a fused-state interpretation.}
+\label{tab:semantic-roles}
+\small
+\begin{tabularx}{\textwidth}{@{}L{0.18\textwidth}L{0.25\textwidth}Y@{}}
+\toprule
+Role & Object & Why it is separated \\
+\midrule
+Physical dynamics & $x_t$ and $P$ & Encodes how the port or simulator evolves under physical and epistemic actions. \\
+Visible context & $\chi(x_t)$ & Encodes what the controller may observe without leaking the theorem's hidden readiness truth. \\
+Operational claims & $C_t$ & Preserves incompatible reports, timestamps, credibility, and provenance until they are resolved or bypassed. \\
+Defeat / priority & $\mathcal D$ & Specifies which claims can dominate others within a proposition family before outcomes are known. \\
+Admissibility & $\mathcal F$ & Converts unresolved contradiction and certificate failure into action infeasibility or required exception acts. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Observer--Situation Constrained Process Model}
 \label{sec:model}
@@ -500,6 +574,27 @@ By definition of dominant support certificate, $\Cons(\Th_{\lambda_i(x_t)}(S))=1
 The theorem is intentionally modest. It establishes that a certificate is internally satisfiable, undefeated under the fixed dominance scheme, and supportive of the stated preconditions. It does not establish that the physical world truly satisfies those preconditions. That stronger claim requires assumptions about sensor fidelity, authority calibration, and simulator validity.
 \end{remark}
 
+\subsection{What the theorems do and do not establish}
+
+\Cref{tab:theory-status} summarizes the role of each theorem. This table is included to keep the manuscript reviewer-facing: the formal results are designed to establish process-class separation and certificate soundness, not empirical superiority.
+
+\begin{table}[H]
+\centering
+\caption{Theory status and validation responsibility.}
+\label{tab:theory-status}
+\small
+\begin{tabularx}{\textwidth}{@{}L{0.23\textwidth}YY@{}}
+\toprule
+Result & Established by the manuscript & Left to validation or deployment calibration \\
+\midrule
+Containment & \OSCPOSG{} specializes to standard constrained POSG/Dec-POMDP variants when claim semantics are removed. & Whether a particular maritime twin needs the richer state. \\
+Observer-collapse separation & There exist controlled cases where provenance erasure causes linear regret under identical visible context. & Frequency and operational importance of such cases in real replay. \\
+Safety-budget separation & Provenance erasure can force a safety--service tradeoff that observer-aware semantics avoid. & Magnitude of safety, emissions, and service burdens under the twin's metric definitions. \\
+Certificate soundness & Certified support sets are internally satisfiable and entail action preconditions. & Whether the underlying sensors, authority hierarchy, and simulator are externally valid. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \section{Minimal benchmark: Berth-1-Conflict}
 \label{sec:benchmark}
 
@@ -549,7 +644,7 @@ A professional validation plan should separate three layers.
 \centering
 \caption{Experimental lock items. These are fixed before local experiments.}
 \label{tab:prerun}
-\begin{tabularx}{\textwidth}{@{}p{0.25\textwidth}X@{}}
+\begin{tabularx}{\textwidth}{@{}L{0.34\textwidth}Y@{}}
 \toprule
 Item & Required lock \\
 \midrule
@@ -574,12 +669,32 @@ The dominance-gated EcoFair-style wrapper is an implementation witness, not the 
 \section{Limitations and threats to validity}
 \label{sec:limitations}
 
-First, the separation theorem is deliberately minimal. It proves that observer--situation provenance can be necessary, not that large maritime systems always exhibit the same separation. Second, dominance orders are domain artifacts. If authority or freshness rules are tuned after observing benchmark outcomes, the experiment becomes invalid. Third, certification soundness is logical soundness, not empirical truth. Physical validity still depends on calibrated sensors, reliable human authority, and simulator fidelity. Fourth, fairness and emissions translations are secondary and require replay calibration; they are not treated as primary theory claims. Fifth, OSL, EcoFair-CH-MARL, and R-CMASP are contemporary preprints rather than mature peer-reviewed baselines; they are therefore positioned as immediate technical neighbors while relying on established stochastic-control, epistemic-logic, and MARL literature for the broader scholarly spine.
+First, the separation theorem is deliberately minimal. It proves that observer--situation provenance can be necessary, not that large maritime systems always exhibit the same separation. Second, dominance orders are domain artifacts. If authority or freshness rules are tuned after observing benchmark outcomes, the experiment becomes invalid. Third, certification soundness is logical soundness, not empirical truth. Physical validity still depends on calibrated sensors, reliable human authority, and simulator fidelity. Fourth, fairness and emissions translations are secondary and require replay calibration; they are not treated as primary theory claims. Fifth, OSL, EcoFair-CH-MARL, and R-CMASP are contemporary preprints rather than mature peer-reviewed baselines; they are therefore positioned as immediate technical neighbors while relying on established stochastic-control, epistemic-logic, provenance, and MARL literature for the broader scholarly spine.
+
+\begin{table}[H]
+\centering
+\caption{Main threats to validity and protocol controls.}
+\label{tab:threats}
+\small
+\begin{tabularx}{\textwidth}{@{}L{0.34\textwidth}Y@{}}
+\toprule
+Threat & Control \\
+\midrule
+Hidden truth leaks through ordinary features & Lock $\chi_{B1}$; run a leakage test on the provenance-erased condition. \\
+Dominance order is outcome-tuned & Register $\mathcal D$, freshness windows, and tie rules before replay. \\
+Solver improvement is mistaken for semantics & Freeze solver, seeds, action costs, and latent episode bank. \\
+Fairness lift overclaims beyond replay support & Certify only positive replay coefficients; otherwise report as diagnostics. \\
+Minimal benchmark lacks ecological validity & Use only as an active-regime screen before maritime-twin replay. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-\OSCMASP{} proposes a process-level account of regulated multi-agent coordination under fragmented truth. Its novelty is not a new hierarchy, belief layer, or LLM wrapper. It is the decision-theoretic status of observer--situation provenance: when contradictions are action-relevant, erasing provenance can alter regret and feasibility even under a frozen solver. The next empirical step is a locked, paired, solver-isolated \textsc{Berth-1-Conflict} run, followed by maritime-twin replay only if the minimal separation appears under the pre-registered conditions.
+\OSCMASP{} proposes a process-level account of regulated multi-agent coordination under fragmented operational truth. Its novelty is not a new hierarchy, belief layer, or LLM wrapper. It is the decision-theoretic status of observer--situation provenance: when contradictions are action-relevant, erasing provenance can alter regret and feasibility even under a frozen solver. The formal results establish that provenance can be part of the control problem rather than only part of an explanation layer.
+
+The next empirical step is a locked, paired, solver-isolated \textsc{Berth-1-Conflict} run, followed by maritime-twin replay only if the minimal separation appears under the pre-registered conditions. If the separation does not appear, the response should not be to add controller depth; it should be to identify the narrower operational regime in which observer--situation provenance is active.
 
 
 \appendix
