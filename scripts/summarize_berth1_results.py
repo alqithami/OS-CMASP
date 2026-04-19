@@ -1,60 +1,50 @@
 #!/usr/bin/env python3
-"""Create a small shareable Markdown report from Berth-1 output files."""
 from __future__ import annotations
-import csv, json, sys
+import csv
+import json
+import sys
 from pathlib import Path
 
-if len(sys.argv) != 2:
-    raise SystemExit("Usage: scripts/summarize_berth1_results.py OUT_PREFIX")
 
-prefix = Path(sys.argv[1])
-summary_path = Path(str(prefix) + "_summary.csv")
-paired_path = Path(str(prefix) + "_paired.csv")
-diag_path = Path(str(prefix) + "_diagnostics.json")
-report_path = Path(str(prefix) + "_report.md")
-for p in (summary_path, paired_path, diag_path):
-    if not p.exists():
-        raise SystemExit(f"Missing required file: {p}")
-
-def read_csv(path):
+def read_csv(path: Path):
     with path.open(newline="") as f:
         return list(csv.DictReader(f))
-summary = read_csv(summary_path)
-paired = read_csv(paired_path)
-with diag_path.open() as f:
-    diagnostics = json.load(f)
 
-lines = []
-lines.append(f"# Berth-1-Conflict Report: `{prefix}`")
-lines.append("")
-lines.append("## Summary by condition")
-lines.append("")
-lines.append("| condition | n | mean_regret | safety_violations | waiting_cost | intervention_cost | false_certifications |")
-lines.append("|---|---:|---:|---:|---:|---:|---:|")
-for r in summary:
-    lines.append("| {condition} | {n} | {mean_regret} | {safety_violations} | {waiting_cost} | {intervention_cost} | {false_certifications} |".format(**r))
-lines.append("")
-lines.append("## Paired deltas vs provenance_preserving")
-lines.append("")
-lines.append("| condition | metric | mean_delta | ci95_low | ci95_high |")
-lines.append("|---|---|---:|---:|---:|")
-for r in paired:
-    lines.append("| {condition} | {metric} | {mean_delta_vs_provenance_preserving} | {ci95_low} | {ci95_high} |".format(**r))
-lines.append("")
-lines.append("## Diagnostics")
-lines.append("")
-checks = diagnostics.get("diagnostics", diagnostics).get("checks", {})
-if checks:
+
+def main() -> None:
+    if len(sys.argv) != 2:
+        raise SystemExit("usage: summarize_berth1_results.py output_prefix")
+    prefix = Path(sys.argv[1])
+    summary_path = Path(str(prefix) + "_summary.csv")
+    paired_path = Path(str(prefix) + "_paired.csv")
+    diag_path = Path(str(prefix) + "_diagnostics.json")
+    out_path = Path(str(prefix) + "_report.md")
+    summary = read_csv(summary_path)
+    paired = read_csv(paired_path)
+    diagnostics = json.loads(diag_path.read_text()).get("diagnostics", {})
+
+    lines = [f"# Berth-1-Conflict Report: `{prefix}`", "", "## Summary by condition", ""]
+    cols = ["condition", "n", "mean_regret", "safety_violations", "waiting_cost", "intervention_cost", "false_certifications"]
+    lines.append("| " + " | ".join(cols) + " |")
+    lines.append("|" + "---|" * len(cols))
+    for row in summary:
+        lines.append("| " + " | ".join(str(row.get(c, "")) for c in cols) + " |")
+    lines += ["", "## Paired deltas vs provenance_preserving", ""]
+    pcols = ["condition", "metric", "mean_delta_vs_provenance_preserving", "ci95_low", "ci95_high"]
+    lines.append("| " + " | ".join(pcols) + " |")
+    lines.append("|" + "---|" * len(pcols))
+    for row in paired:
+        lines.append("| " + " | ".join(str(row.get(c, "")) for c in pcols) + " |")
+    lines += ["", "## Diagnostics", ""]
     lines.append("| check | value |")
     lines.append("|---|---:|")
-    for k, v in checks.items():
+    for k, v in diagnostics.get("checks", {}).items():
         lines.append(f"| {k} | {v} |")
-else:
-    lines.append("Diagnostics JSON did not contain a `checks` field.")
-lines.append("")
-lines.append("## Files to share")
-lines.append("")
-for p in (summary_path, paired_path, diag_path, Path(str(prefix)+".manifest.json"), Path(str(prefix)+".preflight_manifest.json"), report_path):
-    lines.append(f"- `{p}`")
-report_path.write_text("\n".join(lines) + "\n")
-print(f"wrote {report_path}")
+    lines += ["", "## Files to share", ""]
+    for suffix in ["_summary.csv", "_paired.csv", "_diagnostics.json", ".manifest.json", ".preflight_manifest.json", "_report.md"]:
+        lines.append(f"- `{prefix}{suffix}`")
+    out_path.write_text("\n".join(lines) + "\n")
+    print(f"wrote {out_path}")
+
+if __name__ == "__main__":
+    main()

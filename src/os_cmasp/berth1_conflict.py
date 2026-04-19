@@ -237,6 +237,45 @@ def write_replay_template(path: str) -> None:
         w.writeheader()
         w.writerows(rows)
 
+def write_replay_bank(path: str, bank: List[EpisodeStep]) -> None:
+    """Write an EpisodeStep bank as the canonical long replay CSV.
+
+    This is intentionally separate from write_replay_template(): the template is
+    documentation, while this function writes a fully runnable replay bank.
+    """
+    out_path = Path(path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=REPLAY_TEMPLATE_FIELDS)
+        writer.writeheader()
+        for step in bank:
+            x = step.latent
+            for claim in step.claims:
+                writer.writerow({
+                    "seed": step.seed,
+                    "t": step.t,
+                    "ready": str(x.ready).lower(),
+                    "crane_ok": str(x.crane_ok).lower(),
+                    "eta_on_time": str(x.eta_on_time).lower(),
+                    "weather_safe": str(x.weather_safe).lower(),
+                    "scenario": step.scenario,
+                    "queue_state": x.queue_state,
+                    "weather_regime": x.weather_regime,
+                    "disruption_family": x.disruption_family,
+                    "vessel_class": x.vessel_class,
+                    "operating_mode": x.operating_mode,
+                    "time_bucket": x.time_bucket,
+                    "berth_slot": x.berth_slot,
+                    "eta_bin": x.eta_bin,
+                    "prop": claim.prop,
+                    "value": str(claim.value).lower(),
+                    "observer": claim.observer,
+                    "situation": claim.situation,
+                    "credibility": claim.credibility,
+                    "timestamp": claim.timestamp,
+                    "provenance": claim.provenance,
+                })
+
 def transform_claims(claims: Tuple[Claim, ...], condition: str, rng: Random) -> List[Claim]:
     if condition in {"provenance_preserving", "labels_without_gating", "oracle_visible_state"}:
         return list(claims)
@@ -588,7 +627,9 @@ def main() -> None:
     rows = evaluate_bank(bank, ABLATION_CONDITIONS)
     summary = by_condition(rows)
     paired = paired_deltas(rows)
-    diagnostics = go_no_go(summary, paired, args.horizon, args.seeds)
+    diag_seeds = int(bank_report.get("seeds", args.seeds))
+    diag_horizon = int(int(bank_report.get("steps", args.horizon * max(diag_seeds, 1))) / max(diag_seeds, 1))
+    diagnostics = go_no_go(summary, paired, diag_horizon, diag_seeds)
     write_csv(f"{args.out_prefix}.csv", rows)
     write_csv(f"{args.out_prefix}_summary.csv", summary)
     write_csv(f"{args.out_prefix}_paired.csv", paired)

@@ -1,34 +1,40 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-if [[ $# -lt 2 ]]; then
-  echo "Usage: scripts/package_results.sh OUT_PREFIX ZIP_PATH" >&2
+if [ $# -lt 2 ]; then
+  echo "usage: $0 output_prefix result_zip" >&2
   exit 2
 fi
-
-OUT_PREFIX="$1"
-ZIP_PATH="$2"
-REQUIRED=(
-  "$OUT_PREFIX.csv"
-  "$OUT_PREFIX"_summary.csv
-  "$OUT_PREFIX"_paired.csv
-  "$OUT_PREFIX"_diagnostics.json
-  "$OUT_PREFIX.manifest.json"
-  "$OUT_PREFIX.preflight_manifest.json"
-  "$OUT_PREFIX"_report.md
+PREFIX=$1
+ZIP=$2
+FILES=(
+  "${PREFIX}.csv"
+  "${PREFIX}_summary.csv"
+  "${PREFIX}_paired.csv"
+  "${PREFIX}_diagnostics.json"
+  "${PREFIX}.manifest.json"
+  "${PREFIX}.preflight_manifest.json"
+  "${PREFIX}_report.md"
 )
-
-MISSING=()
-for f in "${REQUIRED[@]}"; do
-  [[ -f "$f" ]] || MISSING+=("$f")
+missing=0
+for f in "${FILES[@]}"; do
+  if [ ! -f "$f" ]; then
+    echo "Missing expected result file: $f" >&2
+    missing=1
+  fi
 done
-if (( ${#MISSING[@]} > 0 )); then
-  echo "ERROR: refusing to create an empty/incomplete results zip. Missing:" >&2
-  printf '  %s\n' "${MISSING[@]}" >&2
-  exit 2
+if [ "$missing" -ne 0 ]; then
+  echo "Refusing to create a partial or empty result zip." >&2
+  exit 1
 fi
-
-mkdir -p "$(dirname "$ZIP_PATH")"
-rm -f "$ZIP_PATH"
-zip -q "$ZIP_PATH" "${REQUIRED[@]}"
-echo "wrote $ZIP_PATH with ${#REQUIRED[@]} files"
+mkdir -p "$(dirname "$ZIP")"
+rm -f "$ZIP"
+${PYTHON:-python} - "$ZIP" "${FILES[@]}" <<'PY'
+import sys
+from zipfile import ZipFile, ZIP_DEFLATED
+zip_path = sys.argv[1]
+files = sys.argv[2:]
+with ZipFile(zip_path, 'w', ZIP_DEFLATED) as z:
+    for f in files:
+        z.write(f)
+print(f"wrote {zip_path} with {len(files)} files")
+PY

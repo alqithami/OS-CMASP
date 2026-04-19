@@ -1,0 +1,5 @@
+seed,t,ready,crane_ok,eta_on_time,weather_safe,scenario,queue_state,weather_regime,disruption_family,vessel_class,operating_mode,time_bucket,berth_slot,eta_bin,harbor_master_ready,strategic_plan_ready,crane_maintenance_crane_ok,ais_feed_eta_on_time,carrier_schedule_eta_on_time,port_safety_weather_safe,human_dispatcher_weather_safe
+0,0,true,true,true,true,authority_conflict,normal,clear,none,feeder,nominal,day,slot-A,on-window,true,false,true,true,true,true,
+0,1,false,true,true,true,authority_conflict,normal,clear,none,feeder,nominal,day,slot-A,on-window,false,true,true,true,true,true,
+1,0,true,true,false,true,freshness_conflict,normal,clear,eta_delay,feeder,nominal,day,slot-A,late,true,true,true,false,true,true,
+1,1,true,true,true,false,human_override,normal,squall,weather,feeder,nominal,day,slot-A,on-window,true,true,true,true,true,false,false

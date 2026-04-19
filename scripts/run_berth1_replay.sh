@@ -1,50 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
-PYTHON_BIN="${PYTHON_BIN:-python}"
-
-
-if [[ $# -lt 2 ]]; then
-  cat >&2 <<'USAGE'
-Usage: scripts/run_berth1_replay.sh ACTUAL_REPLAY_CSV OUT_PREFIX
-
-Example:
-  scripts/run_berth1_replay.sh data/replay/twin_replay_claims.csv outputs/berth1/twin_v1
-
-Do not pass the documentation placeholder path/to/twin_replay_claims.csv.
-Create a template first with:
-  scripts/write_berth1_replay_template.sh data/replay/berth1_replay_template.csv
-USAGE
+if [ $# -lt 2 ]; then
+  echo "usage: $0 replay.csv output_prefix" >&2
   exit 2
 fi
-
-REPLAY_CSV="$1"
-OUT_PREFIX="$2"
-
-if [[ "$REPLAY_CSV" == path/to/* || "$REPLAY_CSV" == *twin_replay_claims.csv && ! -f "$REPLAY_CSV" ]]; then
-  echo "ERROR: Replay CSV does not exist: $REPLAY_CSV" >&2
-  echo "Replace the placeholder with an actual CSV path. For a pipeline check, run:" >&2
-  echo "  scripts/run_berth1_synthetic_smoke.sh outputs/berth1/synthetic_smoke" >&2
-  exit 2
+REPLAY=$1
+PREFIX=$2
+if [ ! -f "$REPLAY" ]; then
+  echo "Missing replay CSV: $REPLAY" >&2
+  echo "This command requires an actual CSV file, not a placeholder." >&2
+  echo "For a no-manual pipeline check, run:" >&2
+  echo "  scripts/run_berth1_locked_replay_demo.sh outputs/berth1/locked_replay_demo" >&2
+  echo "For twin export conversion from a wide CSV, run:" >&2
+  echo "  scripts/build_berth1_replay_from_wide.sh raw_twin_export.csv data/replay/twin_replay_claims.csv" >&2
+  exit 1
 fi
-
-if [[ ! -f "$REPLAY_CSV" ]]; then
-  echo "ERROR: Replay CSV does not exist: $REPLAY_CSV" >&2
-  echo "Create/check the file, or generate a schema template with:" >&2
-  echo "  scripts/write_berth1_replay_template.sh data/replay/berth1_replay_template.csv" >&2
-  exit 2
-fi
-
-mkdir -p "$(dirname "$OUT_PREFIX")"
-
-$PYTHON_BIN -m os_cmasp.berth1_conflict \
-  --mode preflight \
-  --replay-csv "$REPLAY_CSV" \
-  --manifest "$OUT_PREFIX.preflight_manifest.json"
-
-$PYTHON_BIN -m os_cmasp.berth1_conflict \
-  --mode run \
-  --replay-csv "$REPLAY_CSV" \
-  --out-prefix "$OUT_PREFIX" \
-  --manifest "$OUT_PREFIX.manifest.json"
-
-$PYTHON_BIN scripts/summarize_berth1_results.py "$OUT_PREFIX"
+mkdir -p "$(dirname "$PREFIX")"
+${PYTHON:-python} -m os_cmasp.berth1_conflict --mode preflight --replay-csv "$REPLAY" --manifest "${PREFIX}.preflight_manifest.json" --out-prefix "$PREFIX"
+${PYTHON:-python} -m os_cmasp.berth1_conflict --mode run --replay-csv "$REPLAY" --manifest "${PREFIX}.manifest.json" --out-prefix "$PREFIX"
+${PYTHON:-python} scripts/summarize_berth1_results.py "$PREFIX"

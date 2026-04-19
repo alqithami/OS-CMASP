@@ -749,7 +749,7 @@ Run \textsc{Berth-1-Conflict} with paired seeds and a frozen solver. The require
 
 \subsection{Layer 2: maritime replay}
 
-Replace synthetic claims with a replay CSV exported from the maritime twin. The replay schema must include episode identifier, step, visible-context features, latent readiness or admissibility label if available for evaluation, observer, situation, assertion, timestamp, credibility, provenance, and intervention outcome. The solver and ablation interface remain unchanged. A replay path must be an actual file; placeholder paths such as \texttt{path/to/twin\_replay\_claims.csv} are documentation only.
+Replace synthetic claims with a replay CSV exported from the maritime twin. The replay schema must include episode identifier, step, visible-context features, latent readiness or admissibility label if available for evaluation, observer, situation, assertion, timestamp, credibility, provenance, and intervention outcome. The solver and ablation interface remain unchanged. A replay path must be an actual file; placeholder paths such as \texttt{path/to/twin\_replay\_claims.csv} are documentation only. \emph{Replay rows should not be created by hand-editing the template}. The template is a schema contract. A run should either validate an existing long-form replay export or use an adapter that converts a one-row-per-step twin export into the canonical one-row-per-claim replay table. This distinction is operationally important: manual template editing can accidentally change the claim bank, while the paper's ablation requires the same episode bank across all conditions.
 
 \subsection{Layer 3: metric lift}
 
@@ -797,6 +797,15 @@ Packaging & Bundle summary, paired deltas, diagnostics, manifests, and report. &
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\subsection{Automated replay construction}
+\label{sec:auto-replay}
+
+The replay interface is designed to avoid manual CSV construction. The repository contains three distinct pathways. First, a locked synthetic replay generator writes a fully runnable replay CSV from the pre-registered \textsc{Berth-1-Conflict} bank. This pathway is a software sanity check for the replay runner, not maritime evidence. Second, a long-form validator accepts an already exported one-row-per-claim replay table, checks the required schema, normalizes it, and records a manifest. Third, a wide-export adapter accepts a simpler one-row-per-step table and expands it into claim rows using fixed, deterministic claim-generation rules. The wide adapter is the intended bridge when a maritime twin can export latent truth and visible context per episode step but does not yet emit per-observer claim records.
+
+The three pathways have different evidentiary status. A locked synthetic replay can verify that the replay runner, paired ablation, manifest, and packaging machinery work end-to-end. A wide converted replay can be paper evidence only if the underlying wide export is a declared twin replay and the conversion rules are frozen before inspection. A long-form replay is preferred when the twin already records observer, situation, timestamp, credibility, and provenance. In every case, the ablation interface remains unchanged: provenance-preserving, provenance-erased, random-label placebo, labels-without-gating, oracle-visible-state, and benign-agreement conditions are evaluated on the same episode bank.
+
+A local synthetic smoke run should therefore be read narrowly. If the smoke test separates provenance preservation from erasure, it supports only the executable scaffold and the internal consistency of the constructed active regime. It does not establish maritime validity. Maritime validity starts when the same fixed solver and ablation set are run on a replay bank exported or converted from the twin.
 
 The dominance-gated EcoFair-style wrapper is an implementation witness, not the contribution. Any MARL solver can be used if it obeys the frozen-solver ablation contract. This interpretation is supported only if the separation tracks the process-state semantics rather than the solver identity. In particular, local experiments should first run the scaffold exactly as specified; solver improvements belong in a later study after semantic separation is established.
 
