@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
-mkdir -p artifacts/preflight
-python -m os_cmasp.berth1_conflict \
+
+OUT_DIR="${1:-artifacts/preflight}"
+mkdir -p "$OUT_DIR"
+
+PYTHON_BIN="${PYTHON_BIN:-python}"
+$PYTHON_BIN -m os_cmasp.berth1_conflict \
   --mode preflight \
   --scenario mixed \
-  --horizon 40 \
+  --horizon 320 \
   --seeds 8 \
-  --manifest artifacts/preflight/berth1_preflight_manifest.json
+  --manifest "$OUT_DIR/berth1_preflight_manifest.json"

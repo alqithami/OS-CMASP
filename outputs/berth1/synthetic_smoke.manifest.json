@@ -36,11 +36,11 @@
       "freshness_conflict",
       "human_override"
     ],
-    "seed_max": 7,
+    "seed_max": 3,
     "seed_min": 0,
-    "seeds": 8,
+    "seeds": 4,
     "solver_version": "berth1-fixed-solver-v22",
-    "steps": 2560,
+    "steps": 320,
     "unknown_observers": [],
     "unknown_props": []
   },
@@ -53,9 +53,9 @@
     "benign_agreement"
   ],
   "dominance_table_version": "maritime-dominance-v22",
-  "horizon": 320,
-  "mode": "preflight",
-  "out_prefix": "berth1_results",
+  "horizon": 80,
+  "mode": "run",
+  "out_prefix": "outputs/berth1/synthetic_smoke",
   "p_all_clear": 0.5,
   "purpose": "OS-CMASP Berth-1-Conflict fixed-solver ablation manifest",
   "replay_csv": null,
@@ -95,6 +95,6 @@
     "timestamp",
     "provenance"
   ],
-  "seeds": 8,
+  "seeds": 4,
   "solver_version": "berth1-fixed-solver-v22"
 }

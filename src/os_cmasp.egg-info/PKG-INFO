@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: os-cmasp
+Version: 0.0.30
+Summary: OS-CMASP manuscript and Berth-1-Conflict fixed-solver scaffold
+Author: OS-CMASP contributors
+Requires-Python: >=3.10

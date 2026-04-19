@@ -1,0 +1,545 @@
+Only in os_cmasp_repo_update_v30/manuscript: main.aux
+Only in os_cmasp_repo_update_v30/manuscript: main.bbl
+Only in os_cmasp_repo_update_v30/manuscript: main.blg
+Only in os_cmasp_repo_update_v30/manuscript: main.fdb_latexmk
+Only in os_cmasp_repo_update_v30/manuscript: main.fls
+Only in os_cmasp_repo_update_v30/manuscript: main.log
+Only in os_cmasp_repo_update_v30/manuscript: main.out
+Only in os_cmasp_repo_update_v30/manuscript: main.pdf
+diff -ru os_cmasp_repo_update_v29/manuscript/main.tex os_cmasp_repo_update_v30/manuscript/main.tex
+--- os_cmasp_repo_update_v29/manuscript/main.tex	2026-04-19 13:05:09.846405935 +0000
++++ os_cmasp_repo_update_v30/manuscript/main.tex	2026-04-19 13:10:19.801339214 +0000
+@@ -224,73 +224,118 @@
+ \section{Running example: berth-readiness under conflicting provenance}
+ \label{sec:running-example}
+ 
+-Consider a vessel approaching a berth. The physical question is simple: should the system admit the vessel now or hold it? The informational situation is not simple. A berth-management system may report \emph{ready}; a crane-maintenance feed may report \emph{not ready}; an AIS-derived ETA forecast may be fresh but indirect; and a human harbor master may issue a later confirmation. A fused-state controller can aggregate these reports into one readiness probability. That may be sufficient when reports are merely noisy. It is insufficient when the policy must also know which report is authoritative for admission, which contradictions are unresolved, and whether a high-impact action is admissible without verification.
++The main technical object is easier to see in a deliberately small maritime decision. A vessel approaches a berth, and the controller must decide whether to \texttt{admit} or \texttt{hold}. In a conventional partially observed formulation, the reports below would normally be converted into a single latent estimate such as $\Prob(ready(b)=1\mid h_t)$. That conversion is often sensible when reports are exchangeable noisy measurements. It is not sufficient when the operational rule asks a different question: \emph{which report is allowed to certify a critical action under the current situation?}
+ 
+ \begin{table}[H]
+ \centering
+-\caption{Illustrative claim base for a single berth-admission decision. The point is not the specific ranking; the point is that the ranking must be pre-registered and visible to the process.}
++\caption{Illustrative claim base for a single berth-admission decision. The table separates measurement content from decision authority.}
+ \label{tab:running-example}
+ \small
+-\begin{tabularx}{\textwidth}{@{}L{0.24\textwidth}L{0.17\textwidth}L{0.14\textwidth}Y@{}}
++\begin{tabularx}{\textwidth}{@{}L{0.18\textwidth}L{0.17\textwidth}L{0.17\textwidth}Y@{}}
+ \toprule
+-Source / observer & Situation & Formula & Control relevance \\
++Observer & Situation & Formula & Operational role \\
+ \midrule
+-Berth operating system & nominal window & $ready(b)$ & Supports \texttt{admit}, but can be defeated by higher-priority local maintenance evidence. \\
+-Crane maintenance feed & crane outage & $\neg ready(b)$ & Defeats readiness for safety-critical admission when within the freshness window. \\
+-AIS ETA service & vessel approach & $arrives\_soon(v)$ & Affects service cost and emissions from holding, but does not by itself certify berth readiness. \\
+-Harbor master & local confirmation & $ready(b)$ & May dominate automated reports under the pre-registered maritime dominance scheme. \\
++Berth operating system & nominal slot & $ready(b)$ & Supports admission under ordinary conditions, but may be defeated by fresher local evidence. \\
++Crane maintenance feed & active outage & $\neg ready(b)$ & Blocks admission when the outage is current and the crane family is safety-relevant. \\
++AIS ETA service & approach window & $arrives\_soon(v)$ & Affects holding cost and idling emissions, but does not certify berth readiness. \\
++Harbor master & local confirmation & $ready(b)$ & May dominate automated reports for berth-readiness certification when issued in the current situation. \\
++Strategic plan & planning horizon & $ready(b)$ & Useful for scheduling, but weaker than current local operational evidence. \\
+ \bottomrule
+ \end{tabularx}
+ \end{table}
+ 
+-In \OSCMASP{}, the admission decision is not based only on whether $ready(b)$ has high posterior probability. It also depends on whether the support set for $ready(b)$ is undefeated under the dominance scheme, whether contradictory relevant claims remain active, and whether the action is critical enough to require certification or escalation. This running example is used throughout the paper: the minimal benchmark in \cref{sec:benchmark} is the smallest stochastic game that preserves this structure while stripping away full-port complexity.
++The conflict is not only that $ready(b)$ and $\neg ready(b)$ coexist. Existing methods already have mechanisms for uncertainty, disagreement, and partial observation. The distinctive issue is that the contradiction is \emph{typed by provenance}: the formulas are asserted by different observers, at different situation nodes, with different authority and freshness. A controller that collapses the table to a posterior probability may preserve enough information to choose a high expected-reward action, but it may lose the information required to decide whether that action is admissible, certifiable, or must be routed through an exception.
++
++\begin{example}[Two superficially identical aggregates]
++\label{ex:two-aggregates}
++Consider two claim bases with the same formulas and timestamps:
++\[
++C^+=\{(ready,\ell_H,1,0,\rho_1),(\neg ready,\ell_L,1,0,\rho_2)\},
++\]
++\[
++C^-=\{(ready,\ell_L,1,0,\rho_1),(\neg ready,\ell_H,1,0,\rho_2)\},
++\]
++where $\ell_H$ is dominant over $\ell_L$ for readiness claims. A provenance-erased controller sees the same aggregate in both cases. An observer--situation-aware controller sees that $C^+$ supports \texttt{admit} and $C^-$ supports \texttt{hold}. The separation theorem in \cref{sec:theory} is the stochastic-game version of this example.
++\end{example}
++
++This example also clarifies what the paper is \emph{not} claiming. It is not claiming that all multi-source conflicts require symbolic provenance, nor that every maritime decision should be passed through a theorem prover. The claim is narrower: in regulated, safety- or service-critical multi-agent control, there are regimes in which provenance-bearing contradictions are themselves part of the state of the control problem. In those regimes, observer--situation labels are not post-hoc explanation metadata; they affect admissibility, regret, and constraint tradeoffs.
++
++\begin{table}[H]
++\centering
++\caption{Why the berth example is not exhausted by common neighboring formalisms.}
++\label{tab:running-deltas}
++\small
++\begin{tabularx}{\textwidth}{@{}L{0.25\textwidth}Y Y@{}}
++\toprule
++Neighboring line & What it captures & What remains exposed in the example \\
++\midrule
++POMDP / POSG belief state & Hidden readiness and noisy observations \citep{Kaelbling1998,Bernstein2002}. & The posterior need not retain which observer--situation node can certify a critical action. \\
++Common-information MARL & Shared histories and coordination-relevant information \citep{Nayyar2013,SchroederdeWitt2019MACKRL,LiuZhang2023InfoSharing}. & Shared information can still be a fused information state rather than a contradiction-bearing claim base. \\
++Safe RL and shielding & Action suppression under safety constraints \citep{GarciaFernandez2015,Alshiekh2018,Carr2023ShieldingPOMDP}. & The shield condition is usually defined over states/specifications, not over undefeated provenance-indexed support. \\
++Truth maintenance / belief revision & Inconsistent support and revision \citep{Doyle1979,deKleer1986,AGM1985,McAllester1990TMS}. & These are not normally embedded as feasibility objects inside constrained stochastic games. \\
++Data provenance and fusion & Lineage, source conflict, and fusion policies \citep{Buneman2001Provenance,Cheney2009Provenance,DongNaumann2009DataFusion}. & Fusion is usually upstream of control, while here unresolved provenance can directly affect action admissibility. \\
++\bottomrule
++\end{tabularx}
++\end{table}
++
++The running example will be instantiated as \textsc{Berth-1-Conflict} in \cref{sec:benchmark}. That benchmark is intentionally small: it is not a port-operations benchmark, but a test of the paper's process-semantic claim under a frozen solver.
+ 
+ \section{Notation and modeling commitments}
+ \label{sec:notation}
+ 
+-The formal model separates four objects that are often conflated in partially observed control: latent physical state, controller-visible context, observer--situation provenance, and admissibility. The notation in \cref{tab:notation} is used throughout the paper and the technical supplement.
++\OSCMASP{} separates objects that are frequently collapsed in applied MARL pipelines: the physical simulator state, the controller-visible physical context, the claim base, the dominance scheme, and the admissibility relation. This separation is the main novelty boundary. If these objects are collapsed before decision, the paper reduces to a familiar partially observed constrained-control problem.
+ 
+ \begin{table}[H]
+ \centering
+ \caption{Core notation and modeling role.}
+ \label{tab:notation}
+ \small
+-\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth}X@{}}
++\begin{tabularx}{\textwidth}{@{}L{0.20\textwidth}Y@{}}
+ \toprule
+ Symbol & Meaning \\
+ \midrule
+-$X$, $x_t$ & Latent physical state and its value at time $t$. \\
+-$\chi:X\to\mathcal Y$ & Controller-visible context map; in the separation theorem it prevents hidden truth from leaking through ordinary state features. \\
+-$L=\mathcal O\times\Sigma$ & Observer--situation carrier with product order. \\
+-$C_t$ & Formula-valued claim base containing assertions, observer--situation labels, credibility, timestamps, and provenance. \\
+-$\mathcal D$ & Proposition-family dominance scheme; fixed before evaluation. \\
+-$A_i^p$, $A_i^e$ & Physical and epistemic action spaces for agent $i$. \\
++$X$, $x_t$ & Latent physical state and its value at time $t$. In maritime replay this may include berth status, queue, vessel, weather, crane, and disruption variables. \\
++$\chi:X\to\mathcal Y$ & Controller-visible context map. It includes ordinary non-claim context available to all compared policies, and excludes the hidden truth variable used in the separation theorem. \\
++$\mathcal O$, $\Sigma$, $L$ & Observer set, situation set, and observer--situation carrier $L=\mathcal O\times\Sigma$. \\
++$\Lang_\Phi$, $\Cons$ & Formula language and sound consistency predicate. The minimal benchmark uses literals; richer maritime assertions may use SAT/SMT-backed formulas. \\
++$C_t$ & Formula-valued claim base containing formulas, observer--situation labels, credibility, timestamps, and provenance. \\
++$\mathcal D$ & Proposition-family dominance scheme. It encodes pre-registered source authority, freshness, context priority, and tie rules. \\
++$A_i^p$, $A_i^e$ & Physical and epistemic action spaces for agent $i$. Epistemic actions include verification, deferral, escalation, and certification. \\
+ $\mathcal F$ & Admissibility relation coupling physical feasibility, dominant support certificates, contradiction mass, and exception acts. \\
+-$\Agg(C)$ & Aggregation that erases observer--situation labels and provenance; used to define provenance-erased policies. \\
++$\Agg(C)$ & Aggregation that erases observer--situation labels and provenance; used to define provenance-erased baselines. \\
+ \bottomrule
+ \end{tabularx}
+ \end{table}
+ 
+-Two modeling commitments are fixed before benchmark execution. First, $\chi$ must exclude the hidden truth variable that the theorem is intended to protect. Second, $\mathcal D$ must be declared before training or replay, so that authority, freshness, and source priority cannot be tuned after outcomes are observed.
+-
+ \begin{table}[H]
+ \centering
+-\caption{Semantic roles separated by the model. This table is intended as a reader check against accidental reversion to a fused-state interpretation.}
++\caption{Semantic roles separated by the process. The final column states the failure mode if the role is collapsed.}
+ \label{tab:semantic-roles}
+ \small
+-\begin{tabularx}{\textwidth}{@{}L{0.18\textwidth}L{0.25\textwidth}Y@{}}
++\begin{tabularx}{\textwidth}{@{}L{0.18\textwidth}L{0.23\textwidth}Y@{}}
+ \toprule
+-Role & Object & Why it is separated \\
++Role & Object & Failure mode when collapsed \\
+ \midrule
+-Physical dynamics & $x_t$ and $P$ & Encodes how the port or simulator evolves under physical and epistemic actions. \\
+-Visible context & $\chi(x_t)$ & Encodes what the controller may observe without leaking the theorem's hidden readiness truth. \\
+-Operational claims & $C_t$ & Preserves incompatible reports, timestamps, credibility, and provenance until they are resolved or bypassed. \\
+-Defeat / priority & $\mathcal D$ & Specifies which claims can dominate others within a proposition family before outcomes are known. \\
+-Admissibility & $\mathcal F$ & Converts unresolved contradiction and certificate failure into action infeasibility or required exception acts. \\
++Physical dynamics & $x_t$ and $P$ & The simulator may predict feasible trajectories, but cannot by itself determine which report is admissible support. \\
++Visible context & $\chi(x_t)$ & Hidden truth may leak into the baseline comparison, invalidating the observer-collapse theorem. \\
++Operational claims & $C_t$ & Contradictions are prematurely fused into a single estimate, losing provenance needed for certification. \\
++Defeat / priority & $\mathcal D$ & Authority and freshness are tuned informally after outcomes, converting the benchmark into an unregistered heuristic. \\
++Admissibility & $\mathcal F$ & Safety and auditability become external wrappers rather than state-dependent feasibility constraints. \\
+ \bottomrule
+ \end{tabularx}
+ \end{table}
+ 
++The following commitments are fixed before any experiment.
++
++\begin{enumerate}[leftmargin=1.6em]
++  \item \textbf{Visible-context commitment.} The map $\chi$ is defined before running the ablations and is used identically by all non-oracle policies. In \textsc{Berth-1-Conflict}, $\chi$ may include vessel class, queue state, weather regime, disruption family, operating mode, time bucket, berth slot, and ETA bin, but not latent readiness, crane safety, weather admissibility, or claim provenance.
++  \item \textbf{Dominance commitment.} The dominance scheme $\mathcal D$ is registered by proposition family. It cannot be tuned after seeing paired deltas.
++  \item \textbf{Solver-isolation commitment.} The policy code, action costs, episode bank, and random seeds are fixed across all ablations. Conditions change only the claim-state semantics.
++  \item \textbf{Evidence-status commitment.} Synthetic smoke tests are pipeline checks, not evidence. Paper evidence begins only when the same frozen interface is run on a replay bank or a declared synthetic benchmark with locked parameters.
++\end{enumerate}
++
++These commitments make the model stricter than an architecture proposal. A new controller can be plugged in later, but the paper's first claim must survive when the solver is held fixed.
++
+ \section{Observer--Situation Constrained Process Model}
+ \label{sec:model}
+ 
+@@ -309,13 +354,15 @@
+ Then $L$ is a finite complete lattice under the product order.
+ \end{definition}
+ 
++The observer order need not be a single global hierarchy. A harbor master may dominate for berth admission; a maintenance feed may dominate for crane availability; an approved weather source may dominate for safety windows; and a human dispatcher may dominate when an override is explicitly recorded. For this reason, dominance is defined by proposition family below rather than by a single universal source order.
++
+ \begin{definition}[Formula language and consistency oracle]
+ \label{def:language}
+ Let $\Phi$ be a finite propositional vocabulary and let $\Lang_\Phi$ be a finite set of propositional formulas over $\Phi$ closed under negation for the formulas used as action preconditions. Let
+ \[
+ \Cons:2^{\Lang_\Phi}\to\{0,1\}
+ \]
+-be a sound consistency predicate, where $\Cons(B)=1$ means that the finite formula set $B$ is propositionally satisfiable. We write $\Incon(B)=1-\Cons(B)$. For the literal-only benchmark, $\Lang_\Phi=\Lit(\Phi)$ and $\Cons$ is the usual no-complement-pair test. For richer operational schemas, $\Cons$ can be implemented by a SAT or SMT solver.
++be a sound consistency predicate, where $\Cons(B)=1$ means that the finite formula set $B$ is propositionally satisfiable. We write $\Incon(B)=1-\Cons(B)$. For the literal-only benchmark, $\Lang_\Phi=\Lit(\Phi)$ and $\Cons$ is the no-complement-pair test. For richer operational schemas, $\Cons$ can be implemented by a SAT or SMT solver.
+ \end{definition}
+ 
+ \begin{definition}[Claim base]
+@@ -331,17 +378,19 @@
+ \]
+ \end{definition}
+ 
++The claim base is not a belief state in the standard filtering sense. It is allowed to contain incompatible formulas. Its purpose is to preserve the structure of incompatibility until a dominance rule, an epistemic action, or an exception path resolves its decision relevance.
++
+ \begin{definition}[Proposition-family dominance scheme]
+ \label{def:dominance}
+ Let $\mathcal Q$ be a finite set of proposition families and let
+ \[
+ \Fam:\Lang_\Phi\to\mathcal Q
+ \]
+-map each formula to the operational fact-family it concerns, such as berth readiness, ETA, crane availability, weather admissibility, or customs clearance. A dominance scheme is a family of preorders
++map each formula to the operational fact-family it concerns, such as berth readiness, ETA, crane availability, weather admissibility, customs release, or emissions feasibility. A dominance scheme is a family of preorders
+ \[
+ \mathcal D=\{\unrhd_q:q\in\mathcal Q\}
+ \]
+-over claim records with family $q$. The strict part is denoted $\rhd_q$. The preorder may encode source authority, freshness, calibrated reliability, or regulatory priority; it is a process parameter and must be fixed before evaluation. For a finite set of claims $B$ of family $q$, define its undefeated elements as
++over claim records with family $q$. The strict part is denoted $\rhd_q$. The preorder may encode source authority, freshness, calibrated reliability, regulatory priority, or situation specificity. It is a process parameter and must be fixed before evaluation. For a finite set of claims $B$ of family $q$, define its undefeated elements as
+ \[
+ \operatorname{Max}_{\unrhd_q}(B)
+ =
+@@ -360,8 +409,8 @@
+ Let $\MCC(C)$ denote the non-singleton connected components of $G_{\bot}(C)$.
+ \end{definition}
+ 
+-\begin{remark}[Why the formula-level version is primary]
+-The literal-only definition is adequate for the minimal benchmark, but it is too narrow for a deployable maritime setting: readiness, emissions feasibility, weather limits, and customs release often arrive as structured assertions rather than atomic literals. Making $\Cons$ explicit separates the process semantics from any particular logical implementation. The theory below requires only sound consistency checks; completeness or efficient satisfiability is an implementation question.
++\begin{remark}[Relation to truth maintenance]
++The contradiction graph resembles a truth-maintenance dependency structure \citep{Doyle1979,deKleer1986,McAllester1990TMS}, but its role is different. Here the contradiction components are part of the stochastic-game state and can enter rewards, constraints, admissibility, and audit traces. The formal object is therefore not a standalone belief-revision system; it is a constrained control process with embedded claim maintenance.
+ \end{remark}
+ 
+ \subsection{The OS-CPOSG}
+@@ -402,15 +451,19 @@
+ \]
+ \end{definition}
+ 
++The epistemic action space is deliberately part of the game rather than an off-line preprocessing step. A \texttt{verify} action can request a new claim from an authoritative observer; \texttt{defer} can postpone a physical action while preserving the unresolved contradiction; \texttt{escalate} can route the conflict to a human or institutional authority; and \texttt{certify} can emit a support witness for an action. Different applications may instantiate these actions differently, but the process class treats them as actions with costs and transition effects.
++
+ \begin{definition}[Simulator-coupled subclass]
+ \label{def:os-cmasp}
+ An Observer--Situation Constrained Multi-Agent Simulation Process (\OSCMASP) is an \OSCPOSG{} whose physical transition kernel is mediated by a simulator family $\mathcal S$:
+ \[
+ x_{t+1}\sim P_{\mathcal S}(\cdot\mid x_t,a_t,\xi_t),
+ \]
+-where $\xi_t$ denotes exogenous simulator input such as traffic demand, weather, disruption state, or scenario seed.
++where $\xi_t$ denotes exogenous simulator input such as traffic demand, weather, disruption state, scenario seed, or simulator-version state.
+ \end{definition}
+ 
++The simulator-coupled definition is the maritime target. The simulator can remain a black-box digital twin, but the claim state is not black-box: it is an explicit part of the process state and of the ablation contract.
++
+ \subsection{Dominant support, certification, and admissibility}
+ 
+ For each agent $i$ and physical action $a_i^p$, let $\operatorname{Pre}_i(a_i^p)\subseteq\Lang_\Phi$ be the action precondition set. Let $\lambda_i:X\to L$ map physical states to the observer--situation decision node at which agent $i$ evaluates support.
+@@ -446,11 +499,11 @@
+ \Th_{\lambda_i(x)}(S)\models \varphi
+ \qquad\text{for every }\varphi\in\operatorname{Pre}_i(a_i^p).
+ \]
+-The family of such certificates is denoted $\DCert_i(x,C,a_i^p)$. Since $\DomRel_i$ is uniquely determined by $(x,C,a_i^p)$ and $\mathcal D$, $\DCert_i$ is either the singleton $\{\DomRel_i(x,C,a_i^p)\}$ or empty.
++The family of such certificates is denoted $\DCert_i(x,C,a_i^p)$. Since $\DomRel_i$ is determined by $(x,C,a_i^p)$ and $\mathcal D$, $\DCert_i$ is either the singleton $\{\DomRel_i(x,C,a_i^p)\}$ or empty.
+ \end{definition}
+ 
+ \begin{remark}[No cherry-picking]
+-The dominant certificate definition prevents an agent from certifying a critical action by selecting a convenient satisfiable subset while ignoring a more dominant contradictory record. If the undefeated relevant claims are mutually inconsistent, certification fails and the action must be routed through an epistemic exception act or made inadmissible.
++The dominant certificate definition prevents an agent from certifying a critical action by selecting a convenient satisfiable subset while ignoring a more dominant contradictory record. If the undefeated relevant claims are mutually inconsistent, certification fails and the action must be routed through an epistemic exception act or made inadmissible. This is the point at which the process differs from merely attaching explanations to a conventional MARL policy.
+ \end{remark}
+ 
+ \begin{definition}[Contradiction mass]
+@@ -473,7 +526,7 @@
+ or $a_i^e\in\Exc_i(a_i^p)$.
+ \end{definition}
+ 
+-The optimization problem can then be written as
++The optimization problem is
+ \[
+ \max_{\pi}\;\E_{\pi}\sum_{t=0}^{T-1}\gamma^t
+ \left[r(x_t,a_t^p)-\lambda_{\bot}\sum_i\kappa_i(x_t,C_t,a_{i,t}^p)-\lambda_e\sum_i c_e(a_{i,t}^e)\right]
+@@ -485,10 +538,14 @@
+ \]
+ and admissibility $\mathcal F(x_t,C_t,a_t)=1$ for all $t$.
+ 
++\begin{remark}[Why this is not a stack]
++A stacked controller would keep the underlying process fixed and add a provenance layer, a shield, or an explanation module around it. \OSCMASP{} changes the process itself: claim records are state variables, epistemic acts are actions, and certification is part of feasibility. A solver can be simple or complex, but the distinction being tested is whether the process semantics are preserved or erased.
++\end{remark}
++
+ \section{Theoretical properties}
+ \label{sec:theory}
+ 
+-\subsection{Containment}
++\subsection{Containment and boundary cases}
+ 
+ \begin{proposition}[Containment]
+ \label{prop:containment}
+@@ -496,7 +553,7 @@
+ \begin{enumerate}[leftmargin=1.4em]
+   \item If $L$ is a singleton, $A_i^e=\{\varnothing\}$, $\mathcal D$ is vacuous, and $\mathcal F$ is independent of $C_t$, then \OSCPOSG{} reduces to a constrained POSG; in the cooperative case it reduces to a constrained Dec-POMDP.
+   \item If the physical kernel is simulator-mediated and admissibility contains only exogenous regulatory or organizational rules, then \OSCMASP{} projects to a simulator-coupled norm-governed process.
+-  \item If policies are restricted to the two-timescale hierarchical controller family used by CH-MARL/\allowbreak EcoFair, then the result is a controller family over an \OSCMASP{} environment rather than a new process class.
++  \item If policies are restricted to the two-timescale hierarchical controller family used by CH-MARL/EcoFair, then the result is a controller family over an \OSCMASP{} environment rather than a new process class.
+ \end{enumerate}
+ \end{proposition}
+ 
+@@ -504,9 +561,11 @@
+ The restrictions remove observer--situation structure, dominance, epistemic actions, and claim-dependent feasibility. What remains is a standard constrained stochastic game or its cooperative partial-observation specialization. Simulator coupling is retained by choosing $P=P_{\mathcal S}$. Restricting the policy family affects the solver class but not the environment semantics.
+ \end{proof}
+ 
++The containment result is useful for two reasons. First, it prevents the formalism from becoming an unrelated notation system: it reduces to standard objects when the proposed semantics are inactive. Second, it makes ablation interpretation precise: provenance-erased and labels-without-gating conditions are not weaker neural architectures, but projections of the process state and feasibility relation.
++
+ \subsection{Observer-collapse separation}
+ 
+-The central theorem must avoid a common loophole: if the physical state differs across cases and the policy can observe that difference, the hidden truth may leak through non-claim features. We therefore make the controller-visible physical context explicit.
++The central theorem must avoid a common loophole: if the physical state differs across cases and the policy can observe that difference, hidden truth may leak through ordinary non-claim features. We therefore make the controller-visible physical context explicit.
+ 
+ \begin{definition}[Visible context and provenance-erased policies]
+ \label{def:visible}
+@@ -521,7 +580,7 @@
+ 
+ \begin{theorem}[Observer-collapse separation]
+ \label{thm:separation}
+-For every horizon $T\ge 1$, there exists a finite-horizon \OSCPOSG{} with two physical actions and a fixed dominance scheme such that
++For every horizon $T\ge 1$, there exists a finite-horizon \OSCPOSG{} with two physical actions, a fixed dominance scheme, and a visible-context map $\chi$ such that
+ \[
+ \inf_{\pi\in\Pi_{\mathrm{erase}}}\Reg_T(\pi)\ge T/2,
+ \]
+@@ -545,14 +604,16 @@
+ 
+ \begin{corollary}[Safety-budget separation]
+ \label{cor:safety}
+-There exists a safety-constrained version of the construction in Theorem~\ref{thm:separation} in which any provenance-erased policy either incurs linear safety violation or linear service regret, while an observer-aware policy incurs neither.
++There exists a safety-constrained version of the construction in \cref{thm:separation} in which any provenance-erased policy either incurs linear safety violation or linear service regret, while an observer-aware policy incurs neither.
+ \end{corollary}
+ 
+ \begin{proof}
+ Set \texttt{go} in state $s^-$ to create one unit of safety violation and set \texttt{hold} in state $s^+$ to create one unit of service regret. Since any provenance-erased policy uses the same action distribution in both states, decreasing one burden increases the other. The observer-aware policy conditions on the undefeated readiness-family claim and selects the correct action in both cases.
+ \end{proof}
+ 
+-\subsection{Certified-action soundness}
++\subsection{Certification, shields, and soundness}
++
++The admissibility relation resembles a shield, but the shield condition is constructed from dominant support certificates rather than from a state predicate alone. This distinction matters for the paper's novelty boundary. If the certificate is erased and only a final binary safety label remains, the process becomes closer to standard shielding \citep{Alshiekh2018,Carr2023ShieldingPOMDP}. If the certificate remains, the action is justified by a specific undefeated support set.
+ 
+ \begin{theorem}[Certificate soundness]
+ \label{thm:soundness}
+@@ -569,21 +630,29 @@
+ By definition of dominant support certificate, $\Cons(\Th_{\lambda_i(x_t)}(S))=1$ and $\Th_{\lambda_i(x_t)}(S)$ entails every formula in $\operatorname{Pre}_i(a_i^p)$. Soundness of $\Cons$ gives a classical interpretation satisfying the supported theory; entailment then gives satisfaction of each action precondition.
+ \end{proof}
+ 
++\begin{proposition}[Gate safety by construction]
++\label{prop:gate-safety}
++Suppose all critical unsafe admissions are characterized by failure of at least one precondition in $\operatorname{Pre}_i(\texttt{admit})$, and suppose the dominance scheme is correct on the active proposition family in the sense that the undefeated support set entails a false precondition only when the corresponding authoritative claim is itself false. Then any policy that admits only when $\DCert_i(x,C,\texttt{admit})\neq\varnothing$ and $\kappa_i(x,C,\texttt{admit})\le \eta_i$ has zero certificate-induced safety violations on episodes where the authoritative active claims are physically correct.
++\end{proposition}
++
++\begin{proof}
++Under the policy condition, every admission has a dominant certificate. By \cref{thm:soundness}, the certificate entails the admission preconditions. By the correctness assumption for active authoritative claims, those preconditions hold physically on the considered episodes. Therefore the admission is not unsafe on those episodes. Any remaining safety violation would arise from false authoritative claims or incorrect dominance calibration, which the proposition explicitly excludes.
++\end{proof}
++
+ \begin{remark}
+-\label{rem:proof-obligation}
+-The theorem is intentionally modest. It establishes that a certificate is internally satisfiable, undefeated under the fixed dominance scheme, and supportive of the stated preconditions. It does not establish that the physical world truly satisfies those preconditions. That stronger claim requires assumptions about sensor fidelity, authority calibration, and simulator validity.
++\Cref{prop:gate-safety} is not a deployment guarantee. It states the exact assumption under which the gate is safe by construction. This is useful because it exposes what the experiment must measure: whether false authoritative claims, stale dominance, or hidden leakage occur often enough to invalidate the active regime.
+ \end{remark}
+ 
+ \subsection{What the theorems do and do not establish}
+ 
+-\Cref{tab:theory-status} summarizes the role of each theorem. This table is included to keep the manuscript reviewer-facing: the formal results are designed to establish process-class separation and certificate soundness, not empirical superiority.
++\Cref{tab:theory-status} summarizes the role of each theorem. The formal results establish process-class separation and certificate soundness, not empirical superiority in a full maritime twin.
+ 
+ \begin{table}[H]
+ \centering
+ \caption{Theory status and validation responsibility.}
+ \label{tab:theory-status}
+ \small
+-\begin{tabularx}{\textwidth}{@{}L{0.23\textwidth}YY@{}}
++\begin{tabularx}{\textwidth}{@{}L{0.22\textwidth}Y Y@{}}
+ \toprule
+ Result & Established by the manuscript & Left to validation or deployment calibration \\
+ \midrule
+@@ -591,6 +660,7 @@
+ Observer-collapse separation & There exist controlled cases where provenance erasure causes linear regret under identical visible context. & Frequency and operational importance of such cases in real replay. \\
+ Safety-budget separation & Provenance erasure can force a safety--service tradeoff that observer-aware semantics avoid. & Magnitude of safety, emissions, and service burdens under the twin's metric definitions. \\
+ Certificate soundness & Certified support sets are internally satisfiable and entail action preconditions. & Whether the underlying sensors, authority hierarchy, and simulator are externally valid. \\
++Gate safety by construction & If active authoritative claims are physically correct, certificate-gated admission prevents certificate-induced unsafe admission. & Estimating false-authority and stale-dominance rates under replay. \\
+ \bottomrule
+ \end{tabularx}
+ \end{table}
+@@ -598,18 +668,46 @@
+ \section{Minimal benchmark: Berth-1-Conflict}
+ \label{sec:benchmark}
+ 
+-The purpose of the benchmark is not to demonstrate final maritime performance. It is to test whether provenance-preserving semantics can separate from provenance-erased semantics under a fixed solver.
++The benchmark tests whether the semantic distinction in \cref{thm:separation} survives executable conditions. It is not intended to show that a full port is solved. It is a unit test for the process-class claim.
+ 
+ \subsection{Environment}
+ 
+-Each episode concerns a single berth admission decision. The hidden physical truth is whether the berth is ready. The visible context map $\chi_{B1}$ includes only non-discriminating operational features: vessel class, nominal time window, weather class, berth identifier class, and disruption family. It deliberately excludes the latent readiness bit and excludes observer--situation provenance. Claims are drawn from an authority-ordered set of observers: for example, harbor master, local crane-maintenance feed, AIS-derived ETA, berth operating system, and automated planner. The action set is
++Each episode concerns a single berth admission decision repeated across seeds and time steps. The latent state contains four safety-relevant booleans:
++\[
++x_t=(ready_t, craneOK_t, etaOnTime_t, weatherSafe_t, z_t),
++\]
++where $z_t$ contains visible non-safety context. The controller-visible map $\chi_{B1}$ exposes only $z_t$:
++\[
++\chi_{B1}(x_t)=
++(queue\_state, weather\_regime, disruption\_family, vessel\_class, operating\_mode, time\_bucket, berth\_slot, eta\_bin).
++\]
++It deliberately excludes the four hidden booleans and all claim provenance.
++
++The physical and epistemic action sets are
+ \[
+ A^p=\{\texttt{admit},\texttt{hold}\},
+ \qquad
+ A^e=\{\texttt{none},\texttt{verify},\texttt{defer},\texttt{escalate},\texttt{certify}\}.
+ \]
++The admission precondition family is
++\[
++\operatorname{Pre}(\texttt{admit})=
++\{ready, craneOK, etaOnTime, weatherSafe\}.
++\]
++An unsafe admission occurs if \texttt{admit} is chosen while any of these latent preconditions is false. A service burden occurs if \texttt{hold} is chosen while all latent preconditions are true. Epistemic exception actions incur intervention cost.
+ 
+-A safety violation occurs if the vessel is admitted while the undefeated readiness-family support indicates non-readiness. A service penalty occurs if the vessel is held while the undefeated readiness-family support indicates readiness. Epistemic actions incur intervention cost.
++\subsection{Scenario families}
++
++The benchmark contains four active conflict families and one inactive control family:
++\begin{enumerate}[leftmargin=1.6em]
++  \item \textbf{Authority conflict}: a high-priority local observer and a lower-priority planning observer disagree on readiness.
++  \item \textbf{Freshness conflict}: a fresh and stale report disagree within the same proposition family.
++  \item \textbf{Context conflict}: a current-situation report conflicts with a planning-situation report.
++  \item \textbf{Human override}: a human or institutional authority conflicts with an automated feed.
++  \item \textbf{Benign agreement}: observers agree; provenance semantics should introduce little or no overhead.
++\end{enumerate}
++
++These families map directly to maritime sources: harbor master or terminal operations for readiness, crane maintenance for crane availability, AIS or carrier schedule for ETA, and local sensor or approved weather feed for weather admissibility. The point is not that these are the only maritime sources. The point is that the family labels are fixed before results and reused across ablations.
+ 
+ \subsection{Ablation contract}
+ 
+@@ -618,43 +716,62 @@
+   \item \textbf{Provenance-preserving}: full observer--situation labels, pre-registered dominance, contradiction mass, and certification gates.
+   \item \textbf{Provenance-erased}: labels and provenance removed before decision.
+   \item \textbf{Random-label placebo}: labels randomized independently of authority; tests whether arbitrary metadata helps.
+-  \item \textbf{Labels without gating}: labels visible, but certification/admissibility gates disabled; isolates provenance from feasibility semantics.
+-  \item \textbf{Oracle visible-state}: hidden readiness exposed; sanity upper bound.
++  \item \textbf{Labels without gating}: labels visible, but certification/admissibility gates disabled; isolates provenance visibility from feasibility semantics.
++  \item \textbf{Oracle visible-state}: hidden readiness and related latent booleans exposed; sanity upper bound and leakage diagnostic.
+   \item \textbf{Benign agreement}: no relevant contradictions; tests overhead when semantics are inactive.
+ \end{enumerate}
+ 
+-This design is solver-isolating. A positive result is not that a larger controller wins, but that the same controller changes behavior when the process state preserves the information that the theorem says is decision-relevant.
++A positive benchmark result has a specific shape. Provenance-preserving should approach the oracle in active conflict regimes. Provenance-erased should incur paired regret or a safety--service tradeoff. Random-label placebo should not close the gap. Labels-without-gating should reveal why visibility alone is insufficient. Benign agreement should show low overhead. If this pattern does not appear, the correct response is not to add controller depth; it is to narrow the active regime or revise the dominance assumptions.
+ 
+ \subsection{Metrics}
+ 
+-The primary metrics are zero-violation regret, safety violations, service regret, epistemic intervention cost, and contradiction half-life. Emissions and fairness metrics are secondary translations. For a berth decision, an unnecessary hold can be mapped to idling emissions through a simulator-calibrated idling constant; service disparity can be measured directly through wait-time or cost differences across vessel or stakeholder classes. Ratio metrics such as Gini should be reported only with denominator diagnostics; absolute pairwise disparity is the preferred denominator-free companion.
++The primary metrics are:
++\begin{align*}
++\text{Regret}_T &= \sum_{t=0}^{T-1} (r_t^{\star}-r_t),\\
++\text{SafetyViol}_T &= \sum_{t=0}^{T-1}\1[\texttt{admit}_t\text{ and some latent precondition is false}],\\
++\text{ServiceDelay}_T &= \sum_{t=0}^{T-1}\1[\texttt{hold}_t\text{ and all latent preconditions are true}],\\
++\text{InterventionCost}_T &= \sum_{t=0}^{T-1} c_e(a_t^e).
++\end{align*}
++Contradiction half-life is a secondary semantic metric: the number of steps required for a contradiction component to be resolved, bypassed, or rendered irrelevant to the action. Emissions and fairness metrics are tertiary translations. An unnecessary hold can be mapped to idling emissions through a simulator-calibrated idling constant; service disparity can be measured through wait-time or cost differences across vessel or stakeholder classes. Ratio metrics such as Gini should be reported only with denominator diagnostics; absolute pairwise disparity is the preferred denominator-free companion.
+ 
+ \section{Replay calibration and locked validation protocol}
+ \label{sec:validation}
+ 
+-A professional validation plan should separate three layers.
++A professional validation plan separates semantic separation, replay transfer, and metric lift. This section is intentionally prescriptive because the benchmark is easy to invalidate accidentally.
++
++\subsection{Layer 0: preflight}
++
++Preflight validates the contract and writes no result CSVs. It checks the visible-context leakage guard, condition set, dominance-table version, solver version, replay schema, known observers, known proposition families, and manifest path. Preflight may be run on the synthetic bank or on a proposed replay CSV. It is not evidence.
++
++\subsection{Layer 1: semantic separation}
++
++Run \textsc{Berth-1-Conflict} with paired seeds and a frozen solver. The required result is a paired difference between provenance-preserving and provenance-erased conditions on zero-violation regret or the safety--service tradeoff. The random-label placebo and benign-agreement conditions are essential controls: without them, a positive result could be attributed to arbitrary labels or to generic conservatism.
+ 
+-\paragraph{Layer 1: semantic separation.} Run Berth-1-Conflict with paired seeds and a frozen solver. The required result is a paired difference between provenance-preserving and provenance-erased conditions on zero-violation regret or the safety--service tradeoff, while random-label placebo and benign-agreement checks behave as expected.
++\subsection{Layer 2: maritime replay}
+ 
+-\paragraph{Layer 2: maritime replay.} Replace synthetic claims with a replay CSV exported from the maritime twin. The replay schema must include episode identifier, step, visible-context features, latent readiness or admissibility label if available for evaluation, observer, situation, assertion, timestamp, credibility, provenance, and intervention outcome. The solver and ablation interface remain unchanged.
++Replace synthetic claims with a replay CSV exported from the maritime twin. The replay schema must include episode identifier, step, visible-context features, latent readiness or admissibility label if available for evaluation, observer, situation, assertion, timestamp, credibility, provenance, and intervention outcome. The solver and ablation interface remain unchanged. A replay path must be an actual file; placeholder paths such as \texttt{path/to/twin\_replay\_claims.csv} are documentation only.
+ 
+-\paragraph{Layer 3: metric lift.} Only after Layer 1 separates should the analysis translate burdens into CH-MARL-style metrics: idling emissions, service disparity, intervention spend, and fairness observables. Confidence statements should use block-level replay units keyed by traffic family, weather regime, disruption family, horizon, operating mode, and simulator version. Hoeffding-style bounds or empirical distribution bounds can be used for one-sided coverage when the block assumptions are appropriate \citep{Hoeffding1963,Massart1990}.
++\subsection{Layer 3: metric lift}
+ 
+-\begin{table}[t]
++Only after Layer 1 separates should the analysis translate burdens into CH-MARL-style metrics: idling emissions, service disparity, intervention spend, and fairness observables. Confidence statements should use block-level replay units keyed by traffic family, weather regime, disruption family, horizon, operating mode, and simulator version. Hoeffding-style bounds or empirical distribution bounds can be used for one-sided coverage when the block assumptions are appropriate \citep{Hoeffding1963,Massart1990}.
++
++\begin{table}[H]
+ \centering
+ \caption{Experimental lock items. These are fixed before local experiments.}
+ \label{tab:prerun}
+-\begin{tabularx}{\textwidth}{@{}L{0.34\textwidth}Y@{}}
++\small
++\begin{tabularx}{\textwidth}{@{}L{0.30\textwidth}Y@{}}
+ \toprule
+ Item & Required lock \\
+ \midrule
+-Visible context & Define $\chi_{B1}(x)$ and verify it excludes latent readiness and claim provenance. \\
++Visible context & Define $\chi_{B1}(x)$ and verify it excludes latent safety truth and claim provenance. \\
+ Dominance table & Pre-register observer priority by proposition family; do not tune after seeing results. \\
+ Freshness windows & Fix timestamp decay and stale-claim thresholds by proposition family. \\
+ Ablation set & Use the six conditions in \S\ref{sec:benchmark}; no solver changes across conditions. \\
+ Episode bank & Generate or export latent episodes once; reuse across all conditions. \\
+ Metrics & Primary: zero-violation regret and safety--service tradeoff. Secondary: emissions/fairness translations. \\
+-Decision & Scale to full twin only if fixed-solver provenance preservation separates from erasure and placebo. \\
++Stopping rule & Scale to full twin only if fixed-solver provenance preservation separates from erasure and placebo. \\
++Shareable output & Summary CSV, paired-delta CSV, diagnostics JSON, manifest JSON, preflight manifest, and short report. \\
+ \bottomrule
+ \end{tabularx}
+ \end{table}
+@@ -662,14 +779,37 @@
+ \section{Implementation witness}
+ \label{sec:implementation}
+ 
+-The artifact package accompanying this paper contains a \texttt{Berth-1-Conflict} scaffold. Its role is contractual rather than evidentiary. In preflight mode it validates schema, manifests, ablation condition names, and output paths without generating results. Result generation is intentionally explicit. This prevents accidental synthetic smoke tests from being treated as evidence.
++The artifact package contains a \texttt{Berth-1-Conflict} scaffold. Its role is contractual rather than evidentiary. In preflight mode it validates schema, manifests, ablation condition names, and output paths without generating results. Result generation is intentionally explicit. This prevents accidental synthetic smoke tests from being treated as evidence.
+ 
+-The dominance-gated EcoFair-style wrapper is an implementation witness, not the contribution. Any MARL solver can be used if it obeys the frozen-solver ablation contract. This interpretation is supported only if the separation tracks the process-state semantics rather than the solver identity.
++\begin{table}[H]
++\centering
++\caption{Executable modes and evidentiary status.}
++\label{tab:executable-modes}
++\small
++\begin{tabularx}{\textwidth}{@{}L{0.24\textwidth}L{0.25\textwidth}Y@{}}
++\toprule
++Mode & Command intent & Evidentiary status \\
++\midrule
++Preflight & Validate schema, leakage guard, manifest, condition names, and dominance versions. & Contract check only. No results. \\
++Synthetic smoke & Run the fixed solver on generated episodes with explicit \texttt{--allow-synthetic-results}. & Software sanity check. Not maritime evidence unless declared as a locked synthetic benchmark. \\
++Replay run & Run the same ablation interface on an actual replay CSV exported from the maritime twin. & First admissible empirical evidence for the paper. \\
++Packaging & Bundle summary, paired deltas, diagnostics, manifests, and report. & Shareable artifact for review and follow-up analysis. \\
++\bottomrule
++\end{tabularx}
++\end{table}
++
++The dominance-gated EcoFair-style wrapper is an implementation witness, not the contribution. Any MARL solver can be used if it obeys the frozen-solver ablation contract. This interpretation is supported only if the separation tracks the process-state semantics rather than the solver identity. In particular, local experiments should first run the scaffold exactly as specified; solver improvements belong in a later study after semantic separation is established.
+ 
+ \section{Limitations and threats to validity}
+ \label{sec:limitations}
+ 
+-First, the separation theorem is deliberately minimal. It proves that observer--situation provenance can be necessary, not that large maritime systems always exhibit the same separation. Second, dominance orders are domain artifacts. If authority or freshness rules are tuned after observing benchmark outcomes, the experiment becomes invalid. Third, certification soundness is logical soundness, not empirical truth. Physical validity still depends on calibrated sensors, reliable human authority, and simulator fidelity. Fourth, fairness and emissions translations are secondary and require replay calibration; they are not treated as primary theory claims. Fifth, OSL, EcoFair-CH-MARL, and R-CMASP are contemporary preprints rather than mature peer-reviewed baselines; they are therefore positioned as immediate technical neighbors while relying on established stochastic-control, epistemic-logic, provenance, and MARL literature for the broader scholarly spine.
++The central limitation is scope. The separation theorem proves that observer--situation provenance can be necessary, not that every maritime coordination instance requires \OSCMASP{} semantics. The active regime is expected to be situations with safety-critical or service-critical actions, competing reports, and pre-registered authority/freshness rules. In low-conflict or purely stochastic-noise regimes, a fused belief state may be sufficient.
++
++A second limitation is authority calibration. Dominance orders are domain artifacts. If authority or freshness rules are tuned after observing benchmark outcomes, the experiment becomes invalid. This is why the pre-run lock treats $\mathcal D$, freshness windows, and tie rules as versioned process parameters.
++
++A third limitation is the distinction between logical soundness and empirical truth. Certificate soundness means that the emitted support set is internally satisfiable and entails the stated action preconditions. It does not prove that the world satisfies those preconditions. Physical validity still depends on calibrated sensors, reliable human authority, and simulator fidelity.
++
++A fourth limitation concerns secondary metrics. Fairness and emissions translations are meaningful only when replay calibration supports them. If denominator diagnostics fail for Gini, Gini should be reported as descriptive only, while direct service proxies or absolute pairwise disparity carry the proof burden.
+ 
+ \begin{table}[H]
+ \centering
+@@ -683,6 +823,7 @@
+ Hidden truth leaks through ordinary features & Lock $\chi_{B1}$; run a leakage test on the provenance-erased condition. \\
+ Dominance order is outcome-tuned & Register $\mathcal D$, freshness windows, and tie rules before replay. \\
+ Solver improvement is mistaken for semantics & Freeze solver, seeds, action costs, and latent episode bank. \\
++Synthetic smoke tests are mistaken for evidence & Require an explicit synthetic flag and label outputs as software checks. \\
+ Fairness lift overclaims beyond replay support & Certify only positive replay coefficients; otherwise report as diagnostics. \\
+ Minimal benchmark lacks ecological validity & Use only as an active-regime screen before maritime-twin replay. \\
+ \bottomrule
+@@ -694,7 +835,8 @@
+ 
+ \OSCMASP{} proposes a process-level account of regulated multi-agent coordination under fragmented operational truth. Its novelty is not a new hierarchy, belief layer, or LLM wrapper. It is the decision-theoretic status of observer--situation provenance: when contradictions are action-relevant, erasing provenance can alter regret and feasibility even under a frozen solver. The formal results establish that provenance can be part of the control problem rather than only part of an explanation layer.
+ 
+-The next empirical step is a locked, paired, solver-isolated \textsc{Berth-1-Conflict} run, followed by maritime-twin replay only if the minimal separation appears under the pre-registered conditions. If the separation does not appear, the response should not be to add controller depth; it should be to identify the narrower operational regime in which observer--situation provenance is active.
++The next empirical step is a locked, paired, solver-isolated \textsc{Berth-1-Conflict} run. The first local run should be preflight. The second should be a synthetic smoke test only to verify the pipeline. The first paper-relevant run should use an actual replay CSV exported from the maritime twin. If the minimal separation does not appear, the response should not be to add controller depth; it should be to identify the narrower operational regime in which observer--situation provenance is active.
++
+ 
+ 
+ \appendix
+Only in os_cmasp_repo_update_v30/manuscript: main.toc

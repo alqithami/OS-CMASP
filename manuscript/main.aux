@@ -1,0 +1,534 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {paragraph}{Reader roadmap.}{4}{section*.2}\protected@file@percent }
+\citation{Shapley1953,Littman1994}
+\citation{Bernstein2002,OliehoekAmato2016}
+\citation{Nayyar2013}
+\citation{Altman1999}
+\citation{GarciaFernandez2015,Achiam2017,Alshiekh2018}
+\@writefile{toc}{\contentsline {paragraph}{Evidence status.}{5}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{5}{section.1}\protected@file@percent }
+\newlabel{sec:introduction}{{1}{5}{Introduction}{section.1}{}}
+\newlabel{sec:introduction@cref}{{[section][1][]1}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Contributions.}{6}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scope.}{6}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Claim hierarchy and non-stacking scope}{6}{section.2}\protected@file@percent }
+\newlabel{sec:claim-hierarchy}{{2}{6}{Claim hierarchy and non-stacking scope}{section.2}{}}
+\newlabel{sec:claim-hierarchy@cref}{{[section][2][]2}{[1][6][]6}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Claim hierarchy for the paper. Primary claims are semantic and solver-independent; metric claims are secondary.}}{7}{table.1}\protected@file@percent }
+\newlabel{tab:claim-hierarchy}{{1}{7}{Claim hierarchy for the paper. Primary claims are semantic and solver-independent; metric claims are secondary}{table.1}{}}
+\newlabel{tab:claim-hierarchy@cref}{{[table][1][]1}{[1][6][]7}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Non-stacking criterion.}{7}{section*.6}\protected@file@percent }
+\newlabel{def:provenance-active-regime-main}{{2.1}{7}{Provenance-active regime}{definition.2.1}{}}
+\newlabel{def:provenance-active-regime-main@cref}{{[definition][1][2]2.1}{[1][7][]7}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Related work and precise delta}{7}{section.3}\protected@file@percent }
+\newlabel{sec:related}{{3}{7}{Related work and precise delta}{section.3}{}}
+\newlabel{sec:related@cref}{{[section][3][]3}{[1][7][]7}{}{}{}}
+\citation{Shapley1953,Littman1994}
+\citation{Bernstein2002,OliehoekAmato2016}
+\citation{Nayyar2013}
+\citation{LiuZhang2023InfoSharing}
+\citation{Altman1999}
+\citation{GarciaFernandez2015,Achiam2017,Chow2018}
+\citation{Alshiekh2018,Carr2023ShieldingPOMDP}
+\citation{Alqithami2025CHMARL,Alqithami2026EcoFair}
+\citation{Lowe2017,Foerster2018COMA}
+\citation{Sunehag2018VDN,Rashid2018QMIX}
+\citation{SchroederdeWitt2019MACKRL}
+\citation{Fagin1995,HalpernMoses1990,vanDitmarsch2007,Baltag1998}
+\citation{BolanderAndersen2011,Bolander2017Gentle,LiuLiu2018MEP,Liberman2020TermModal}
+\citation{GmytrasiewiczDoshi2005}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}POSGs, Dec-POMDPs, and information structure}{8}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Constrained RL, safe RL, and shielding}{8}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}MARL solver families}{8}{subsection.3.3}\protected@file@percent }
+\citation{Doyle1979,deKleer1986,McAllester1990TMS}
+\citation{AGM1985}
+\citation{Dung1995Argumentation}
+\citation{Buneman2001Provenance,Cheney2009Provenance,Moreau2013PROV}
+\citation{HallLlinas1997Fusion,Li2024MSIF,DongNaumann2009DataFusion}
+\citation{Dempster1967,Shafer1976,Josang2016SubjectiveLogic}
+\citation{Dong2025RCMASP}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Epistemic logic, epistemic planning, and interactive beliefs}{9}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Truth maintenance, belief revision, and non-monotonic support}{9}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Provenance, trust, and multi-source data fusion}{9}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Simulator-coupled processes and maritime logistics}{9}{subsection.3.7}\protected@file@percent }
+\citation{Steenken2004,SongDong2012}
+\citation{Li2019LogisticsMARL}
+\citation{Xu2024ECRRL}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Existing mechanisms already cover many pieces of the problem. The OS-CMASP delta is not any single ingredient; it is the process-level coupling of provenance-bearing claim state, contradiction-aware admissibility, epistemic exception actions, and fixed-solver semantic ablation.}}{10}{table.2}\protected@file@percent }
+\newlabel{tab:related-delta-expanded}{{2}{10}{Existing mechanisms already cover many pieces of the problem. The OS-CMASP delta is not any single ingredient; it is the process-level coupling of provenance-bearing claim state, contradiction-aware admissibility, epistemic exception actions, and fixed-solver semantic ablation}{table.2}{}}
+\newlabel{tab:related-delta-expanded@cref}{{[table][2][]2}{[1][10][]10}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Precise novelty statement.}{10}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Running example: berth-readiness under conflicting provenance}{10}{section.4}\protected@file@percent }
+\newlabel{sec:running-example}{{4}{10}{Running example: berth-readiness under conflicting provenance}{section.4}{}}
+\newlabel{sec:running-example@cref}{{[section][4][]4}{[1][10][]10}{}{}{}}
+\citation{Kaelbling1998,Bernstein2002}
+\citation{Nayyar2013,SchroederdeWitt2019MACKRL,LiuZhang2023InfoSharing}
+\citation{GarciaFernandez2015,Alshiekh2018,Carr2023ShieldingPOMDP}
+\citation{Doyle1979,deKleer1986,AGM1985,McAllester1990TMS}
+\citation{Buneman2001Provenance,Cheney2009Provenance,DongNaumann2009DataFusion}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Illustrative claim base for a single berth-admission decision. The table separates measurement content from decision authority.}}{11}{table.3}\protected@file@percent }
+\newlabel{tab:running-example}{{3}{11}{Illustrative claim base for a single berth-admission decision. The table separates measurement content from decision authority}{table.3}{}}
+\newlabel{tab:running-example@cref}{{[table][3][]3}{[1][10][]11}{}{}{}}
+\newlabel{ex:two-aggregates}{{4.1}{11}{Two superficially identical aggregates}{definition.4.1}{}}
+\newlabel{ex:two-aggregates@cref}{{[definition][1][4]4.1}{[1][11][]11}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Why the berth example is not exhausted by common neighboring formalisms.}}{12}{table.4}\protected@file@percent }
+\newlabel{tab:running-deltas}{{4}{12}{Why the berth example is not exhausted by common neighboring formalisms}{table.4}{}}
+\newlabel{tab:running-deltas@cref}{{[table][4][]4}{[1][11][]12}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Notation and modeling commitments}{12}{section.5}\protected@file@percent }
+\newlabel{sec:notation}{{5}{12}{Notation and modeling commitments}{section.5}{}}
+\newlabel{sec:notation@cref}{{[section][5][]5}{[1][12][]12}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Core notation and modeling role.}}{13}{table.5}\protected@file@percent }
+\newlabel{tab:notation}{{5}{13}{Core notation and modeling role}{table.5}{}}
+\newlabel{tab:notation@cref}{{[table][5][]5}{[1][12][]13}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Semantic roles separated by the process. The final column states the failure mode if the role is collapsed.}}{13}{table.6}\protected@file@percent }
+\newlabel{tab:semantic-roles}{{6}{13}{Semantic roles separated by the process. The final column states the failure mode if the role is collapsed}{table.6}{}}
+\newlabel{tab:semantic-roles@cref}{{[table][6][]6}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Observer--Situation Constrained Process Model}{14}{section.6}\protected@file@percent }
+\newlabel{sec:model}{{6}{14}{Observer--Situation Constrained Process Model}{section.6}{}}
+\newlabel{sec:model@cref}{{[section][6][]6}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Observer--situation carrier, formula language, and claims}{14}{subsection.6.1}\protected@file@percent }
+\newlabel{def:carrier}{{6.1}{14}{Observer--situation carrier}{definition.6.1}{}}
+\newlabel{def:carrier@cref}{{[definition][1][6]6.1}{[1][14][]14}{}{}{}}
+\newlabel{def:language}{{6.2}{14}{Formula language and consistency oracle}{definition.6.2}{}}
+\newlabel{def:language@cref}{{[definition][2][6]6.2}{[1][14][]14}{}{}{}}
+\newlabel{def:claimbase}{{6.3}{14}{Claim base}{definition.6.3}{}}
+\newlabel{def:claimbase@cref}{{[definition][3][6]6.3}{[1][14][]14}{}{}{}}
+\citation{Doyle1979,deKleer1986,McAllester1990TMS}
+\newlabel{def:dominance}{{6.4}{15}{Proposition-family dominance scheme}{definition.6.4}{}}
+\newlabel{def:dominance@cref}{{[definition][4][6]6.4}{[1][14][]15}{}{}{}}
+\newlabel{def:contradiction}{{6.5}{15}{Contradiction graph}{definition.6.5}{}}
+\newlabel{def:contradiction@cref}{{[definition][5][6]6.5}{[1][15][]15}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}The OS-CPOSG}{15}{subsection.6.2}\protected@file@percent }
+\newlabel{def:oscposg}{{6.7}{15}{Observer--Situation Constrained POSG}{definition.6.7}{}}
+\newlabel{def:oscposg@cref}{{[definition][7][6]6.7}{[1][15][]15}{}{}{}}
+\newlabel{def:os-cmasp}{{6.8}{16}{Simulator-coupled subclass}{definition.6.8}{}}
+\newlabel{def:os-cmasp@cref}{{[definition][8][6]6.8}{[1][16][]16}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Dominant support, certification, and admissibility}{16}{subsection.6.3}\protected@file@percent }
+\newlabel{def:drel}{{6.9}{16}{Dominant relevant claim set}{definition.6.9}{}}
+\newlabel{def:drel@cref}{{[definition][9][6]6.9}{[1][16][]16}{}{}{}}
+\newlabel{def:certificate}{{6.10}{16}{Dominant support certificate}{definition.6.10}{}}
+\newlabel{def:certificate@cref}{{[definition][10][6]6.10}{[1][16][]16}{}{}{}}
+\newlabel{def:kappa}{{6.12}{17}{Contradiction mass}{definition.6.12}{}}
+\newlabel{def:kappa@cref}{{[definition][12][6]6.12}{[1][17][]17}{}{}{}}
+\newlabel{def:admissibility}{{6.13}{17}{Contradiction-aware admissibility}{definition.6.13}{}}
+\newlabel{def:admissibility@cref}{{[definition][13][6]6.13}{[1][17][]17}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Theoretical properties}{17}{section.7}\protected@file@percent }
+\newlabel{sec:theory}{{7}{17}{Theoretical properties}{section.7}{}}
+\newlabel{sec:theory@cref}{{[section][7][]7}{[1][17][]17}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Containment and boundary cases}{17}{subsection.7.1}\protected@file@percent }
+\newlabel{prop:containment}{{7.1}{17}{Containment}{definition.7.1}{}}
+\newlabel{prop:containment@cref}{{[definition][1][7]7.1}{[1][17][]17}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Observer-collapse separation}{18}{subsection.7.2}\protected@file@percent }
+\newlabel{def:visible}{{7.2}{18}{Visible context and provenance-erased policies}{definition.7.2}{}}
+\newlabel{def:visible@cref}{{[definition][2][7]7.2}{[1][18][]18}{}{}{}}
+\newlabel{thm:separation}{{7.3}{18}{Observer-collapse separation}{definition.7.3}{}}
+\newlabel{thm:separation@cref}{{[definition][3][7]7.3}{[1][18][]18}{}{}{}}
+\citation{Alshiekh2018,Carr2023ShieldingPOMDP}
+\newlabel{cor:safety}{{7.4}{19}{Safety-budget separation}{definition.7.4}{}}
+\newlabel{cor:safety@cref}{{[definition][4][7]7.4}{[1][19][]19}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Certification, shields, and soundness}{19}{subsection.7.3}\protected@file@percent }
+\newlabel{thm:soundness}{{7.5}{19}{Certificate soundness}{definition.7.5}{}}
+\newlabel{thm:soundness@cref}{{[definition][5][7]7.5}{[1][19][]19}{}{}{}}
+\newlabel{prop:gate-safety}{{7.6}{19}{Gate safety by construction}{definition.7.6}{}}
+\newlabel{prop:gate-safety@cref}{{[definition][6][7]7.6}{[1][19][]19}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}What the theorems do and do not establish}{20}{subsection.7.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Theory status and validation responsibility.}}{20}{table.7}\protected@file@percent }
+\newlabel{tab:theory-status}{{7}{20}{Theory status and validation responsibility}{table.7}{}}
+\newlabel{tab:theory-status@cref}{{[table][7][]7}{[1][20][]20}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Minimal benchmark: Berth-1-Conflict}{20}{section.8}\protected@file@percent }
+\newlabel{sec:benchmark}{{8}{20}{Minimal benchmark: Berth-1-Conflict}{section.8}{}}
+\newlabel{sec:benchmark@cref}{{[section][8][]8}{[1][20][]20}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Environment}{20}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Scenario families}{21}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Ablation contract}{21}{subsection.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Metrics}{22}{subsection.8.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Replay calibration and locked validation protocol}{22}{section.9}\protected@file@percent }
+\newlabel{sec:validation}{{9}{22}{Replay calibration and locked validation protocol}{section.9}{}}
+\newlabel{sec:validation@cref}{{[section][9][]9}{[1][22][]22}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Layer 0: preflight}{22}{subsection.9.1}\protected@file@percent }
+\citation{Hoeffding1963,Massart1990}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Layer 1: semantic separation}{23}{subsection.9.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Layer 2: maritime replay}{23}{subsection.9.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.4}Layer 3: metric lift}{23}{subsection.9.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Experimental lock items. These are fixed before local experiments.}}{23}{table.8}\protected@file@percent }
+\newlabel{tab:prerun}{{8}{23}{Experimental lock items. These are fixed before local experiments}{table.8}{}}
+\newlabel{tab:prerun@cref}{{[table][8][]8}{[1][23][]23}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Implementation witness}{24}{section.10}\protected@file@percent }
+\newlabel{sec:implementation}{{10}{24}{Implementation witness}{section.10}{}}
+\newlabel{sec:implementation@cref}{{[section][10][]10}{[1][23][]24}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Executable modes and evidentiary status.}}{24}{table.9}\protected@file@percent }
+\newlabel{tab:executable-modes}{{9}{24}{Executable modes and evidentiary status}{table.9}{}}
+\newlabel{tab:executable-modes@cref}{{[table][9][]9}{[1][24][]24}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {11}Limitations and threats to validity}{24}{section.11}\protected@file@percent }
+\newlabel{sec:limitations}{{11}{24}{Limitations and threats to validity}{section.11}{}}
+\newlabel{sec:limitations@cref}{{[section][11][]11}{[1][24][]24}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Main threats to validity and protocol controls.}}{25}{table.10}\protected@file@percent }
+\newlabel{tab:threats}{{10}{25}{Main threats to validity and protocol controls}{table.10}{}}
+\newlabel{tab:threats@cref}{{[table][10][]10}{[1][25][]25}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {12}Conclusion}{25}{section.12}\protected@file@percent }
+\newlabel{sec:conclusion}{{12}{25}{Conclusion}{section.12}{}}
+\newlabel{sec:conclusion@cref}{{[section][12][]12}{[1][25][]25}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Proof details for the safety-budget construction}{25}{appendix.A}\protected@file@percent }
+\newlabel{app:safety-proof}{{A}{25}{Proof details for the safety-budget construction}{appendix.A}{}}
+\newlabel{app:safety-proof@cref}{{[section][1][]A}{[1][25][]25}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Replay schema}{26}{appendix.B}\protected@file@percent }
+\newlabel{app:schema}{{B}{26}{Replay schema}{appendix.B}{}}
+\newlabel{app:schema@cref}{{[section][2][]B}{[1][25][]26}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Bibliographic positioning}{26}{appendix.C}\protected@file@percent }
+\newlabel{app:ref-policy}{{C}{26}{Bibliographic positioning}{appendix.C}{}}
+\newlabel{app:ref-policy@cref}{{[section][3][]C}{[1][26][]26}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {D}Technical supplement: budget lifts, replay certification, and operationalization}{26}{appendix.D}\protected@file@percent }
+\newlabel{app:extended-technical-supplement}{{D}{26}{Technical supplement: budget lifts, replay certification, and operationalization}{appendix.D}{}}
+\newlabel{app:extended-technical-supplement@cref}{{[section][4][]D}{[1][26][]26}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {E}Extended non-stacking rationale}{26}{appendix.E}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {E.1}Non-stacking criterion and refinement ladder}{27}{subsection.E.1}\protected@file@percent }
+\newlabel{supp:def:stacking}{{E.1}{27}{Stacked architectural augmentation}{definition.E.1}{}}
+\newlabel{supp:def:stacking@cref}{{[definition][1][5]E.1}{[1][27][]27}{}{}{}}
+\newlabel{supp:rem:what-stacking-rules-out}{{E.2}{27}{What this definition rules out}{definition.E.2}{}}
+\newlabel{supp:rem:what-stacking-rules-out@cref}{{[definition][2][5]E.2}{[1][27][]27}{}{}{}}
+\citation{GmytrasiewiczDoshi2005,SchroederdeWitt2019MACKRL,LiuLiu2018MEP}
+\citation{Dong2025RCMASP}
+\citation{GmytrasiewiczDoshi2005}
+\citation{SchroederdeWitt2019MACKRL}
+\citation{LiuLiu2018MEP}
+\@writefile{toc}{\contentsline {subsection}{\numberline {E.2}Cautionary scope and non-claims}{28}{subsection.E.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {F}Expanded budget-bundle and replay-calibration machinery}{28}{appendix.F}\protected@file@percent }
+\newlabel{supp:app:expanded-budget-replay}{{F}{28}{Expanded budget-bundle and replay-calibration machinery}{appendix.F}{}}
+\newlabel{supp:app:expanded-budget-replay@cref}{{[section][6][]F}{[1][28][]28}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.1}A CH-MARL-shaped budget bundle}{28}{subsection.F.1}\protected@file@percent }
+\newlabel{supp:subsec:bundle}{{F.1}{28}{A CH-MARL-shaped budget bundle}{subsection.F.1}{}}
+\newlabel{supp:subsec:bundle@cref}{{[subsection][1][6]F.1}{[1][28][]28}{}{}{}}
+\newlabel{supp:def:bundle}{{F.1}{28}{Minimal CH-MARL-style budget bundle}{definition.F.1}{}}
+\newlabel{supp:def:bundle@cref}{{[definition][1][6]F.1}{[1][28][]28}{}{}{}}
+\newlabel{supp:rem:minimal-fairness}{{F.2}{29}{Why this fairness metric is intentionally minimal}{definition.F.2}{}}
+\newlabel{supp:rem:minimal-fairness@cref}{{[definition][2][6]F.2}{[1][29][]29}{}{}{}}
+\newlabel{supp:thm:bundle-impossibility}{{F.3}{29}{Two-class bundle impossibility under provenance erasure}{definition.F.3}{}}
+\newlabel{supp:thm:bundle-impossibility@cref}{{[definition][3][6]F.3}{[1][29][]29}{}{}{}}
+\newlabel{supp:cor:bundle-tradeoff}{{F.4}{31}{Linear budget tradeoff under provenance erasure}{definition.F.4}{}}
+\newlabel{supp:cor:bundle-tradeoff@cref}{{[definition][4][6]F.4}{[1][30][]31}{}{}{}}
+\newlabel{supp:cor:intervention-tradeoff}{{F.5}{31}{Intervention can only buy down the burden linearly}{definition.F.5}{}}
+\newlabel{supp:cor:intervention-tradeoff@cref}{{[definition][5][6]F.5}{[1][31][]31}{}{}{}}
+\newlabel{supp:rem:bundle-scope}{{F.6}{31}{What the bundle theorem does and does not establish}{definition.F.6}{}}
+\newlabel{supp:rem:bundle-scope@cref}{{[definition][6][6]F.6}{[1][31][]31}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.2}Toward an EcoFair-aligned budget lift}{32}{subsection.F.2}\protected@file@percent }
+\newlabel{supp:subsec:budget-lift}{{F.2}{32}{Toward an EcoFair-aligned budget lift}{subsection.F.2}{}}
+\newlabel{supp:subsec:budget-lift@cref}{{[subsection][2][6]F.2}{[1][31][]32}{}{}{}}
+\newlabel{supp:def:actual-metrics}{{F.7}{32}{EcoFair-aligned benchmark metrics}{definition.F.7}{}}
+\newlabel{supp:def:actual-metrics@cref}{{[definition][7][6]F.7}{[1][32][]32}{}{}{}}
+\newlabel{supp:def:calibration}{{F.8}{32}{Benchmark-side calibration assumptions}{definition.F.8}{}}
+\newlabel{supp:def:calibration@cref}{{[definition][8][6]F.8}{[1][32][]32}{}{}{}}
+\newlabel{supp:prop:budget-lift}{{F.9}{32}{EcoFair-aligned metric lift}{definition.F.9}{}}
+\newlabel{supp:prop:budget-lift@cref}{{[definition][9][6]F.9}{[1][32][]32}{}{}{}}
+\citation{Alqithami2026EcoFair}
+\newlabel{supp:cor:budget-overshoot}{{F.10}{33}{EcoFair-aligned overshoot tradeoff}{definition.F.10}{}}
+\newlabel{supp:cor:budget-overshoot@cref}{{[definition][10][6]F.10}{[1][32][]33}{}{}{}}
+\newlabel{supp:rem:budget-lift-caution}{{F.11}{33}{Why this lift is still cautious}{definition.F.11}{}}
+\newlabel{supp:rem:budget-lift-caution@cref}{{[definition][11][6]F.11}{[1][33][]33}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.3}Simulator-grounded calibration by counterfactual replay}{33}{subsection.F.3}\protected@file@percent }
+\newlabel{supp:subsec:sim-grounded-calibration}{{F.3}{33}{Simulator-grounded calibration by counterfactual replay}{subsection.F.3}{}}
+\newlabel{supp:subsec:sim-grounded-calibration@cref}{{[subsection][3][6]F.3}{[1][33][]33}{}{}{}}
+\newlabel{supp:def:twin-idling-constant}{{F.12}{33}{Twin-native idling constant}{definition.F.12}{}}
+\newlabel{supp:def:twin-idling-constant@cref}{{[definition][12][6]F.12}{[1][33][]33}{}{}{}}
+\newlabel{supp:prop:twin-emission-calibration}{{F.13}{34}{Emission calibration from twin-native idling semantics}{definition.F.13}{}}
+\newlabel{supp:prop:twin-emission-calibration@cref}{{[definition][13][6]F.13}{[1][33][]34}{}{}{}}
+\newlabel{supp:def:episode-calibration-record}{{F.14}{34}{Episode-matched fairness calibration record}{definition.F.14}{}}
+\newlabel{supp:def:episode-calibration-record@cref}{{[definition][14][6]F.14}{[1][34][]34}{}{}{}}
+\newlabel{supp:def:quantile-certified-slope}{{F.15}{34}{Quantile-certified replay slope}{definition.F.15}{}}
+\newlabel{supp:def:quantile-certified-slope@cref}{{[definition][15][6]F.15}{[1][34][]34}{}{}{}}
+\newlabel{supp:prop:confidence-envelope}{{F.16}{35}{Confidence-certified replay envelope}{definition.F.16}{}}
+\newlabel{supp:prop:confidence-envelope@cref}{{[definition][16][6]F.16}{[1][34][]35}{}{}{}}
+\newlabel{supp:cor:confidence-budget-lift}{{F.17}{35}{Confidence-certified budget lift on a replay distribution}{definition.F.17}{}}
+\newlabel{supp:cor:confidence-budget-lift@cref}{{[definition][17][6]F.17}{[1][35][]35}{}{}{}}
+\newlabel{supp:def:class-separated-witness}{{F.18}{36}{Class-separated cost witness}{definition.F.18}{}}
+\newlabel{supp:def:class-separated-witness@cref}{{[definition][18][6]F.18}{[1][35][]36}{}{}{}}
+\newlabel{supp:prop:minmax-envelope}{{F.19}{36}{Min--max carries a lower envelope on class-separated witnesses}{definition.F.19}{}}
+\newlabel{supp:prop:minmax-envelope@cref}{{[definition][19][6]F.19}{[1][36][]36}{}{}{}}
+\newlabel{supp:prop:gini-envelope}{{F.20}{36}{Conditional Gini lower envelope on range-bounded class-separated witnesses}{definition.F.20}{}}
+\newlabel{supp:prop:gini-envelope@cref}{{[definition][20][6]F.20}{[1][36][]36}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.4}Relaxing witness assumptions under drift and spillover}{37}{subsection.F.4}\protected@file@percent }
+\newlabel{supp:subsec:relaxed-witnesses}{{F.4}{37}{Relaxing witness assumptions under drift and spillover}{subsection.F.4}{}}
+\newlabel{supp:subsec:relaxed-witnesses@cref}{{[subsection][4][6]F.4}{[1][37][]37}{}{}{}}
+\newlabel{supp:def:drift-contaminated-witness}{{F.21}{37}{Drift-contaminated class-separated witness}{definition.F.21}{}}
+\newlabel{supp:def:drift-contaminated-witness@cref}{{[definition][21][6]F.21}{[1][37][]37}{}{}{}}
+\newlabel{supp:rem:contamination-interpretation}{{F.22}{37}{Interpretation of the contamination terms}{definition.F.22}{}}
+\newlabel{supp:rem:contamination-interpretation@cref}{{[definition][22][6]F.22}{[1][37][]37}{}{}{}}
+\newlabel{supp:prop:minmax-contaminated}{{F.23}{38}{Min--max lower envelope under bounded drift contamination}{definition.F.23}{}}
+\newlabel{supp:prop:minmax-contaminated@cref}{{[definition][23][6]F.23}{[1][37][]38}{}{}{}}
+\newlabel{supp:prop:gini-contaminated}{{F.24}{38}{Conditional Gini lower envelope under bounded spillover}{definition.F.24}{}}
+\newlabel{supp:prop:gini-contaminated@cref}{{[definition][24][6]F.24}{[1][38][]38}{}{}{}}
+\newlabel{supp:cor:contaminated-proof-carrying}{{F.25}{39}{Operational-range proof-carrying regime under contamination}{definition.F.25}{}}
+\newlabel{supp:cor:contaminated-proof-carrying@cref}{{[definition][25][6]F.25}{[1][39][]39}{}{}{}}
+\newlabel{supp:cor:ratio-normalized-contaminated}{{F.26}{39}{Ratio-normalized contaminated envelope}{definition.F.26}{}}
+\newlabel{supp:cor:ratio-normalized-contaminated@cref}{{[definition][26][6]F.26}{[1][39][]39}{}{}{}}
+\newlabel{supp:rem:relaxed-witness-novelty}{{F.27}{39}{Why this relaxation matters for the novelty claim}{definition.F.27}{}}
+\newlabel{supp:rem:relaxed-witness-novelty@cref}{{[definition][27][6]F.27}{[1][39][]39}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.5}Matched-seed replay certification of contamination}{40}{subsection.F.5}\protected@file@percent }
+\newlabel{supp:subsec:matched-seed-contamination}{{F.5}{40}{Matched-seed replay certification of contamination}{subsection.F.5}{}}
+\newlabel{supp:subsec:matched-seed-contamination@cref}{{[subsection][5][6]F.5}{[1][39][]40}{}{}{}}
+\newlabel{supp:def:matched-seed-contam-record}{{F.28}{40}{Matched-seed replay contamination record}{definition.F.28}{}}
+\newlabel{supp:def:matched-seed-contam-record@cref}{{[definition][28][6]F.28}{[1][40][]40}{}{}{}}
+\newlabel{supp:def:witness-dominating-bank}{{F.29}{40}{Witness-dominating matched-seed replay bank}{definition.F.29}{}}
+\newlabel{supp:def:witness-dominating-bank@cref}{{[definition][29][6]F.29}{[1][40][]40}{}{}{}}
+\newlabel{supp:rem:witness-dominating-caution}{{F.30}{41}{Why the witness-dominating condition is the right caution point}{definition.F.30}{}}
+\newlabel{supp:rem:witness-dominating-caution@cref}{{[definition][30][6]F.30}{[1][40][]41}{}{}{}}
+\newlabel{supp:def:ucb-contam}{{F.31}{41}{Upper-confidence contamination quantiles}{definition.F.31}{}}
+\newlabel{supp:def:ucb-contam@cref}{{[definition][31][6]F.31}{[1][40][]41}{}{}{}}
+\newlabel{supp:prop:ucb-contam}{{F.32}{41}{Replay-bank upper-confidence contamination bounds}{definition.F.32}{}}
+\newlabel{supp:prop:ucb-contam@cref}{{[definition][32][6]F.32}{[1][41][]41}{}{}{}}
+\newlabel{supp:cor:joint-replay-certified-contam}{{F.33}{42}{Joint replay-certified contamination regime under a frozen solver}{definition.F.33}{}}
+\newlabel{supp:cor:joint-replay-certified-contam@cref}{{[definition][33][6]F.33}{[1][42][]42}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.6}A witness-free paired-replay route for min--max}{43}{subsection.F.6}\protected@file@percent }
+\newlabel{supp:subsec:witness-free-minmax}{{F.6}{43}{A witness-free paired-replay route for min--max}{subsection.F.6}{}}
+\newlabel{supp:subsec:witness-free-minmax@cref}{{[subsection][6][6]F.6}{[1][43][]43}{}{}{}}
+\newlabel{supp:prop:paired-minmax}{{F.34}{43}{Observable paired-replay min--max lower bound}{definition.F.34}{}}
+\newlabel{supp:prop:paired-minmax@cref}{{[definition][34][6]F.34}{[1][43][]43}{}{}{}}
+\newlabel{supp:cor:witness-free-minmax}{{F.35}{44}{Witness-free replay-certified min--max under a frozen solver}{definition.F.35}{}}
+\newlabel{supp:cor:witness-free-minmax@cref}{{[definition][35][6]F.35}{[1][43][]44}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.7}A more conservative witness-free paired-replay route for Gini}{44}{subsection.F.7}\protected@file@percent }
+\newlabel{supp:subsec:witness-free-gini}{{F.7}{44}{A more conservative witness-free paired-replay route for Gini}{subsection.F.7}{}}
+\newlabel{supp:subsec:witness-free-gini@cref}{{[subsection][7][6]F.7}{[1][44][]44}{}{}{}}
+\newlabel{supp:prop:paired-gini}{{F.36}{45}{Observable paired-replay Gini lower bound}{definition.F.36}{}}
+\newlabel{supp:prop:paired-gini@cref}{{[definition][36][6]F.36}{[1][44][]45}{}{}{}}
+\newlabel{supp:cor:witness-free-gini}{{F.37}{46}{Witness-free replay-certified Gini under a frozen solver}{definition.F.37}{}}
+\newlabel{supp:cor:witness-free-gini@cref}{{[definition][37][6]F.37}{[1][46][]46}{}{}{}}
+\newlabel{supp:rem:witness-free-gini-caution}{{F.38}{47}{Why this does not promote Gini to the paper's main proof carrier}{definition.F.38}{}}
+\newlabel{supp:rem:witness-free-gini-caution@cref}{{[definition][38][6]F.38}{[1][47][]47}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.8}A denominator-free companion to Gini}{47}{subsection.F.8}\protected@file@percent }
+\newlabel{supp:subsec:apd-companion}{{F.8}{47}{A denominator-free companion to Gini}{subsection.F.8}{}}
+\newlabel{supp:subsec:apd-companion@cref}{{[subsection][8][6]F.8}{[1][47][]47}{}{}{}}
+\newlabel{supp:def:apd}{{F.39}{47}{Absolute pairwise disparity}{definition.F.39}{}}
+\newlabel{supp:def:apd@cref}{{[definition][39][6]F.39}{[1][47][]47}{}{}{}}
+\newlabel{supp:prop:paired-apd}{{F.40}{47}{Observable paired-replay lower bound for absolute pairwise disparity}{definition.F.40}{}}
+\newlabel{supp:prop:paired-apd@cref}{{[definition][40][6]F.40}{[1][47][]47}{}{}{}}
+\newlabel{supp:cor:witness-free-apd}{{F.41}{48}{Witness-free replay-certified absolute pairwise disparity under a frozen solver}{definition.F.41}{}}
+\newlabel{supp:cor:witness-free-apd@cref}{{[definition][41][6]F.41}{[1][48][]48}{}{}{}}
+\newlabel{supp:rem:apd-companion}{{F.42}{49}{Why APD is a proof-carrying companion, not a new headline metric}{definition.F.42}{}}
+\newlabel{supp:rem:apd-companion@cref}{{[definition][42][6]F.42}{[1][48][]49}{}{}{}}
+\newlabel{supp:rem:gini-apd-split}{{F.43}{49}{How the Gini/APD split should be used}{definition.F.43}{}}
+\newlabel{supp:rem:gini-apd-split@cref}{{[definition][43][6]F.43}{[1][49][]49}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.9}Replay-certifying the Gini/APD denominator gap}{49}{subsection.F.9}\protected@file@percent }
+\newlabel{supp:subsec:gini-apd-gap}{{F.9}{49}{Replay-certifying the Gini/APD denominator gap}{subsection.F.9}{}}
+\newlabel{supp:subsec:gini-apd-gap@cref}{{[subsection][9][6]F.9}{[1][49][]49}{}{}{}}
+\newlabel{supp:def:positive-burden-total-cost}{{F.44}{49}{Positive-burden total-cost ratio}{definition.F.44}{}}
+\newlabel{supp:def:positive-burden-total-cost@cref}{{[definition][44][6]F.44}{[1][49][]49}{}{}{}}
+\newlabel{supp:def:replay-denominator-band}{{F.45}{49}{Replay-certified denominator band}{definition.F.45}{}}
+\newlabel{supp:def:replay-denominator-band@cref}{{[definition][45][6]F.45}{[1][49][]49}{}{}{}}
+\newlabel{supp:prop:replay-denominator-band}{{F.46}{50}{Replay-certified denominator band on the positive-burden operational range}{definition.F.46}{}}
+\newlabel{supp:prop:replay-denominator-band@cref}{{[definition][46][6]F.46}{[1][50][]50}{}{}{}}
+\newlabel{supp:prop:gini-apd-conversion}{{F.47}{50}{Replay-certified Gini/APD conversion}{definition.F.47}{}}
+\newlabel{supp:prop:gini-apd-conversion@cref}{{[definition][47][6]F.47}{[1][50][]50}{}{}{}}
+\newlabel{supp:cor:apd-to-gini}{{F.48}{50}{Replay-certified inheritance of Gini from APD}{definition.F.48}{}}
+\newlabel{supp:cor:apd-to-gini@cref}{{[definition][48][6]F.48}{[1][50][]50}{}{}{}}
+\newlabel{supp:rem:gini-apd-gap}{{F.49}{51}{How to interpret the replay-certified denominator distortion}{definition.F.49}{}}
+\newlabel{supp:rem:gini-apd-gap@cref}{{[definition][49][6]F.49}{[1][51][]51}{}{}{}}
+\newlabel{supp:rem:witness-free-minmax-novelty}{{F.50}{51}{Why this is the cleaner novelty test for min--max}{definition.F.50}{}}
+\newlabel{supp:rem:witness-free-minmax-novelty@cref}{{[definition][50][6]F.50}{[1][51][]51}{}{}{}}
+\newlabel{supp:rem:replay-cert-novelty}{{F.51}{51}{Why the witness-dominating route is still useful}{definition.F.51}{}}
+\newlabel{supp:rem:replay-cert-novelty@cref}{{[definition][51][6]F.51}{[1][51][]51}{}{}{}}
+\newlabel{supp:rem:fairness-envelope}{{F.52}{51}{What should carry the proof on the fairness side}{definition.F.52}{}}
+\newlabel{supp:rem:fairness-envelope@cref}{{[definition][52][6]F.52}{[1][51][]51}{}{}{}}
+\newlabel{supp:prop:sim-grounded-budget-lift}{{F.53}{52}{Conditional simulator-grounded budget lift}{definition.F.53}{}}
+\newlabel{supp:prop:sim-grounded-budget-lift@cref}{{[definition][53][6]F.53}{[1][52][]52}{}{}{}}
+\newlabel{supp:rem:sim-grounded-caution}{{F.54}{52}{Why this is more careful than a blanket fairness theorem}{definition.F.54}{}}
+\newlabel{supp:rem:sim-grounded-caution@cref}{{[definition][54][6]F.54}{[1][52][]52}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.10}Robustifying replay certification against dependence and seed shift}{52}{subsection.F.10}\protected@file@percent }
+\newlabel{supp:subsec:seed-shift-robust}{{F.10}{52}{Robustifying replay certification against dependence and seed shift}{subsection.F.10}{}}
+\newlabel{supp:subsec:seed-shift-robust@cref}{{[subsection][10][6]F.10}{[1][52][]52}{}{}{}}
+\newlabel{supp:def:seed-blocks}{{F.55}{53}{Seed blocks and conservative block summaries}{definition.F.55}{}}
+\newlabel{supp:def:seed-blocks@cref}{{[definition][55][6]F.55}{[1][52][]53}{}{}{}}
+\newlabel{supp:def:blockwise-cert}{{F.56}{53}{Blockwise replay certification}{definition.F.56}{}}
+\newlabel{supp:def:blockwise-cert@cref}{{[definition][56][6]F.56}{[1][53][]53}{}{}{}}
+\newlabel{supp:prop:block-robust}{{F.57}{53}{Within-block dependence robustification}{definition.F.57}{}}
+\newlabel{supp:prop:block-robust@cref}{{[definition][57][6]F.57}{[1][53][]53}{}{}{}}
+\newlabel{supp:def:seed-shift}{{F.58}{54}{Bounded seed-shift radius}{definition.F.58}{}}
+\newlabel{supp:def:seed-shift@cref}{{[definition][58][6]F.58}{[1][53][]54}{}{}{}}
+\newlabel{supp:prop:seed-shift-transfer}{{F.59}{54}{Seed-shift transfer of certified block events}{definition.F.59}{}}
+\newlabel{supp:prop:seed-shift-transfer@cref}{{[definition][59][6]F.59}{[1][54][]54}{}{}{}}
+\newlabel{supp:cor:shift-aware-replay}{{F.60}{54}{Shift-aware replay certification of fairness and denominator events}{definition.F.60}{}}
+\newlabel{supp:cor:shift-aware-replay@cref}{{[definition][60][6]F.60}{[1][54][]54}{}{}{}}
+\newlabel{supp:rem:seed-shift-caution}{{F.61}{54}{What this robustness layer does and does not buy}{definition.F.61}{}}
+\newlabel{supp:rem:seed-shift-caution@cref}{{[definition][61][6]F.61}{[1][54][]54}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.11}Twin-specific block units and seed-shift diagnostics}{55}{subsection.F.11}\protected@file@percent }
+\newlabel{supp:subsec:twin-specific-shift}{{F.11}{55}{Twin-specific block units and seed-shift diagnostics}{subsection.F.11}{}}
+\newlabel{supp:subsec:twin-specific-shift@cref}{{[subsection][11][6]F.11}{[1][54][]55}{}{}{}}
+\newlabel{supp:def:maritime-block-key}{{F.62}{55}{Maritime replay descriptor and block key}{definition.F.62}{}}
+\newlabel{supp:def:maritime-block-key@cref}{{[definition][62][6]F.62}{[1][55][]55}{}{}{}}
+\newlabel{supp:rem:block-key-not-controller}{{F.63}{55}{Why the block key is part of the process claim}{definition.F.63}{}}
+\newlabel{supp:rem:block-key-not-controller@cref}{{[definition][63][6]F.63}{[1][55][]55}{}{}{}}
+\newlabel{supp:def:key-within-shift}{{F.64}{55}{Scenario-key and within-key seed shift}{definition.F.64}{}}
+\newlabel{supp:def:key-within-shift@cref}{{[definition][64][6]F.64}{[1][55][]55}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces A concrete maritime block key for replay certification. The key is intentionally operational rather than architectural: it groups episodes by scenario-generation and port-operating conditions, not by controller internals.}}{56}{table.11}\protected@file@percent }
+\newlabel{supp:tab:maritime-block-key}{{11}{56}{A concrete maritime block key for replay certification. The key is intentionally operational rather than architectural: it groups episodes by scenario-generation and port-operating conditions, not by controller internals}{table.11}{}}
+\newlabel{supp:tab:maritime-block-key@cref}{{[table][11][]11}{[1][55][]56}{}{}{}}
+\newlabel{supp:prop:key-residual-shift}{{F.65}{56}{Key/residual decomposition of seed shift}{definition.F.65}{}}
+\newlabel{supp:prop:key-residual-shift@cref}{{[definition][65][6]F.65}{[1][56][]56}{}{}{}}
+\newlabel{supp:def:finite-key-radius}{{F.66}{56}{Finite-key upper-confidence radius}{definition.F.66}{}}
+\newlabel{supp:def:finite-key-radius@cref}{{[definition][66][6]F.66}{[1][56][]56}{}{}{}}
+\newlabel{supp:prop:finite-key-radius}{{F.67}{57}{Conservative finite-key seed-shift certificate}{definition.F.67}{}}
+\newlabel{supp:prop:finite-key-radius@cref}{{[definition][67][6]F.67}{[1][56][]57}{}{}{}}
+\newlabel{supp:def:within-diagnostics}{{F.68}{57}{Operational residual diagnostics}{definition.F.68}{}}
+\newlabel{supp:def:within-diagnostics@cref}{{[definition][68][6]F.68}{[1][57][]57}{}{}{}}
+\newlabel{supp:cor:twin-specific-transfer}{{F.69}{57}{Twin-specific shift-aware replay transfer}{definition.F.69}{}}
+\newlabel{supp:cor:twin-specific-transfer@cref}{{[definition][69][6]F.69}{[1][57][]57}{}{}{}}
+\newlabel{supp:rem:radius-use}{{F.70}{57}{How to use the radius in the paper}{definition.F.70}{}}
+\newlabel{supp:rem:radius-use@cref}{{[definition][70][6]F.70}{[1][57][]57}{}{}{}}
+\citation{Alqithami2026OSL}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.12}Certified actions and explanation soundness}{58}{subsection.F.12}\protected@file@percent }
+\newlabel{supp:thm:certificate-soundness}{{F.71}{58}{Certified-action soundness}{definition.F.71}{}}
+\newlabel{supp:thm:certificate-soundness@cref}{{[definition][71][6]F.71}{[1][57][]58}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.13}Bounded-overhead inheritance}{58}{subsection.F.13}\protected@file@percent }
+\newlabel{supp:prop:inheritance}{{F.72}{58}{Regret and violation transfer under bounded epistemic interventions}{definition.F.72}{}}
+\newlabel{supp:prop:inheritance@cref}{{[definition][72][6]F.72}{[1][58][]58}{}{}{}}
+\citation{GmytrasiewiczDoshi2005}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.14}Contradiction burden and half-life}{59}{subsection.F.14}\protected@file@percent }
+\newlabel{supp:def:contradiction-burden}{{F.73}{59}{Contradiction burden}{definition.F.73}{}}
+\newlabel{supp:def:contradiction-burden@cref}{{[definition][73][6]F.73}{[1][59][]59}{}{}{}}
+\newlabel{supp:def:clearing-time}{{F.74}{59}{Clearing time of a contradiction component}{definition.F.74}{}}
+\newlabel{supp:def:clearing-time@cref}{{[definition][74][6]F.74}{[1][59][]59}{}{}{}}
+\newlabel{supp:def:half-life}{{F.75}{59}{Shock half-life}{definition.F.75}{}}
+\newlabel{supp:def:half-life@cref}{{[definition][75][6]F.75}{[1][59][]59}{}{}{}}
+\newlabel{supp:rem:half-life-measurement}{{F.76}{59}{}{definition.F.76}{}}
+\newlabel{supp:rem:half-life-measurement@cref}{{[definition][76][6]F.76}{[1][59][]59}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {G}Additional related-work comparisons}{59}{appendix.G}\protected@file@percent }
+\newlabel{supp:sec:related}{{G}{59}{Additional related-work comparisons}{appendix.G}{}}
+\newlabel{supp:sec:related@cref}{{[section][7][]G}{[1][59][]59}{}{}{}}
+\citation{SchroederdeWitt2019MACKRL}
+\citation{LiuLiu2018MEP}
+\citation{Dong2025RCMASP}
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.1}Interactive belief-state models}{60}{subsection.G.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.2}Common-knowledge coordination}{60}{subsection.G.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.3}Multi-agent epistemic planning}{60}{subsection.G.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.4}Simulator-coupled, norm-governed processes}{60}{subsection.G.4}\protected@file@percent }
+\citation{Alqithami2026EcoFair,Alqithami2025CHMARL}
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.5}Current CH-MARL / EcoFair baseline}{61}{subsection.G.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.6}Concise novelty statement}{61}{subsection.G.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {H}Detailed minimal separation benchmark: Berth-1-Conflict}{61}{appendix.H}\protected@file@percent }
+\newlabel{supp:sec:benchmark}{{H}{61}{Detailed minimal separation benchmark: Berth-1-Conflict}{appendix.H}{}}
+\newlabel{supp:sec:benchmark@cref}{{[section][8][]H}{[1][61][]61}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.1}Benchmark purpose}{61}{subsection.H.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Proposed first benchmark for instantiating the observer-collapse separation result in a maritime setting.}}{62}{table.12}\protected@file@percent }
+\newlabel{supp:tab:benchmark-components}{{12}{62}{Proposed first benchmark for instantiating the observer-collapse separation result in a maritime setting}{table.12}{}}
+\newlabel{supp:tab:benchmark-components@cref}{{[table][12][]12}{[1][62][]62}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.2}Environment skeleton}{62}{subsection.H.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.3}Controller-visible context map for \textsc  {Berth-1-Conflict}}{62}{subsection.H.3}\protected@file@percent }
+\newlabel{supp:subsec:b1-chi}{{H.3}{62}{Controller-visible context map for \textsc {Berth-1-Conflict}}{subsection.H.3}{}}
+\newlabel{supp:subsec:b1-chi@cref}{{[subsection][3][8]H.3}{[1][62][]62}{}{}{}}
+\newlabel{supp:prop:b1-realizes-separation}{{H.1}{63}{Benchmark realization of the observer-collapse construction}{definition.H.1}{}}
+\newlabel{supp:prop:b1-realizes-separation@cref}{{[definition][1][8]H.1}{[1][63][]63}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.4}Pre-registered maritime dominance order}{63}{subsection.H.4}\protected@file@percent }
+\newlabel{supp:subsec:dominance-prereg}{{H.4}{63}{Pre-registered maritime dominance order}{subsection.H.4}{}}
+\newlabel{supp:subsec:dominance-prereg@cref}{{[subsection][4][8]H.4}{[1][63][]63}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Pre-registered proposition-family dominance order for the minimal maritime benchmark. The table is not a learned component; it is part of the environment specification being tested.}}{64}{table.13}\protected@file@percent }
+\newlabel{supp:tab:dominance-prereg}{{13}{64}{Pre-registered proposition-family dominance order for the minimal maritime benchmark. The table is not a learned component; it is part of the environment specification being tested}{table.13}{}}
+\newlabel{supp:tab:dominance-prereg@cref}{{[table][13][]13}{[1][63][]64}{}{}{}}
+\newlabel{supp:subsec:numerical-dominance-default}{{H.4}{64}{Numerical default for the first pre-registration}{section*.8}{}}
+\newlabel{supp:subsec:numerical-dominance-default@cref}{{[subsection][4][8]H.4}{[1][64][]64}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.5}Fixed-solver ablation contract}{65}{subsection.H.5}\protected@file@percent }
+\newlabel{supp:subsec:fixed-solver-contract}{{H.5}{65}{Fixed-solver ablation contract}{subsection.H.5}{}}
+\newlabel{supp:subsec:fixed-solver-contract@cref}{{[subsection][5][8]H.5}{[1][65][]65}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.6}Environment-step protocol}{66}{subsection.H.6}\protected@file@percent }
+\newlabel{supp:subsec:b1-step-protocol}{{H.6}{66}{Environment-step protocol}{subsection.H.6}{}}
+\newlabel{supp:subsec:b1-step-protocol@cref}{{[subsection][6][8]H.6}{[1][66][]66}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.7}Minimum viable experiment protocol}{67}{subsection.H.7}\protected@file@percent }
+\newlabel{supp:subsec:b1-experiment-protocol}{{H.7}{67}{Minimum viable experiment protocol}{subsection.H.7}{}}
+\newlabel{supp:subsec:b1-experiment-protocol@cref}{{[subsection][7][8]H.7}{[1][67][]67}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.8}Executable scaffold, paired ablation, and replay adapter}{67}{subsection.H.8}\protected@file@percent }
+\newlabel{supp:subsec:executable-scaffold}{{H.8}{67}{Executable scaffold, paired ablation, and replay adapter}{subsection.H.8}{}}
+\newlabel{supp:subsec:executable-scaffold@cref}{{[subsection][8][8]H.8}{[1][67][]67}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.9}Scenario families}{69}{subsection.H.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.10}Baselines}{69}{subsection.H.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.11}Metrics}{70}{subsection.H.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.12}Hypotheses}{70}{subsection.H.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.13}Path to the full maritime twin}{70}{subsection.H.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.14}Experimental lock-in protocol}{71}{subsection.H.14}\protected@file@percent }
+\newlabel{supp:subsec:prerun-lock}{{H.14}{71}{Experimental lock-in protocol}{subsection.H.14}{}}
+\newlabel{supp:subsec:prerun-lock@cref}{{[subsection][14][8]H.14}{[1][70][]71}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Active-regime diagnosis and solver-isolation plan}{71}{appendix.I}\protected@file@percent }
+\newlabel{supp:sec:falsification}{{I}{71}{Active-regime diagnosis and solver-isolation plan}{appendix.I}{}}
+\newlabel{supp:sec:falsification@cref}{{[section][9][]I}{[1][70][]71}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {I.1}What would narrow the active OS-CMASP regime?}{71}{subsection.I.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {I.2}Ablation logic that isolates novelty}{71}{subsection.I.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {I.3}Interpretive rule}{71}{subsection.I.3}\protected@file@percent }
+\citation{Alqithami2026EcoFair}
+\@writefile{toc}{\contentsline {section}{\numberline {J}Operationalization: dominance-gated EcoFair}{72}{appendix.J}\protected@file@percent }
+\newlabel{supp:sec:operationalization}{{J}{72}{Operationalization: dominance-gated EcoFair}{appendix.J}{}}
+\newlabel{supp:sec:operationalization@cref}{{[section][10][]J}{[1][72][]72}{}{}{}}
+\newlabel{supp:sec:controller}{{J}{72}{Operationalization: dominance-gated EcoFair}{appendix.J}{}}
+\newlabel{supp:sec:controller@cref}{{[section][10][]J}{[1][72][]72}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {J.1}Controller decomposition}{72}{subsection.J.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {J.2}One-step execution template}{72}{subsection.J.2}\protected@file@percent }
+\newlabel{supp:prop:gate-safety}{{J.1}{73}{Gate-safety by construction}{definition.J.1}{}}
+\newlabel{supp:prop:gate-safety@cref}{{[definition][1][10]J.1}{[1][73][]73}{}{}{}}
+\newlabel{supp:rem:gate-safety-limit}{{J.2}{73}{What gate-safety does not prove}{definition.J.2}{}}
+\newlabel{supp:rem:gate-safety-limit@cref}{{[definition][2][10]J.2}{[1][73][]73}{}{}{}}
+\newlabel{supp:prop:bundle-transfer}{{J.3}{73}{Frozen-solver bundle transfer}{definition.J.3}{}}
+\newlabel{supp:prop:bundle-transfer@cref}{{[definition][3][10]J.3}{[1][73][]73}{}{}{}}
+\newlabel{supp:prop:overshoot-transfer}{{J.4}{74}{Frozen-solver transfer to budget overshoot metrics}{definition.J.4}{}}
+\newlabel{supp:prop:overshoot-transfer@cref}{{[definition][4][10]J.4}{[1][74][]74}{}{}{}}
+\newlabel{supp:rem:overshoot-transfer}{{J.5}{74}{Why the transfer result helps the novelty case}{definition.J.5}{}}
+\newlabel{supp:rem:overshoot-transfer@cref}{{[definition][5][10]J.5}{[1][74][]74}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {J.3}Training options}{75}{subsection.J.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {J.4}Interpretation of the implementation witness}{75}{subsection.J.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {K}Validation roadmap and refinement rule}{75}{appendix.K}\protected@file@percent }
+\newlabel{supp:sec:next}{{K}{75}{Validation roadmap and refinement rule}{appendix.K}{}}
+\newlabel{supp:sec:next@cref}{{[section][11][]K}{[1][75][]75}{}{}{}}
+\bibstyle{unsrtnat}
+\bibdata{refs}
+\bibcite{Shapley1953}{{1}{1953}{{Shapley}}{{}}}
+\bibcite{Littman1994}{{2}{1994}{{Littman}}{{}}}
+\bibcite{Bernstein2002}{{3}{2002}{{Bernstein et~al.}}{{Bernstein, Givan, Immerman, and Zilberstein}}}
+\@writefile{toc}{\contentsline {section}{Distilled thesis}{76}{section*.9}\protected@file@percent }
+\newlabel{app:distilled-thesis}{{K}{76}{Distilled thesis}{section*.9}{}}
+\newlabel{app:distilled-thesis@cref}{{[section][11][]K}{[1][76][]76}{}{}{}}
+\bibcite{OliehoekAmato2016}{{4}{2016}{{Oliehoek and Amato}}{{}}}
+\bibcite{Nayyar2013}{{5}{2013}{{Nayyar et~al.}}{{Nayyar, Mahajan, and Teneketzis}}}
+\bibcite{Altman1999}{{6}{1999}{{Altman}}{{}}}
+\bibcite{GarciaFernandez2015}{{7}{2015}{{Garc{\'i}a and Fern{\'a}ndez}}{{}}}
+\bibcite{Achiam2017}{{8}{2017}{{Achiam et~al.}}{{Achiam, Held, Tamar, and Abbeel}}}
+\bibcite{Alshiekh2018}{{9}{2018}{{Alshiekh et~al.}}{{Alshiekh, Bloem, Ehlers, K{\"o}nighofer, Niekum, and Topcu}}}
+\bibcite{LiuZhang2023InfoSharing}{{10}{2023}{{Liu and Zhang}}{{}}}
+\bibcite{Chow2018}{{11}{2018}{{Chow et~al.}}{{Chow, Nachum, Du{\'{e}}nez-Guzm{\'{a}}n, and Ghavamzadeh}}}
+\bibcite{Carr2023ShieldingPOMDP}{{12}{2023}{{Carr et~al.}}{{Carr, Jansen, Junges, and Topcu}}}
+\bibcite{Alqithami2025CHMARL}{{13}{2025}{{Alqithami}}{{}}}
+\bibcite{Alqithami2026EcoFair}{{14}{2026{}}{{Alqithami}}{{}}}
+\bibcite{Lowe2017}{{15}{2017}{{Lowe et~al.}}{{Lowe, Wu, Tamar, Harb, Abbeel, and Mordatch}}}
+\bibcite{Foerster2018COMA}{{16}{2018}{{Foerster et~al.}}{{Foerster, Farquhar, Afouras, Nardelli, and Whiteson}}}
+\bibcite{Sunehag2018VDN}{{17}{2018}{{Sunehag et~al.}}{{Sunehag, Lever, Gruslys, Czarnecki, Zambaldi, Jaderberg, Lanctot, Sonnerat, Leibo, Tuyls, and Graepel}}}
+\bibcite{Rashid2018QMIX}{{18}{2018}{{Rashid et~al.}}{{Rashid, Samvelyan, Schroeder~de Witt, Farquhar, Foerster, and Whiteson}}}
+\bibcite{SchroederdeWitt2019MACKRL}{{19}{2019}{{Schroeder~de Witt et~al.}}{{Schroeder~de Witt, Foerster, Farquhar, Torr, Boehmer, and Whiteson}}}
+\bibcite{Fagin1995}{{20}{1995}{{Fagin et~al.}}{{Fagin, Halpern, Moses, and Vardi}}}
+\bibcite{HalpernMoses1990}{{21}{1990}{{Halpern and Moses}}{{}}}
+\bibcite{vanDitmarsch2007}{{22}{2007}{{van Ditmarsch et~al.}}{{van Ditmarsch, van~der Hoek, and Kooi}}}
+\bibcite{Baltag1998}{{23}{1998}{{Baltag et~al.}}{{Baltag, Moss, and Solecki}}}
+\bibcite{BolanderAndersen2011}{{24}{2011}{{Bolander and Andersen}}{{}}}
+\bibcite{Bolander2017Gentle}{{25}{2017}{{Bolander}}{{}}}
+\bibcite{LiuLiu2018MEP}{{26}{2018}{{Liu and Liu}}{{}}}
+\bibcite{Liberman2020TermModal}{{27}{2020}{{Liberman et~al.}}{{Liberman, Triantafillou, Muise, and Belle}}}
+\bibcite{GmytrasiewiczDoshi2005}{{28}{2005}{{Gmytrasiewicz and Doshi}}{{}}}
+\bibcite{Doyle1979}{{29}{1979}{{Doyle}}{{}}}
+\bibcite{deKleer1986}{{30}{1986}{{de~Kleer}}{{}}}
+\bibcite{McAllester1990TMS}{{31}{1990}{{McAllester}}{{}}}
+\bibcite{AGM1985}{{32}{1985}{{Alchourr{\'{o}}n et~al.}}{{Alchourr{\'{o}}n, G{\"{a}}rdenfors, and Makinson}}}
+\bibcite{Dung1995Argumentation}{{33}{1995}{{Dung}}{{}}}
+\bibcite{Buneman2001Provenance}{{34}{2001}{{Buneman et~al.}}{{Buneman, Khanna, and Tan}}}
+\bibcite{Cheney2009Provenance}{{35}{2009}{{Cheney et~al.}}{{Cheney, Chiticariu, and Tan}}}
+\bibcite{Moreau2013PROV}{{36}{2013}{{Moreau and Missier}}{{}}}
+\bibcite{HallLlinas1997Fusion}{{37}{1997}{{Hall and Llinas}}{{}}}
+\bibcite{Li2024MSIF}{{38}{2024}{{Li et~al.}}{{Li, Dunkin, and Dezert}}}
+\bibcite{DongNaumann2009DataFusion}{{39}{2009}{{Dong and Naumann}}{{}}}
+\bibcite{Dempster1967}{{40}{1967}{{Dempster}}{{}}}
+\bibcite{Shafer1976}{{41}{1976}{{Shafer}}{{}}}
+\bibcite{Josang2016SubjectiveLogic}{{42}{2016}{{J{\o }sang}}{{}}}
+\bibcite{Dong2025RCMASP}{{43}{2025}{{Dong}}{{}}}
+\bibcite{Steenken2004}{{44}{2004}{{Steenken et~al.}}{{Steenken, Vo{\ss }, and Stahlbock}}}
+\bibcite{SongDong2012}{{45}{2012}{{Song and Dong}}{{}}}
+\bibcite{Li2019LogisticsMARL}{{46}{2019}{{Li et~al.}}{{Li, Zhang, Zhang, and Liu}}}
+\bibcite{Xu2024ECRRL}{{47}{2024}{{Xu et~al.}}{{Xu, Zhang, Chen, and Yang}}}
+\bibcite{Kaelbling1998}{{48}{1998}{{Kaelbling et~al.}}{{Kaelbling, Littman, and Cassandra}}}
+\bibcite{Hoeffding1963}{{49}{1963}{{Hoeffding}}{{}}}
+\bibcite{Massart1990}{{50}{1990}{{Massart}}{{}}}
+\bibcite{Alqithami2026OSL}{{51}{2026{}}{{Alqithami}}{{}}}
+\gdef \@abspage@last{80}

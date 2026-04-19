@@ -1,0 +1,364 @@
+\begin{thebibliography}{51}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Shapley(1953)]{Shapley1953}
+Lloyd~S. Shapley.
+\newblock Stochastic games.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 39\penalty0
+  (10):\penalty0 1095--1100, 1953.
+\newblock \doi{10.1073/pnas.39.10.1095}.
+
+\bibitem[Littman(1994)]{Littman1994}
+Michael~L. Littman.
+\newblock Markov games as a framework for multi-agent reinforcement learning.
+\newblock In \emph{Proceedings of the Eleventh International Conference on
+  Machine Learning}, pages 157--163. Morgan Kaufmann, 1994.
+
+\bibitem[Bernstein et~al.(2002)Bernstein, Givan, Immerman, and
+  Zilberstein]{Bernstein2002}
+Daniel~S. Bernstein, Robert Givan, Neil Immerman, and Shlomo Zilberstein.
+\newblock The complexity of decentralized control of markov decision processes.
+\newblock \emph{Mathematics of Operations Research}, 27\penalty0 (4):\penalty0
+  819--840, 2002.
+\newblock \doi{10.1287/moor.27.4.819.297}.
+
+\bibitem[Oliehoek and Amato(2016)]{OliehoekAmato2016}
+Frans~A. Oliehoek and Christopher Amato.
+\newblock \emph{A Concise Introduction to Decentralized POMDPs}.
+\newblock SpringerBriefs in Intelligent Systems. Springer, 2016.
+\newblock \doi{10.1007/978-3-319-28929-8}.
+
+\bibitem[Nayyar et~al.(2013)Nayyar, Mahajan, and Teneketzis]{Nayyar2013}
+Ashutosh Nayyar, Aditya Mahajan, and Demosthenis Teneketzis.
+\newblock Decentralized stochastic control with partial history sharing: A
+  common information approach.
+\newblock \emph{IEEE Transactions on Automatic Control}, 58\penalty0
+  (7):\penalty0 1644--1658, 2013.
+\newblock \doi{10.1109/TAC.2013.2239000}.
+
+\bibitem[Altman(1999)]{Altman1999}
+Eitan Altman.
+\newblock \emph{Constrained Markov Decision Processes}.
+\newblock Chapman and Hall/CRC, 1999.
+\newblock \doi{10.1201/9781315140223}.
+
+\bibitem[Garc{\'i}a and Fern{\'a}ndez(2015)]{GarciaFernandez2015}
+Javier Garc{\'i}a and Fernando Fern{\'a}ndez.
+\newblock A comprehensive survey on safe reinforcement learning.
+\newblock \emph{Journal of Machine Learning Research}, 16\penalty0
+  (42):\penalty0 1437--1480, 2015.
+
+\bibitem[Achiam et~al.(2017)Achiam, Held, Tamar, and Abbeel]{Achiam2017}
+Joshua Achiam, David Held, Aviv Tamar, and Pieter Abbeel.
+\newblock Constrained policy optimization.
+\newblock In \emph{Proceedings of the 34th International Conference on Machine
+  Learning}, volume~70 of \emph{Proceedings of Machine Learning Research},
+  pages 22--31. PMLR, 2017.
+
+\bibitem[Alshiekh et~al.(2018)Alshiekh, Bloem, Ehlers, K{\"o}nighofer, Niekum,
+  and Topcu]{Alshiekh2018}
+Mohammed Alshiekh, Roderick Bloem, R{\"u}diger Ehlers, Bettina K{\"o}nighofer,
+  Scott Niekum, and Ufuk Topcu.
+\newblock Safe reinforcement learning via shielding.
+\newblock In \emph{Proceedings of the Thirty-Second AAAI Conference on
+  Artificial Intelligence}, pages 2669--2678, 2018.
+
+\bibitem[Liu and Zhang(2023)]{LiuZhang2023InfoSharing}
+Xiangyu Liu and Kaiqing Zhang.
+\newblock Partially observable multi-agent reinforcement learning with
+  information sharing.
+\newblock arXiv preprint arXiv:2308.08705, 2023.
+
+\bibitem[Chow et~al.(2018)Chow, Nachum, Du{\'{e}}nez-Guzm{\'{a}}n, and
+  Ghavamzadeh]{Chow2018}
+Yinlam Chow, Ofir Nachum, Edgar Du{\'{e}}nez-Guzm{\'{a}}n, and Mohammad
+  Ghavamzadeh.
+\newblock A lyapunov-based approach to safe reinforcement learning.
+\newblock In \emph{Advances in Neural Information Processing Systems 31}, 2018.
+
+\bibitem[Carr et~al.(2023)Carr, Jansen, Junges, and
+  Topcu]{Carr2023ShieldingPOMDP}
+Steven Carr, Nils Jansen, Sebastian Junges, and Ufuk Topcu.
+\newblock Safe reinforcement learning via shielding under partial
+  observability.
+\newblock In \emph{Proceedings of the Thirty-Seventh AAAI Conference on
+  Artificial Intelligence}, 2023.
+
+\bibitem[Alqithami(2025)]{Alqithami2025CHMARL}
+Saad Alqithami.
+\newblock {CH-MARL}: Constrained hierarchical multiagent reinforcement learning
+  for sustainable and equitable coordination.
+\newblock arXiv preprint arXiv:2502.02060, 2025.
+
+\bibitem[Alqithami(2026{\natexlab{a}})]{Alqithami2026EcoFair}
+Saad Alqithami.
+\newblock Ecofair-{CH}-{MARL}: Scalable constrained hierarchical multi-agent
+  {RL} with real-time emission budgets and fairness guarantees.
+\newblock arXiv preprint arXiv:2603.14625, 2026{\natexlab{a}}.
+
+\bibitem[Lowe et~al.(2017)Lowe, Wu, Tamar, Harb, Abbeel, and
+  Mordatch]{Lowe2017}
+Ryan Lowe, Yi~Wu, Aviv Tamar, Jean Harb, Pieter Abbeel, and Igor Mordatch.
+\newblock Multi-agent actor-critic for mixed cooperative-competitive
+  environments.
+\newblock In \emph{Advances in Neural Information Processing Systems 30}, 2017.
+
+\bibitem[Foerster et~al.(2018)Foerster, Farquhar, Afouras, Nardelli, and
+  Whiteson]{Foerster2018COMA}
+Jakob~N. Foerster, Gregory Farquhar, Triantafyllos Afouras, Nantas Nardelli,
+  and Shimon Whiteson.
+\newblock Counterfactual multi-agent policy gradients.
+\newblock In \emph{Proceedings of the Thirty-Second AAAI Conference on
+  Artificial Intelligence}, 2018.
+
+\bibitem[Sunehag et~al.(2018)Sunehag, Lever, Gruslys, Czarnecki, Zambaldi,
+  Jaderberg, Lanctot, Sonnerat, Leibo, Tuyls, and Graepel]{Sunehag2018VDN}
+Peter Sunehag, Guy Lever, Audrunas Gruslys, Wojciech~Marian Czarnecki, Vinicius
+  Zambaldi, Max Jaderberg, Marc Lanctot, Nicolas Sonnerat, Joel~Z. Leibo, Karl
+  Tuyls, and Thore Graepel.
+\newblock Value-decomposition networks for cooperative multi-agent learning.
+\newblock In \emph{Proceedings of the 17th International Conference on
+  Autonomous Agents and Multiagent Systems}, pages 2085--2087. IFAAMAS, 2018.
+
+\bibitem[Rashid et~al.(2018)Rashid, Samvelyan, Schroeder~de Witt, Farquhar,
+  Foerster, and Whiteson]{Rashid2018QMIX}
+Tabish Rashid, Mikayel Samvelyan, Christian Schroeder~de Witt, Gregory
+  Farquhar, Jakob Foerster, and Shimon Whiteson.
+\newblock {QMIX}: Monotonic value function factorisation for deep multi-agent
+  reinforcement learning.
+\newblock In \emph{Proceedings of the 35th International Conference on Machine
+  Learning}, volume~80 of \emph{Proceedings of Machine Learning Research},
+  pages 4295--4304. PMLR, 2018.
+
+\bibitem[Schroeder~de Witt et~al.(2019)Schroeder~de Witt, Foerster, Farquhar,
+  Torr, Boehmer, and Whiteson]{SchroederdeWitt2019MACKRL}
+Christian~A. Schroeder~de Witt, Jakob~N. Foerster, Gregory Farquhar, Philip
+  H.~S. Torr, Wendelin Boehmer, and Shimon Whiteson.
+\newblock Multi-agent common knowledge reinforcement learning.
+\newblock In \emph{Advances in Neural Information Processing Systems 32}, pages
+  9924--9935, 2019.
+
+\bibitem[Fagin et~al.(1995)Fagin, Halpern, Moses, and Vardi]{Fagin1995}
+Ronald Fagin, Joseph~Y. Halpern, Yoram Moses, and Moshe~Y. Vardi.
+\newblock \emph{Reasoning about Knowledge}.
+\newblock MIT Press, 1995.
+
+\bibitem[Halpern and Moses(1990)]{HalpernMoses1990}
+Joseph~Y. Halpern and Yoram Moses.
+\newblock Knowledge and common knowledge in a distributed environment.
+\newblock \emph{Journal of the ACM}, 37\penalty0 (3):\penalty0 549--587, 1990.
+\newblock \doi{10.1145/79147.79161}.
+
+\bibitem[van Ditmarsch et~al.(2007)van Ditmarsch, van~der Hoek, and
+  Kooi]{vanDitmarsch2007}
+Hans van Ditmarsch, Wiebe van~der Hoek, and Barteld Kooi.
+\newblock \emph{Dynamic Epistemic Logic}.
+\newblock Springer, 2007.
+\newblock \doi{10.1007/978-1-4020-5839-4}.
+
+\bibitem[Baltag et~al.(1998)Baltag, Moss, and Solecki]{Baltag1998}
+Alexandru Baltag, Lawrence~S. Moss, and Slawomir Solecki.
+\newblock The logic of public announcements, common knowledge, and private
+  suspicions.
+\newblock In \emph{Proceedings of the 7th Conference on Theoretical Aspects of
+  Rationality and Knowledge}, pages 43--56, 1998.
+
+\bibitem[Bolander and Andersen(2011)]{BolanderAndersen2011}
+Thomas Bolander and Mikkel~Birkegaard Andersen.
+\newblock Epistemic planning for single- and multi-agent systems.
+\newblock \emph{Journal of Applied Non-Classical Logics}, 21\penalty0
+  (1):\penalty0 9--34, 2011.
+\newblock \doi{10.3166/jancl.21.9-34}.
+
+\bibitem[Bolander(2017)]{Bolander2017Gentle}
+Thomas Bolander.
+\newblock A gentle introduction to epistemic planning.
+\newblock arXiv preprint arXiv:1703.02192, 2017.
+
+\bibitem[Liu and Liu(2018)]{LiuLiu2018MEP}
+Qiang Liu and Yongmei Liu.
+\newblock Multi-agent epistemic planning with common knowledge.
+\newblock In \emph{Proceedings of the Twenty-Seventh International Joint
+  Conference on Artificial Intelligence}, pages 1912--1920, 2018.
+\newblock \doi{10.24963/ijcai.2018/264}.
+
+\bibitem[Liberman et~al.(2020)Liberman, Triantafillou, Muise, and
+  Belle]{Liberman2020TermModal}
+Alessandro~O. Liberman, Eleni Triantafillou, Christian Muise, and Vaishak
+  Belle.
+\newblock Dynamic term-modal logics for first-order epistemic planning.
+\newblock \emph{Artificial Intelligence}, 286:\penalty0 103305, 2020.
+\newblock \doi{10.1016/j.artint.2020.103305}.
+
+\bibitem[Gmytrasiewicz and Doshi(2005)]{GmytrasiewiczDoshi2005}
+Piotr~J. Gmytrasiewicz and Prashant Doshi.
+\newblock A framework for sequential planning in multi-agent settings.
+\newblock \emph{Journal of Artificial Intelligence Research}, 24:\penalty0
+  49--79, 2005.
+\newblock \doi{10.1613/jair.1579}.
+
+\bibitem[Doyle(1979)]{Doyle1979}
+Jon Doyle.
+\newblock A truth maintenance system.
+\newblock \emph{Artificial Intelligence}, 12\penalty0 (3):\penalty0 231--272,
+  1979.
+\newblock \doi{10.1016/0004-3702(79)90008-0}.
+
+\bibitem[de~Kleer(1986)]{deKleer1986}
+Johan de~Kleer.
+\newblock An assumption-based {TMS}.
+\newblock \emph{Artificial Intelligence}, 28\penalty0 (2):\penalty0 127--162,
+  1986.
+\newblock \doi{10.1016/0004-3702(86)90080-9}.
+
+\bibitem[McAllester(1990)]{McAllester1990TMS}
+David~A. McAllester.
+\newblock Truth maintenance.
+\newblock In \emph{Proceedings of the Eighth National Conference on Artificial
+  Intelligence}, pages 1109--1116. AAAI Press, 1990.
+
+\bibitem[Alchourr{\'{o}}n et~al.(1985)Alchourr{\'{o}}n, G{\"{a}}rdenfors, and
+  Makinson]{AGM1985}
+Carlos~E. Alchourr{\'{o}}n, Peter G{\"{a}}rdenfors, and David Makinson.
+\newblock On the logic of theory change: Partial meet contraction and revision
+  functions.
+\newblock \emph{Journal of Symbolic Logic}, 50\penalty0 (2):\penalty0 510--530,
+  1985.
+\newblock \doi{10.2307/2274239}.
+
+\bibitem[Dung(1995)]{Dung1995Argumentation}
+Phan~Minh Dung.
+\newblock On the acceptability of arguments and its fundamental role in
+  nonmonotonic reasoning, logic programming and n-person games.
+\newblock \emph{Artificial Intelligence}, 77\penalty0 (2):\penalty0 321--357,
+  1995.
+\newblock \doi{10.1016/0004-3702(94)00041-X}.
+
+\bibitem[Buneman et~al.(2001)Buneman, Khanna, and Tan]{Buneman2001Provenance}
+Peter Buneman, Sanjeev Khanna, and Wang-Chiew Tan.
+\newblock Why and where: A characterization of data provenance.
+\newblock In \emph{Database Theory -- ICDT 2001}, pages 316--330. Springer,
+  2001.
+\newblock \doi{10.1007/3-540-44503-X_20}.
+
+\bibitem[Cheney et~al.(2009)Cheney, Chiticariu, and Tan]{Cheney2009Provenance}
+James Cheney, Laura Chiticariu, and Wang-Chiew Tan.
+\newblock Provenance in databases: Why, how, and where.
+\newblock \emph{Foundations and Trends in Databases}, 1\penalty0 (4):\penalty0
+  379--474, 2009.
+\newblock \doi{10.1561/1900000006}.
+
+\bibitem[Moreau and Missier(2013)]{Moreau2013PROV}
+Luc Moreau and Paolo Missier.
+\newblock {PROV-DM}: The {PROV} data model.
+\newblock {W3C} recommendation, World Wide Web Consortium, 2013.
+\newblock URL \url{https://www.w3.org/TR/prov-dm/}.
+
+\bibitem[Hall and Llinas(1997)]{HallLlinas1997Fusion}
+David~L. Hall and James Llinas.
+\newblock An introduction to multisensor data fusion.
+\newblock \emph{Proceedings of the IEEE}, 85\penalty0 (1):\penalty0 6--23,
+  1997.
+\newblock \doi{10.1109/5.554205}.
+
+\bibitem[Li et~al.(2024)Li, Dunkin, and Dezert]{Li2024MSIF}
+Xinde Li, Fir Dunkin, and Jean Dezert.
+\newblock Multi-source information fusion: Progress and future.
+\newblock \emph{Chinese Journal of Aeronautics}, 2024.
+\newblock \doi{10.1016/j.cja.2023.12.009}.
+
+\bibitem[Dong and Naumann(2009)]{DongNaumann2009DataFusion}
+Xin~Luna Dong and Felix Naumann.
+\newblock Data fusion: Resolving data conflicts for integration.
+\newblock \emph{Proceedings of the VLDB Endowment}, 2\penalty0 (2):\penalty0
+  1654--1655, 2009.
+\newblock \doi{10.14778/1687553.1687619}.
+
+\bibitem[Dempster(1967)]{Dempster1967}
+Arthur~P. Dempster.
+\newblock Upper and lower probabilities induced by a multivalued mapping.
+\newblock \emph{The Annals of Mathematical Statistics}, 38\penalty0
+  (2):\penalty0 325--339, 1967.
+\newblock \doi{10.1214/aoms/1177698950}.
+
+\bibitem[Shafer(1976)]{Shafer1976}
+Glenn Shafer.
+\newblock \emph{A Mathematical Theory of Evidence}.
+\newblock Princeton University Press, 1976.
+
+\bibitem[J{\o}sang(2016)]{Josang2016SubjectiveLogic}
+Audun J{\o}sang.
+\newblock \emph{Subjective Logic: A Formalism for Reasoning Under Uncertainty}.
+\newblock Springer, 2016.
+\newblock \doi{10.1007/978-3-319-42337-1}.
+
+\bibitem[Dong(2025)]{Dong2025RCMASP}
+Stella~C. Dong.
+\newblock Norm-governed multi-agent decision-making in simulator-coupled
+  environments: The reinsurance constrained multi-agent simulation process
+  ({R-CMASP}).
+\newblock arXiv preprint arXiv:2512.09939, 2025.
+
+\bibitem[Steenken et~al.(2004)Steenken, Vo{\ss}, and Stahlbock]{Steenken2004}
+Dirk Steenken, Stefan Vo{\ss}, and Robert Stahlbock.
+\newblock Container terminal operation and operations research: A
+  classification and literature review.
+\newblock \emph{{OR} Spectrum}, 26\penalty0 (1):\penalty0 3--49, 2004.
+\newblock \doi{10.1007/s00291-003-0157-z}.
+
+\bibitem[Song and Dong(2012)]{SongDong2012}
+Dong-Ping Song and Jing-Xin Dong.
+\newblock Cargo routing and empty container repositioning in multiple shipping
+  service routes.
+\newblock \emph{Transportation Research Part B: Methodological}, 46\penalty0
+  (10):\penalty0 1556--1575, 2012.
+\newblock \doi{10.1016/j.trb.2012.08.003}.
+
+\bibitem[Li et~al.(2019)Li, Zhang, Zhang, and Liu]{Li2019LogisticsMARL}
+Xingyu Li, Huan Zhang, Xin Zhang, and Tie-Yan Liu.
+\newblock A cooperative multi-agent reinforcement learning framework for
+  resource balancing in complex logistics network.
+\newblock In \emph{Proceedings of the 18th International Conference on
+  Autonomous Agents and Multiagent Systems}, pages 980--988. IFAAMAS, 2019.
+
+\bibitem[Xu et~al.(2024)Xu, Zhang, Chen, and Yang]{Xu2024ECRRL}
+Xia Xu, Yuming Zhang, Xiang Chen, and Zaili Yang.
+\newblock Empty container repositioning problem using a reinforcement learning
+  approach.
+\newblock \emph{Maritime Policy \& Management}, 51\penalty0 (8):\penalty0
+  1742--1763, 2024.
+\newblock \doi{10.1080/03088839.2024.2326635}.
+
+\bibitem[Kaelbling et~al.(1998)Kaelbling, Littman, and
+  Cassandra]{Kaelbling1998}
+Leslie~Pack Kaelbling, Michael~L. Littman, and Anthony~R. Cassandra.
+\newblock Planning and acting in partially observable stochastic domains.
+\newblock \emph{Artificial Intelligence}, 101\penalty0 (1--2):\penalty0
+  99--134, 1998.
+\newblock \doi{10.1016/S0004-3702(98)00023-X}.
+
+\bibitem[Hoeffding(1963)]{Hoeffding1963}
+Wassily Hoeffding.
+\newblock Probability inequalities for sums of bounded random variables.
+\newblock \emph{Journal of the American Statistical Association}, 58\penalty0
+  (301):\penalty0 13--30, 1963.
+\newblock \doi{10.1080/01621459.1963.10500830}.
+
+\bibitem[Massart(1990)]{Massart1990}
+Pascal Massart.
+\newblock The tight constant in the {Dvoretzky--Kiefer--Wolfowitz} inequality.
+\newblock \emph{The Annals of Probability}, 18\penalty0 (3):\penalty0
+  1269--1283, 1990.
+\newblock \doi{10.1214/aop/1176990746}.
+
+\bibitem[Alqithami(2026{\natexlab{b}})]{Alqithami2026OSL}
+Saad Alqithami.
+\newblock The observer-situation lattice: A unified formal basis for
+  perspective-aware cognition.
+\newblock arXiv preprint arXiv:2603.01407, 2026{\natexlab{b}}.
+
+\end{thebibliography}

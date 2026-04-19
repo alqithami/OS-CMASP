@@ -1,0 +1,2 @@
+[console_scripts]
+os-cmasp-berth1 = os_cmasp.berth1_conflict:main

@@ -36,11 +36,11 @@
       "freshness_conflict",
       "human_override"
     ],
-    "seed_max": 7,
+    "seed_max": 3,
     "seed_min": 0,
-    "seeds": 8,
+    "seeds": 4,
     "solver_version": "berth1-fixed-solver-v22",
-    "steps": 2560,
+    "steps": 320,
     "unknown_observers": [],
     "unknown_props": []
   },
@@ -53,7 +53,7 @@
     "benign_agreement"
   ],
   "dominance_table_version": "maritime-dominance-v22",
-  "horizon": 320,
+  "horizon": 80,
   "mode": "preflight",
   "out_prefix": "berth1_results",
   "p_all_clear": 0.5,
@@ -95,6 +95,6 @@
     "timestamp",
     "provenance"
   ],
-  "seeds": 8,
+  "seeds": 4,
   "solver_version": "berth1-fixed-solver-v22"
 }

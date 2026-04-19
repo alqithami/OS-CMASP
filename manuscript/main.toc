@@ -1,0 +1,95 @@
+\contentsline {paragraph}{Reader roadmap.}{4}{section*.2}%
+\contentsline {paragraph}{Evidence status.}{5}{section*.3}%
+\contentsline {section}{\numberline {1}Introduction}{5}{section.1}%
+\contentsline {paragraph}{Contributions.}{6}{section*.4}%
+\contentsline {paragraph}{Scope.}{6}{section*.5}%
+\contentsline {section}{\numberline {2}Claim hierarchy and non-stacking scope}{6}{section.2}%
+\contentsline {paragraph}{Non-stacking criterion.}{7}{section*.6}%
+\contentsline {section}{\numberline {3}Related work and precise delta}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}POSGs, Dec-POMDPs, and information structure}{8}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Constrained RL, safe RL, and shielding}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}MARL solver families}{8}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Epistemic logic, epistemic planning, and interactive beliefs}{9}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Truth maintenance, belief revision, and non-monotonic support}{9}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Provenance, trust, and multi-source data fusion}{9}{subsection.3.6}%
+\contentsline {subsection}{\numberline {3.7}Simulator-coupled processes and maritime logistics}{9}{subsection.3.7}%
+\contentsline {paragraph}{Precise novelty statement.}{10}{section*.7}%
+\contentsline {section}{\numberline {4}Running example: berth-readiness under conflicting provenance}{10}{section.4}%
+\contentsline {section}{\numberline {5}Notation and modeling commitments}{12}{section.5}%
+\contentsline {section}{\numberline {6}Observer--Situation Constrained Process Model}{14}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Observer--situation carrier, formula language, and claims}{14}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}The OS-CPOSG}{15}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Dominant support, certification, and admissibility}{16}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Theoretical properties}{17}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Containment and boundary cases}{17}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Observer-collapse separation}{18}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Certification, shields, and soundness}{19}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}What the theorems do and do not establish}{20}{subsection.7.4}%
+\contentsline {section}{\numberline {8}Minimal benchmark: Berth-1-Conflict}{20}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Environment}{20}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Scenario families}{21}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Ablation contract}{21}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Metrics}{22}{subsection.8.4}%
+\contentsline {section}{\numberline {9}Replay calibration and locked validation protocol}{22}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Layer 0: preflight}{22}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Layer 1: semantic separation}{23}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Layer 2: maritime replay}{23}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Layer 3: metric lift}{23}{subsection.9.4}%
+\contentsline {section}{\numberline {10}Implementation witness}{24}{section.10}%
+\contentsline {section}{\numberline {11}Limitations and threats to validity}{24}{section.11}%
+\contentsline {section}{\numberline {12}Conclusion}{25}{section.12}%
+\contentsline {section}{\numberline {A}Proof details for the safety-budget construction}{25}{appendix.A}%
+\contentsline {section}{\numberline {B}Replay schema}{26}{appendix.B}%
+\contentsline {section}{\numberline {C}Bibliographic positioning}{26}{appendix.C}%
+\contentsline {section}{\numberline {D}Technical supplement: budget lifts, replay certification, and operationalization}{26}{appendix.D}%
+\contentsline {section}{\numberline {E}Extended non-stacking rationale}{26}{appendix.E}%
+\contentsline {subsection}{\numberline {E.1}Non-stacking criterion and refinement ladder}{27}{subsection.E.1}%
+\contentsline {subsection}{\numberline {E.2}Cautionary scope and non-claims}{28}{subsection.E.2}%
+\contentsline {section}{\numberline {F}Expanded budget-bundle and replay-calibration machinery}{28}{appendix.F}%
+\contentsline {subsection}{\numberline {F.1}A CH-MARL-shaped budget bundle}{28}{subsection.F.1}%
+\contentsline {subsection}{\numberline {F.2}Toward an EcoFair-aligned budget lift}{32}{subsection.F.2}%
+\contentsline {subsection}{\numberline {F.3}Simulator-grounded calibration by counterfactual replay}{33}{subsection.F.3}%
+\contentsline {subsection}{\numberline {F.4}Relaxing witness assumptions under drift and spillover}{37}{subsection.F.4}%
+\contentsline {subsection}{\numberline {F.5}Matched-seed replay certification of contamination}{40}{subsection.F.5}%
+\contentsline {subsection}{\numberline {F.6}A witness-free paired-replay route for min--max}{43}{subsection.F.6}%
+\contentsline {subsection}{\numberline {F.7}A more conservative witness-free paired-replay route for Gini}{44}{subsection.F.7}%
+\contentsline {subsection}{\numberline {F.8}A denominator-free companion to Gini}{47}{subsection.F.8}%
+\contentsline {subsection}{\numberline {F.9}Replay-certifying the Gini/APD denominator gap}{49}{subsection.F.9}%
+\contentsline {subsection}{\numberline {F.10}Robustifying replay certification against dependence and seed shift}{52}{subsection.F.10}%
+\contentsline {subsection}{\numberline {F.11}Twin-specific block units and seed-shift diagnostics}{55}{subsection.F.11}%
+\contentsline {subsection}{\numberline {F.12}Certified actions and explanation soundness}{58}{subsection.F.12}%
+\contentsline {subsection}{\numberline {F.13}Bounded-overhead inheritance}{58}{subsection.F.13}%
+\contentsline {subsection}{\numberline {F.14}Contradiction burden and half-life}{59}{subsection.F.14}%
+\contentsline {section}{\numberline {G}Additional related-work comparisons}{59}{appendix.G}%
+\contentsline {subsection}{\numberline {G.1}Interactive belief-state models}{60}{subsection.G.1}%
+\contentsline {subsection}{\numberline {G.2}Common-knowledge coordination}{60}{subsection.G.2}%
+\contentsline {subsection}{\numberline {G.3}Multi-agent epistemic planning}{60}{subsection.G.3}%
+\contentsline {subsection}{\numberline {G.4}Simulator-coupled, norm-governed processes}{60}{subsection.G.4}%
+\contentsline {subsection}{\numberline {G.5}Current CH-MARL / EcoFair baseline}{61}{subsection.G.5}%
+\contentsline {subsection}{\numberline {G.6}Concise novelty statement}{61}{subsection.G.6}%
+\contentsline {section}{\numberline {H}Detailed minimal separation benchmark: Berth-1-Conflict}{61}{appendix.H}%
+\contentsline {subsection}{\numberline {H.1}Benchmark purpose}{61}{subsection.H.1}%
+\contentsline {subsection}{\numberline {H.2}Environment skeleton}{62}{subsection.H.2}%
+\contentsline {subsection}{\numberline {H.3}Controller-visible context map for \textsc {Berth-1-Conflict}}{62}{subsection.H.3}%
+\contentsline {subsection}{\numberline {H.4}Pre-registered maritime dominance order}{63}{subsection.H.4}%
+\contentsline {subsection}{\numberline {H.5}Fixed-solver ablation contract}{65}{subsection.H.5}%
+\contentsline {subsection}{\numberline {H.6}Environment-step protocol}{66}{subsection.H.6}%
+\contentsline {subsection}{\numberline {H.7}Minimum viable experiment protocol}{67}{subsection.H.7}%
+\contentsline {subsection}{\numberline {H.8}Executable scaffold, paired ablation, and replay adapter}{67}{subsection.H.8}%
+\contentsline {subsection}{\numberline {H.9}Scenario families}{69}{subsection.H.9}%
+\contentsline {subsection}{\numberline {H.10}Baselines}{69}{subsection.H.10}%
+\contentsline {subsection}{\numberline {H.11}Metrics}{70}{subsection.H.11}%
+\contentsline {subsection}{\numberline {H.12}Hypotheses}{70}{subsection.H.12}%
+\contentsline {subsection}{\numberline {H.13}Path to the full maritime twin}{70}{subsection.H.13}%
+\contentsline {subsection}{\numberline {H.14}Experimental lock-in protocol}{71}{subsection.H.14}%
+\contentsline {section}{\numberline {I}Active-regime diagnosis and solver-isolation plan}{71}{appendix.I}%
+\contentsline {subsection}{\numberline {I.1}What would narrow the active OS-CMASP regime?}{71}{subsection.I.1}%
+\contentsline {subsection}{\numberline {I.2}Ablation logic that isolates novelty}{71}{subsection.I.2}%
+\contentsline {subsection}{\numberline {I.3}Interpretive rule}{71}{subsection.I.3}%
+\contentsline {section}{\numberline {J}Operationalization: dominance-gated EcoFair}{72}{appendix.J}%
+\contentsline {subsection}{\numberline {J.1}Controller decomposition}{72}{subsection.J.1}%
+\contentsline {subsection}{\numberline {J.2}One-step execution template}{72}{subsection.J.2}%
+\contentsline {subsection}{\numberline {J.3}Training options}{75}{subsection.J.3}%
+\contentsline {subsection}{\numberline {J.4}Interpretation of the implementation witness}{75}{subsection.J.4}%
+\contentsline {section}{\numberline {K}Validation roadmap and refinement rule}{75}{appendix.K}%
+\contentsline {section}{Distilled thesis}{76}{section*.9}%

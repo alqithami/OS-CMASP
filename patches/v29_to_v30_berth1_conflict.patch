@@ -1,0 +1,41 @@
+--- os_cmasp_github_repo_v27/src/os_cmasp/berth1_conflict.py	2026-04-19 13:05:11.518508360 +0000
++++ os_cmasp_repo_update_v30/src/os_cmasp/berth1_conflict.py	2026-04-19 13:10:29.878019849 +0000
+@@ -183,8 +183,11 @@
+     return str(x).strip().lower() in {"1", "true", "yes", "y"}
+ 
+ def load_replay_bank(path: str) -> List[EpisodeStep]:
++    replay_path = Path(path)
++    if not replay_path.exists():
++        raise FileNotFoundError(f"Replay CSV not found: {path}")
+     grouped: Dict[Tuple[int, int], List[Dict[str, str]]] = defaultdict(list)
+-    with open(path, newline="") as f:
++    with open(replay_path, newline="") as f:
+         reader = csv.DictReader(f)
+         missing = REPLAY_REQUIRED_FIELDS - set(reader.fieldnames or [])
+         if missing:
+@@ -548,7 +551,24 @@
+         print(f"wrote replay template: {args.write_template}")
+         return
+ 
+-    bank = load_replay_bank(args.replay_csv) if args.replay_csv else generate_episode_bank(args.scenario, args.horizon, args.seeds, args.p_all_clear)
++    if args.replay_csv:
++        replay_path = Path(args.replay_csv)
++        if not replay_path.exists():
++            placeholder_hint = ""
++            if "path/to" in args.replay_csv or "twin_replay_claims.csv" in args.replay_csv:
++                placeholder_hint = (
++                    "\nIt looks like you used the documentation placeholder. "
++                    "Replace it with an actual replay CSV path, or create a template with:\n"
++                    "  python -m os_cmasp.berth1_conflict --write-template data/replay/berth1_replay_template.csv"
++                )
++            raise SystemExit(
++                f"Replay CSV not found: {args.replay_csv}{placeholder_hint}\n"
++                "For a pipeline check without replay, run:\n"
++                "  scripts/run_berth1_synthetic_smoke.sh outputs/berth1/synthetic_smoke"
++            )
++        bank = load_replay_bank(args.replay_csv)
++    else:
++        bank = generate_episode_bank(args.scenario, args.horizon, args.seeds, args.p_all_clear)
+     bank_report = validate_bank(bank)
+     manifest = build_manifest(args, bank_report)
+ 
