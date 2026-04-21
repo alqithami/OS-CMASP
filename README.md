@@ -1,8 +1,8 @@
-# OS-CMASP: Observer-Situation Constrained Multi-Agent Simulation Processes
+# OS-CMASP
 
-This repository contains the OS-CMASP manuscript, the Berth-1-Conflict fixed-solver scaffold, and the pre-run experiment protocol.
+Observer-Situation Constrained Multi-Agent Simulation Process (OS-CMASP): manuscript, Berth-1-Conflict fixed-solver scaffold, and replay-conversion utilities.
 
-The repository identity is process semantics for control under fragmented operational truth. The implementation witness keeps the solver fixed and varies only claim-state semantics across ablations.
+This v32 package is a **complete installable repository**, not a partial update folder. It includes `pyproject.toml`, `Makefile`, scripts, tests, manuscript sources, and the no-manual replay adapter.
 
 ## Quick start
 
@@ -10,24 +10,74 @@ The repository identity is process semantics for control under fragmented operat
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e .[dev]
+python -m pip install -e .
+
 make test
 make preflight
 ```
 
-## Build the paper
+## No-manual replay-path check
+
+This creates a replay CSV automatically, runs the replay pipeline, and packages outputs. It is a software pipeline check, not maritime-twin evidence.
 
 ```bash
-make paper
+scripts/run_berth1_locked_replay_demo.sh outputs/berth1/locked_replay_demo
 ```
 
-The compiled PDF is produced under `manuscript/main.pdf`.
+Expected output zip:
 
-## Run a replay-backed ablation after pre-run lock
+```text
+outputs/berth1/locked_replay_demo_results.zip
+```
+
+## Twin wide-export path
+
+Do not hand-edit the long replay template. Export one row per step from the twin, at minimum:
+
+```text
+seed,t,ready,scenario
+```
+
+Then convert and run:
 
 ```bash
-scripts/run_berth1_replay.sh path/to/twin_replay_claims.csv outputs/berth1/twin_v1
+scripts/build_berth1_replay_from_wide.sh data/raw/my_twin_export.csv data/replay/twin_replay_claims.csv
+scripts/run_berth1_replay.sh data/replay/twin_replay_claims.csv outputs/berth1/twin_v1
 scripts/package_results.sh outputs/berth1/twin_v1 outputs/berth1/twin_v1_results.zip
 ```
 
-See `docs/EXPERIMENT_PIPELINE_v29.md` for the complete protocol.
+An example wide export is included:
+
+```bash
+make wide-example
+```
+
+## Manuscript
+
+The LaTeX source is in `manuscript/`. A reference PDF is included at `artifacts/reference/os_cmasp_expanded_academic_v31.pdf`.
+
+## Evidence status
+
+Synthetic smoke and locked replay demo outputs validate the software contract. They are not paper evidence. Paper-relevant evidence requires a maritime-twin export converted through the wide-export adapter.
+
+## v33 local validation workflow
+
+The repository now supports a no-manual replay path and a single-command local sanity run:
+
+```bash
+python -m pip install -e .
+make test
+make preflight
+make local-sanity
+```
+
+For actual maritime-twin data, export a one-row-per-step wide CSV and inspect it before conversion:
+
+```bash
+scripts/inspect_berth1_wide_export.sh data/raw/my_twin_export.csv data/raw/my_twin_export.inspect_report.json
+scripts/build_berth1_replay_from_wide.sh data/raw/my_twin_export.csv data/replay/twin_replay_claims.csv
+scripts/run_berth1_replay.sh data/replay/twin_replay_claims.csv outputs/berth1/twin_v1
+scripts/package_results.sh outputs/berth1/twin_v1 outputs/berth1/twin_v1_results.zip
+```
+
+See `docs/LOCAL_RUN_READOUT_v33.md` and `docs/TWIN_EXPORT_GUIDE_v33.md`.

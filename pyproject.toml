@@ -4,13 +4,41 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "os-cmasp"
-version = "0.0.30"
-description = "OS-CMASP manuscript and Berth-1-Conflict fixed-solver scaffold"
+version = "0.0.33"
+description = "OS-CMASP manuscript, Berth-1-Conflict scaffold, and no-manual replay adapters"
+readme = "README.md"
 requires-python = ">=3.10"
-authors = [{name = "OS-CMASP contributors"}]
+authors = [
+  {name = "OS-CMASP authors", email = "replace-with-contact@example.com"}
+]
+license = {text = "License not yet selected; see docs/LICENSING_DECISION.md"}
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+
+[project.scripts]
+berth1-conflict = "os_cmasp.berth1_conflict:main"
+berth1-replay-adapter = "os_cmasp.berth1_replay_adapter:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[project.scripts]
-os-cmasp-berth1 = "os_cmasp.berth1_conflict:main"
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]
