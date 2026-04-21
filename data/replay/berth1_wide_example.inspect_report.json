@@ -1,0 +1,41 @@
+{
+  "convertible_without_manual_rename": true,
+  "input": "data/examples/berth1_wide_example.csv",
+  "missing_required_canonical_columns": [],
+  "mode": "inspect-wide",
+  "next_command_if_convertible": "scripts/build_berth1_replay_from_wide.sh data/examples/berth1_wide_example.csv data/replay/twin_replay_claims.csv",
+  "recognized_optional_columns": {
+    "ais_feed_eta_on_time": "ais_feed_eta_on_time",
+    "berth_slot": "berth_slot",
+    "carrier_schedule_eta_on_time": "carrier_schedule_eta_on_time",
+    "crane_maintenance_crane_ok": "crane_maintenance_crane_ok",
+    "crane_ok": "crane_ok",
+    "disruption_family": "disruption_family",
+    "eta_bin": "eta_bin",
+    "eta_on_time": "eta_on_time",
+    "harbor_master_ready": "harbor_master_ready",
+    "human_dispatcher_weather_safe": "human_dispatcher_weather_safe",
+    "operating_mode": "operating_mode",
+    "port_safety_weather_safe": "port_safety_weather_safe",
+    "queue_state": "queue_state",
+    "strategic_plan_ready": "strategic_plan_ready",
+    "time_bucket": "time_bucket",
+    "vessel_class": "vessel_class",
+    "weather_regime": "weather_regime",
+    "weather_safe": "weather_safe"
+  },
+  "recognized_required_columns": {
+    "ready": "ready",
+    "scenario": "scenario",
+    "seed": "seed",
+    "t": "t"
+  },
+  "required_wide_columns": [
+    "seed",
+    "t",
+    "ready",
+    "scenario"
+  ],
+  "rows": 4,
+  "unknown_columns": []
+}

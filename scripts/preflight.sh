@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 set -euo pipefail
-mkdir -p outputs
-python -m os_cmasp.berth1_conflict --mode preflight --manifest outputs/preflight_manifest.json
+scripts/run_berth1_preflight.sh "${1:-artifacts/preflight}"

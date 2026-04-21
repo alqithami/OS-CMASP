@@ -1,2 +1,3 @@
 [console_scripts]
-os-cmasp-berth1 = os_cmasp.berth1_conflict:main
+berth1-conflict = os_cmasp.berth1_conflict:main
+berth1-replay-adapter = os_cmasp.berth1_replay_adapter:main

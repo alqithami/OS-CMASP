@@ -1,0 +1,437 @@
+{
+  "diagnostics": {
+    "all_checks_pass": false,
+    "checks": {
+      "benign_low_overhead": true,
+      "erased_safe_but_burdensome": true,
+      "erasure_regret_separates": false,
+      "leakage_guard_passes": true,
+      "oracle_closes_gap": true,
+      "preserving_low_regret": true,
+      "ungated_exposes_safety_need": true
+    },
+    "horizon": 2,
+    "interpretation": "Inspect active-regime assumptions before scaling",
+    "leakage_diagnostic": {
+      "chi_equal_for_ready_pair": true,
+      "excluded_hidden_keys": [
+        "ready",
+        "crane_ok",
+        "eta_on_time",
+        "weather_safe"
+      ],
+      "hidden_truth_differs": true,
+      "visible_keys": [
+        "berth_slot",
+        "disruption_family",
+        "eta_bin",
+        "operating_mode",
+        "queue_state",
+        "time_bucket",
+        "vessel_class",
+        "weather_regime"
+      ]
+    },
+    "n_per_condition": 4,
+    "seeds": 2
+  },
+  "manifest": {
+    "bank_report": {
+      "conditions": [
+        "provenance_preserving",
+        "provenance_erased",
+        "random_label_placebo",
+        "labels_without_gating",
+        "oracle_visible_state",
+        "benign_agreement"
+      ],
+      "dominance_table_version": "maritime-dominance-v22",
+      "leakage_guard": {
+        "chi_equal_for_ready_pair": true,
+        "excluded_hidden_keys": [
+          "ready",
+          "crane_ok",
+          "eta_on_time",
+          "weather_safe"
+        ],
+        "hidden_truth_differs": true,
+        "visible_keys": [
+          "berth_slot",
+          "disruption_family",
+          "eta_bin",
+          "operating_mode",
+          "queue_state",
+          "time_bucket",
+          "vessel_class",
+          "weather_regime"
+        ]
+      },
+      "missing_claim_steps": [],
+      "scenarios": [
+        "authority_conflict",
+        "freshness_conflict",
+        "human_override"
+      ],
+      "seed_max": 1,
+      "seed_min": 0,
+      "seeds": 2,
+      "solver_version": "berth1-fixed-solver-v22",
+      "steps": 4,
+      "unknown_observers": [],
+      "unknown_props": []
+    },
+    "conditions": [
+      "provenance_preserving",
+      "provenance_erased",
+      "random_label_placebo",
+      "labels_without_gating",
+      "oracle_visible_state",
+      "benign_agreement"
+    ],
+    "dominance_table_version": "maritime-dominance-v22",
+    "horizon": 100,
+    "mode": "run",
+    "out_prefix": "outputs/berth1/wide_example",
+    "p_all_clear": 0.5,
+    "purpose": "OS-CMASP Berth-1-Conflict fixed-solver ablation manifest",
+    "replay_csv": "data/replay/berth1_wide_example_replay.csv",
+    "replay_sha256": "cca95fff9d1a315a881ab383a386b3cec9b1fcc246cd3b52f8786138ff2d6ef5",
+    "scenario": "mixed",
+    "schema_required_fields": [
+      "observer",
+      "prop",
+      "ready",
+      "scenario",
+      "seed",
+      "situation",
+      "t",
+      "value"
+    ],
+    "schema_template_fields": [
+      "seed",
+      "t",
+      "ready",
+      "crane_ok",
+      "eta_on_time",
+      "weather_safe",
+      "scenario",
+      "queue_state",
+      "weather_regime",
+      "disruption_family",
+      "vessel_class",
+      "operating_mode",
+      "time_bucket",
+      "berth_slot",
+      "eta_bin",
+      "prop",
+      "value",
+      "observer",
+      "situation",
+      "credibility",
+      "timestamp",
+      "provenance"
+    ],
+    "seeds": 10,
+    "solver_version": "berth1-fixed-solver-v22"
+  },
+  "paired": [
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "benign_agreement",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "regret",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "benign_agreement",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "safety_violation",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "benign_agreement",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "waiting_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": -0.5,
+      "ci95_low": -0.5,
+      "condition": "benign_agreement",
+      "mean_delta_vs_provenance_preserving": -0.5,
+      "metric": "intervention_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "benign_agreement",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "false_certification",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.5,
+      "ci95_low": 0.5,
+      "condition": "labels_without_gating",
+      "mean_delta_vs_provenance_preserving": 0.5,
+      "metric": "regret",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.5,
+      "ci95_low": 0.5,
+      "condition": "labels_without_gating",
+      "mean_delta_vs_provenance_preserving": 0.5,
+      "metric": "safety_violation",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "labels_without_gating",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "waiting_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": -0.5,
+      "ci95_low": -0.5,
+      "condition": "labels_without_gating",
+      "mean_delta_vs_provenance_preserving": -0.5,
+      "metric": "intervention_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "labels_without_gating",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "false_certification",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "oracle_visible_state",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "regret",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "oracle_visible_state",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "safety_violation",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "oracle_visible_state",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "waiting_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": -0.5,
+      "ci95_low": -0.5,
+      "condition": "oracle_visible_state",
+      "mean_delta_vs_provenance_preserving": -0.5,
+      "metric": "intervention_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "oracle_visible_state",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "false_certification",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.74,
+      "ci95_low": -0.23999999999999994,
+      "condition": "provenance_erased",
+      "mean_delta_vs_provenance_preserving": 0.25,
+      "metric": "regret",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "provenance_erased",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "safety_violation",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.74,
+      "ci95_low": -0.23999999999999994,
+      "condition": "provenance_erased",
+      "mean_delta_vs_provenance_preserving": 0.25,
+      "metric": "waiting_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.74,
+      "ci95_low": -0.23999999999999994,
+      "condition": "provenance_erased",
+      "mean_delta_vs_provenance_preserving": 0.25,
+      "metric": "intervention_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "provenance_erased",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "false_certification",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.5,
+      "ci95_low": 0.5,
+      "condition": "random_label_placebo",
+      "mean_delta_vs_provenance_preserving": 0.5,
+      "metric": "regret",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.5,
+      "ci95_low": 0.5,
+      "condition": "random_label_placebo",
+      "mean_delta_vs_provenance_preserving": 0.5,
+      "metric": "safety_violation",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "condition": "random_label_placebo",
+      "mean_delta_vs_provenance_preserving": 0.0,
+      "metric": "waiting_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": -0.5,
+      "ci95_low": -0.5,
+      "condition": "random_label_placebo",
+      "mean_delta_vs_provenance_preserving": -0.5,
+      "metric": "intervention_cost",
+      "seeds": 2
+    },
+    {
+      "ci95_high": 0.5,
+      "ci95_low": 0.5,
+      "condition": "random_label_placebo",
+      "mean_delta_vs_provenance_preserving": 0.5,
+      "metric": "false_certification",
+      "seeds": 2
+    }
+  ],
+  "summary": [
+    {
+      "certification_rate": 0.25,
+      "condition": "provenance_preserving",
+      "cumulative_regret": 0.0,
+      "false_certifications": 0,
+      "gate_rate": 0.75,
+      "idling_proxy": 0.0,
+      "intervention_cost": 2.0,
+      "mean_contradiction_count": 0.75,
+      "mean_regret": 0.0,
+      "mean_reward": 1.0,
+      "n": 4,
+      "safety_violations": 0,
+      "waiting_cost": 0.0,
+      "zero_violation": 1
+    },
+    {
+      "certification_rate": 0.0,
+      "condition": "provenance_erased",
+      "cumulative_regret": 1.0,
+      "false_certifications": 0,
+      "gate_rate": 0.75,
+      "idling_proxy": 1.0,
+      "intervention_cost": 3.0,
+      "mean_contradiction_count": 0.75,
+      "mean_regret": 0.25,
+      "mean_reward": 0.75,
+      "n": 4,
+      "safety_violations": 0,
+      "waiting_cost": 1.0,
+      "zero_violation": 1
+    },
+    {
+      "certification_rate": 0.75,
+      "condition": "random_label_placebo",
+      "cumulative_regret": 2.0,
+      "false_certifications": 2,
+      "gate_rate": 0.75,
+      "idling_proxy": 0.0,
+      "intervention_cost": 0.0,
+      "mean_contradiction_count": 0.75,
+      "mean_regret": 0.5,
+      "mean_reward": 0.5,
+      "n": 4,
+      "safety_violations": 2,
+      "waiting_cost": 0.0,
+      "zero_violation": 0
+    },
+    {
+      "certification_rate": 0.0,
+      "condition": "labels_without_gating",
+      "cumulative_regret": 2.0,
+      "false_certifications": 0,
+      "gate_rate": 0.0,
+      "idling_proxy": 0.0,
+      "intervention_cost": 0.0,
+      "mean_contradiction_count": 0.75,
+      "mean_regret": 0.5,
+      "mean_reward": 0.5,
+      "n": 4,
+      "safety_violations": 2,
+      "waiting_cost": 0.0,
+      "zero_violation": 0
+    },
+    {
+      "certification_rate": 1.0,
+      "condition": "oracle_visible_state",
+      "cumulative_regret": 0.0,
+      "false_certifications": 0,
+      "gate_rate": 0.0,
+      "idling_proxy": 0.0,
+      "intervention_cost": 0.0,
+      "mean_contradiction_count": 0.75,
+      "mean_regret": 0.0,
+      "mean_reward": 1.0,
+      "n": 4,
+      "safety_violations": 0,
+      "waiting_cost": 0.0,
+      "zero_violation": 1
+    },
+    {
+      "certification_rate": 0.25,
+      "condition": "benign_agreement",
+      "cumulative_regret": 0.0,
+      "false_certifications": 0,
+      "gate_rate": 0.25,
+      "idling_proxy": 0.0,
+      "intervention_cost": 0.0,
+      "mean_contradiction_count": 0.0,
+      "mean_regret": 0.0,
+      "mean_reward": 1.0,
+      "n": 4,
+      "safety_violations": 0,
+      "waiting_cost": 0.0,
+      "zero_violation": 1
+    }
+  ]
+}

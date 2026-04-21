@@ -1,0 +1,7 @@
+condition,n,mean_reward,mean_regret,cumulative_regret,safety_violations,zero_violation,waiting_cost,idling_proxy,intervention_cost,false_certifications,certification_rate,gate_rate,mean_contradiction_count
+provenance_preserving,320,1.0,0.0,0.0,0,1,0.0,0.0,181.0,0,0.434375,1.0,1.0
+provenance_erased,320,0.565625,0.434375,139.0,0,1,139.0,139.0,320.0,0,0.0,1.0,1.0
+random_label_placebo,320,0.6375,0.3625,116.0,59,0,57.0,57.0,179.0,59,0.440625,1.0,1.0
+labels_without_gating,320,0.434375,0.565625,181.0,181,0,0.0,0.0,0.0,0,0.0,0.0,1.0
+oracle_visible_state,320,1.0,0.0,0.0,0,1,0.0,0.0,0.0,0,1.0,0.0,1.0
+benign_agreement,320,1.0,0.0,0.0,0,1,0.0,0.0,0.0,0,0.434375,0.434375,0.0
