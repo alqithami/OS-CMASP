@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "os-cmasp"
-version = "0.0.33"
-description = "OS-CMASP manuscript, Berth-1-Conflict scaffold, and no-manual replay adapters"
+version = "0.0.34"
+description = "OS-CMASP manuscript, Berth-1 promotion gates, and no-manual maritime twin replay adapters"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [

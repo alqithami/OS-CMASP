@@ -2,7 +2,7 @@ PYTHON ?= python
 OUT ?= artifacts/preflight
 MANIFEST ?= $(OUT)/berth1_preflight_manifest.json
 
-.PHONY: setup test preflight locked-replay-demo synthetic-smoke wide-example inspect-wide-example local-sanity replay-template paper clean package
+.PHONY: setup test preflight locked-replay-demo synthetic-smoke wide-example inspect-wide-example promotion-demo local-sanity replay-template paper clean package
 
 setup:
 	$(PYTHON) -m pip install --upgrade pip
@@ -24,6 +24,9 @@ synthetic-smoke:
 
 inspect-wide-example:
 	scripts/inspect_berth1_wide_export.sh data/examples/berth1_wide_example.csv data/replay/berth1_wide_example.inspect_report.json
+
+promotion-demo:
+	scripts/run_promotion_demo.sh outputs/berth1/promotion_demo
 
 wide-example:
 	mkdir -p data/replay outputs/berth1

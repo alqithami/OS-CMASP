@@ -776,6 +776,73 @@ Shareable output & Summary CSV, paired-delta CSV, diagnostics JSON, manifest JSO
 \end{tabularx}
 \end{table}
 
+
+\section{Promotion path to the maritime digital twin}
+\label{sec:twin-promotion}
+
+The minimal benchmark is not the endpoint. It is the entry test for a larger maritime-digital-twin program. The reason to start with \textsc{Berth-1-Conflict} is methodological: if provenance-preserving semantics do not separate from provenance-erased semantics under a frozen solver in the smallest active regime, then scaling to a 16-port or multi-asset simulator would mostly add confounding variation. Once the minimal benchmark works, the next task is to preserve the same semantic ablation while replacing synthetic claim generation with declared twin replay.
+
+\subsection{Promotion gates}
+
+We therefore use a staged promotion protocol. Each stage changes the replay source, not the solver identity or ablation semantics.
+
+\begin{table}[H]
+\centering
+\caption{Promotion gates from \textsc{Berth-1-Conflict} to maritime-digital-twin evaluation.}
+\label{tab:promotion-gates}
+\small
+\begin{tabularx}{\textwidth}{@{}L{0.09\textwidth}L{0.20\textwidth}Y Y@{}}
+\toprule
+Gate & Input & Required action & Pass criterion \\
+\midrule
+G0: software sanity & Locked synthetic replay generated from the benchmark contract. & Run preflight, replay, paired summaries, diagnostics, and packaging. & Active-regime diagnostics pass; output bundle is complete. This is not maritime evidence. \\
+G1: twin-export inspect & One-row-per-step export from the maritime twin. & Inspect aliases, required fields, row count, and convertible status before conversion. & Export is convertible without manual row editing, or the missing fields are identified in a machine-readable report. \\
+G2: Berth-1 twin replay & Canonical long-form replay or deterministic conversion from a declared wide twin export. & Run the six frozen ablation conditions on the same replay bank. & Provenance preservation separates from erasure/placebo while preserving safety and matching oracle behavior where appropriate. \\
+G3: pilot twin slice & Multiple traffic/weather/disruption blocks from the twin. & Repeat G2 by block key and report paired deltas with block-aware uncertainty. & Separation survives in declared active blocks; inactive blocks show low overhead. \\
+G4: full twin campaign & Full-scale twin replay over assets, ports, and operational regimes. & Add metric lifts for emissions, service disparity, intervention spend, contradiction half-life, and false certification. & The process-semantics effect remains under frozen solver identity and calibrated twin metrics. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The gate sequence is deliberately asymmetric. G0 only validates software. G1 validates the interface. G2 is the first paper-relevant empirical step. G3 and G4 are scale-up stages. A failure at G2 is not a reason to add a new reasoning layer. It means that either the replay did not contain active observer--situation conflict, the visible context leaked the latent safety state, or the pre-registered dominance and freshness rules did not match the operational source hierarchy.
+
+\subsection{Twin-to-claim porting contract}
+
+The full maritime twin should be treated as a generator of claim records rather than as a single fused state estimator. A twin export can be long-form, with one row per claim, or wide, with one row per simulator step and columns that are deterministically expanded into claims. In either case, the promotion run must write a manifest recording the replay file hash, solver version, dominance-table version, condition set, schema version, and output prefix.
+
+\begin{table}[H]
+\centering
+\caption{Porting map from maritime-twin subsystems to OS-CMASP claim families.}
+\label{tab:twin-porting-map}
+\small
+\begin{tabularx}{\textwidth}{@{}L{0.22\textwidth}L{0.18\textwidth}L{0.22\textwidth}Y@{}}
+\toprule
+Twin subsystem & Proposition family & Example claims & Example observers or sources \\
+\midrule
+Berth readiness & readiness & \texttt{ready}, \texttt{not ready} & Harbor master, terminal operations, strategic plan. \\
+Crane operations & crane & \texttt{craneOK}, \texttt{not craneOK} & Crane maintenance, terminal operations, strategic plan. \\
+Vessel arrival & eta & \texttt{etaOnTime}, \texttt{not etaOnTime} & AIS feed, carrier schedule, pilot station. \\
+Weather and safety & weather & \texttt{weatherSafe}, \texttt{not weatherSafe} & Port safety, approved weather feed, human dispatcher. \\
+Customs and clearance & clearance & \texttt{cleared}, \texttt{not cleared} & Customs system, terminal documentation, human override. \\
+Yard readiness & yard & \texttt{yardReady}, \texttt{not yardReady} & Yard operations, truck gate system, terminal operations. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The first port should not attempt to cover every row of Table~\ref{tab:twin-porting-map}. The disciplined path is to select one claim family, usually readiness, and export enough active contradiction blocks to test the frozen ablation. Additional proposition families are then added as separate declared blocks. This keeps the empirical story process-semantic: the manipulated variable remains provenance and contradiction-aware admissibility, not a growing controller stack.
+
+\subsection{No-manual replay pipeline}
+
+The repository now supports a no-manual path from a twin wide export to a promotion report. The user supplies a raw export; the scripts inspect aliases, convert to canonical replay, run the frozen ablation, package outputs, and write a gate report. The intended command is
+\begin{verbatim}
+scripts/run_maritime_twin_gate.sh data/raw/my_twin_export.csv outputs/berth1/twin_gate_v1
+\end{verbatim}
+for a one-row-per-step export, or
+\begin{verbatim}
+scripts/run_maritime_twin_gate.sh data/raw/my_claim_replay.csv outputs/berth1/twin_gate_v1 --long-form
+\end{verbatim}
+for an already canonical one-row-per-claim replay. The shareable result consists of a zipped output bundle, a promotion report, and a machine-readable gate summary. This is the concrete bridge from the minimal benchmark to the larger twin.
+
 \section{Implementation witness}
 \label{sec:implementation}
 

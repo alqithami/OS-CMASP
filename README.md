@@ -1,8 +1,8 @@
 # OS-CMASP
 
-Observer-Situation Constrained Multi-Agent Simulation Process (OS-CMASP): manuscript, Berth-1-Conflict fixed-solver scaffold, and replay-conversion utilities.
+Observer-Situation Constrained Multi-Agent Simulation Process (OS-CMASP): manuscript, Berth-1-Conflict fixed-solver scaffold, no-manual replay adapters, and a staged promotion path to maritime-digital-twin replay.
 
-This v32 package is a **complete installable repository**, not a partial update folder. It includes `pyproject.toml`, `Makefile`, scripts, tests, manuscript sources, and the no-manual replay adapter.
+This v34 package is a **complete installable repository**, not a partial update folder. It includes `pyproject.toml`, `Makefile`, scripts, tests, manuscript sources, local validation utilities, and the promotion-gate pipeline.
 
 ## Quick start
 
@@ -16,68 +16,81 @@ make test
 make preflight
 ```
 
-## No-manual replay-path check
+## Local software sanity
 
-This creates a replay CSV automatically, runs the replay pipeline, and packages outputs. It is a software pipeline check, not maritime-twin evidence.
+This validates the executable scaffold. It is not maritime-twin evidence.
 
 ```bash
-scripts/run_berth1_locked_replay_demo.sh outputs/berth1/locked_replay_demo
+make local-sanity
 ```
 
-Expected output zip:
+## Promotion demo
 
-```text
-outputs/berth1/locked_replay_demo_results.zip
+This runs the end-to-end promotion gate on the tiny example wide export. It verifies the gate pipeline, not the paper claim.
+
+```bash
+make promotion-demo
 ```
 
-## Twin wide-export path
+## First paper-relevant twin run
 
-Do not hand-edit the long replay template. Export one row per step from the twin, at minimum:
+Export a one-row-per-step CSV from the maritime twin. Minimum columns:
 
 ```text
 seed,t,ready,scenario
 ```
 
-Then convert and run:
+Recommended columns:
 
-```bash
-scripts/build_berth1_replay_from_wide.sh data/raw/my_twin_export.csv data/replay/twin_replay_claims.csv
-scripts/run_berth1_replay.sh data/replay/twin_replay_claims.csv outputs/berth1/twin_v1
-scripts/package_results.sh outputs/berth1/twin_v1 outputs/berth1/twin_v1_results.zip
+```text
+crane_ok,eta_on_time,weather_safe,
+queue_state,weather_regime,disruption_family,vessel_class,
+operating_mode,time_bucket,berth_slot,eta_bin
 ```
 
-An example wide export is included:
+Then run the no-manual promotion gate:
 
 ```bash
-make wide-example
+scripts/run_maritime_twin_gate.sh \
+  data/raw/my_twin_export.csv \
+  outputs/berth1/twin_gate_v1
 ```
+
+For a canonical one-row-per-claim replay CSV instead of a wide export:
+
+```bash
+scripts/run_maritime_twin_gate.sh \
+  data/raw/my_claim_replay.csv \
+  outputs/berth1/twin_gate_v1 \
+  --long-form
+```
+
+Share these outputs:
+
+```text
+outputs/berth1/twin_gate_v1/twin_gate_results.zip
+outputs/berth1/twin_gate_v1/twin_gate_promotion_report.md
+outputs/berth1/twin_gate_v1/twin_gate_promotion_gate.json
+```
+
+## Promotion protocol
+
+See:
+
+- `docs/MARITIME_TWIN_PROMOTION_PROTOCOL_v34.md`
+- `docs/COMPLETION_PLAN_v34.md`
+- `docs/TWIN_EXPORT_GUIDE_v33.md`
+
+The promotion gates are:
+
+1. G0 software sanity;
+2. G1 twin-export inspection;
+3. G2 Berth-1 twin replay;
+4. G3 pilot twin slice;
+5. G4 full twin campaign.
+
+Do not scale to the full maritime twin by adding controller layers. Scale by preserving the frozen ablation and replacing the replay source.
 
 ## Manuscript
 
-The LaTeX source is in `manuscript/`. A reference PDF is included at `artifacts/reference/os_cmasp_expanded_academic_v31.pdf`.
-
-## Evidence status
-
-Synthetic smoke and locked replay demo outputs validate the software contract. They are not paper evidence. Paper-relevant evidence requires a maritime-twin export converted through the wide-export adapter.
-
-## v33 local validation workflow
-
-The repository now supports a no-manual replay path and a single-command local sanity run:
-
-```bash
-python -m pip install -e .
-make test
-make preflight
-make local-sanity
-```
-
-For actual maritime-twin data, export a one-row-per-step wide CSV and inspect it before conversion:
-
-```bash
-scripts/inspect_berth1_wide_export.sh data/raw/my_twin_export.csv data/raw/my_twin_export.inspect_report.json
-scripts/build_berth1_replay_from_wide.sh data/raw/my_twin_export.csv data/replay/twin_replay_claims.csv
-scripts/run_berth1_replay.sh data/replay/twin_replay_claims.csv outputs/berth1/twin_v1
-scripts/package_results.sh outputs/berth1/twin_v1 outputs/berth1/twin_v1_results.zip
-```
-
-See `docs/LOCAL_RUN_READOUT_v33.md` and `docs/TWIN_EXPORT_GUIDE_v33.md`.
+LaTeX source is in `manuscript/`. A reference PDF is included at `artifacts/reference/os_cmasp_expanded_academic_v34.pdf`.
