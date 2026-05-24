@@ -2,7 +2,7 @@
 
 Observer-Situation Constrained Multi-Agent Simulation Process (OS-CMASP): manuscript, Berth-1-Conflict fixed-solver scaffold, no-manual replay adapters, and a staged promotion path to maritime-digital-twin replay.
 
-This v34 package is a **complete installable repository**, not a partial update folder. It includes `pyproject.toml`, `Makefile`, scripts, tests, manuscript sources, local validation utilities, and the promotion-gate pipeline.
+This package is a **complete installable repository**. It includes `pyproject.toml`, `Makefile`, scripts, tests, manuscript sources, local validation utilities, and the promotion-gate pipeline.
 
 ## Quick start
 
@@ -90,7 +90,3 @@ The promotion gates are:
 5. G4 full twin campaign.
 
 Do not scale to the full maritime twin by adding controller layers. Scale by preserving the frozen ablation and replacing the replay source.
-
-## Manuscript
-
-LaTeX source is in `manuscript/`. A reference PDF is included at `artifacts/reference/os_cmasp_expanded_academic_v34.pdf`.
