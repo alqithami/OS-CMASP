@@ -77,6 +77,7 @@ outputs/berth1/twin_gate_v1/twin_gate_promotion_gate.json
 
 See:
 
+- `docs/MARITIME_TWIN_PROMOTION_RUNBOOK_v35.md` — operational gate-by-gate runbook.
 - `docs/MARITIME_TWIN_PROMOTION_PROTOCOL_v34.md`
 - `docs/COMPLETION_PLAN_v34.md`
 - `docs/TWIN_EXPORT_GUIDE_v33.md`
