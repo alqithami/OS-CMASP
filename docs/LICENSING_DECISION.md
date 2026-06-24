@@ -1,6 +1,8 @@
 # Licensing decision
 
-No license is selected in this package because authorship and project ownership must be confirmed before public release.
+No open-source license is selected yet.
+
+Because the repository is public, the default legal posture is that the code, manuscript, and data templates are visible but not automatically licensed for reuse. This is acceptable for the current validation phase, but a license should be selected before any public release, archive, or external reuse request.
 
 Recommended options:
 
@@ -8,4 +10,4 @@ Recommended options:
 - Manuscript: all rights reserved until publication, or CC-BY-4.0 after preprint release.
 - Data/replay: no open license unless the maritime twin data owner explicitly approves release.
 
-Before making the repository public, replace this file with the selected license files and update `pyproject.toml` and `CITATION.cff`.
+Do not publish maritime-twin data or replay exports under an open license unless the data owner explicitly approves release.
