@@ -2,7 +2,29 @@
 
 Observer-Situation Constrained Multi-Agent Simulation Process (OS-CMASP): manuscript, Berth-1-Conflict fixed-solver scaffold, no-manual replay adapters, and a staged promotion path to maritime-digital-twin replay.
 
-This package is a **complete installable repository**. It includes `pyproject.toml`, `Makefile`, scripts, tests, manuscript sources, local validation utilities, and the promotion-gate pipeline.
+This package is a **complete installable repository**. In practical terms, this means the repository root contains `pyproject.toml`, a `src/` Python package layout, command-line entry points, a `Makefile`, scripts, tests, manuscript sources, local validation utilities, and the promotion-gate pipeline.
+
+## What "installable" means
+
+From the repository root, this command installs the local package in editable mode:
+
+```bash
+python -m pip install -e .
+```
+
+Editable mode means changes to files under `src/os_cmasp/` are reflected immediately without reinstalling. The configured command-line entry points are:
+
+```bash
+berth1-conflict
+berth1-replay-adapter
+```
+
+The same functionality is also available with module execution:
+
+```bash
+python -m os_cmasp.berth1_conflict --help
+python -m os_cmasp.berth1_replay_adapter --help
+```
 
 ## Quick start
 
@@ -77,7 +99,8 @@ outputs/berth1/twin_gate_v1/twin_gate_promotion_gate.json
 
 See:
 
-- `docs/MARITIME_TWIN_PROMOTION_RUNBOOK_v35.md` — operational gate-by-gate runbook.
+- `docs/MARITIME_TWIN_PROMOTION_RUNBOOK_v36.md` — current operational gate-by-gate runbook.
+- `docs/MARITIME_TWIN_PROMOTION_RUNBOOK_v35.md` — prior detailed runbook retained for traceability.
 - `docs/MARITIME_TWIN_PROMOTION_PROTOCOL_v34.md`
 - `docs/COMPLETION_PLAN_v34.md`
 - `docs/TWIN_EXPORT_GUIDE_v33.md`
